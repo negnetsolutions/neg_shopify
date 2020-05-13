@@ -1,0 +1,26 @@
+entity.shopify_product.canonical:
+  route_name: entity.shopify_product.canonical
+  base_route: entity.shopify_product.canonical
+  title: 'View'
+
+entity.shopify_product.edit_form:
+  route_name: entity.shopify_product.edit_form
+  base_route: entity.shopify_product.canonical
+  title: 'Edit'
+
+entity.shopify_product.delete_form:
+  route_name:  entity.shopify_product.delete_form
+  base_route:  entity.shopify_product.canonical
+  title: 'Delete'
+  weight: 10
+
+# Shopify product variant routing definition
+shopify_product_variant.settings_tab:
+  route_name: shopify_product_variant.settings
+  title: 'Settings'
+  base_route: shopify_product_variant.settings
+
+entity.shopify_product_variant.canonical:
+ route_name: entity.shopify_product_variant.canonical
+ base_route: entity.shopify_product_variant.canonical
+ title: 'View'

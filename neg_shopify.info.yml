@@ -1,0 +1,6 @@
+name: Negnet Solutions Shopify Integration
+type: module
+description: "Integrates Shopify with Drupal 8"
+core: 8.x
+dependencies:
+  - neg_paragraphs

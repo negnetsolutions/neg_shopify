@@ -1,0 +1,23 @@
+neg_shopify.settings:
+  title: 'Shopify Settings'
+  parent: system.admin_config_services
+  description: 'Configure Shopify Settings'
+  route_name: neg_shopify.settings
+
+# Shopify product menu items definition
+entity.shopify_product.collection:
+  title: 'Shopify product list'
+  route_name: entity.shopify_product.collection
+  parent: system.admin_content
+
+shopify_product.admin.structure.settings:
+  title: Shopify product settings
+  description: 'Configure Shopify product entities'
+  route_name: shopify_product.settings
+  parent: system.admin_structure
+
+shopify_product_variant.admin.structure.settings:
+  title: Shopify product variant settings
+  description: 'Configure Shopify product variant entities'
+  route_name: shopify_product_variant.settings
+  parent: system.admin_structure

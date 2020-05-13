@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * @file
+ * Shopify module.
+ */
+
+use Drupal\neg_shopify\Settings;
+
+/**
+ * Implements hook_theme().
+ */
+function neg_shopify_widget_theme($existing, $type, $theme, $path) {
+  return [
+  ];
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function neg_shopify_widget_preprocess_paragraph(&$variables) {
+  $method = '_neg_shopify_widget_process_paragraph_' . $variables['paragraph']->getType();
+
+  if (function_exists($method)) {
+    $method($variables);
+  }
+}
+
+/**
+ * Preproccess IG Paragraph.
+ */
+// function _neg_google_reviews_process_paragraph_instagram_posts_widget(&$variables) {
+//   $variables['attributes']['class'][] = 'paragraph';
+//   $variables['attributes']['class'][] = 'paragraph-instagram-posts';
+//
+//   $view = new ListView($variables);
+//   $view->render(50);
+// }
+
+/**
+ * Implements hook_cron().
+ */
+function neg_shopify_widget_cron() {
+
+  $config = Settings::config();
+  $runtime = time();
+  $cache_lifetime = $config->get('frequency');
+  $last_sync = $config->get('last_sync');
+  $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
+
+  // Check if we need to sync.
+  if (($last_sync + $cache_lifetime) > $runtime) {
+    return;
+  }
+
+  // $queue_factory = \Drupal::service('queue');
+  // $queue = $queue_factory->get('instagram_widget_sync');
+  //
+  // if ($queue->numberOfItems() == 0) {
+  //   $command = [
+  //     'op' => 'sync',
+  //   ];
+  //   $queue->createItem($command);
+  // }
+
+}

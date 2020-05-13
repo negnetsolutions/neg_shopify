@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * Implements hook_update_N().
+ */
+function example_update_8701() {
+  \Drupal::entityDefinitionUpdateManager()->installEntityType(new ConfigEntityType([
+    'id' => 'rest_resource_config',
+    'label' => new TranslatableMarkup('REST resource configuration'),
+    'config_prefix' => 'resource',
+    'admin_permission' => 'administer rest resources',
+    'label_callback' => 'getLabelFromPlugin',
+    'entity_keys' => ['id' => 'id'],
+    'config_export' => [
+      'id',
+      'plugin_id',
+      'granularity',
+      'configuration',
+    ],
+  ]));
+}

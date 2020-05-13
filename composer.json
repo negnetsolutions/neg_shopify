@@ -1,0 +1,10 @@
+{
+  "name": "negnet/neg_shopify",
+  "description": "Drupal8 Shopify Integration",
+  "type": "drupal-module",
+  "license": "GPL-3.0+",
+  "require": {
+    "phpclassic/php-shopify": "^1.1",
+    "negnet/neg_paragraphs": "master"
+  }
+}

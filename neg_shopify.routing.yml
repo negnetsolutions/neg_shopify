@@ -1,0 +1,93 @@
+neg_shopify.settings:
+  path: '/admin/config/services/shopify'
+  defaults:
+    _form: '\Drupal\neg_shopify\Form\SettingsForm'
+    _title: 'Shopify Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+neg_shopify.webhook:
+  path: '/shopify/webhook'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\WebhookController::handleIncomingWebhook'
+  requirements:
+    _permission: 'access content'
+
+shopify_product_variant.settings:
+  path: '/admin/structure/shopify_product_variant'
+  defaults:
+   _form: '\Drupal\neg_shopify\Entity\Form\ShopifyProductVariantSettingsForm'
+   _title: 'Shopify product variant settings'
+  requirements:
+    _permission: 'administer shopify product variant entities'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_product.canonical:
+  path: '/store/product/{shopify_product}'
+  defaults:
+    _entity_view: 'shopify_product'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _entity_access: 'shopify_product.view'
+
+entity.shopify_product.collection:
+  path: '/admin/shopify_product'
+  defaults:
+    _entity_list: 'shopify_product'
+    _title: 'Shopify product list'
+  requirements:
+    _permission: 'administer shopify'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_product.add_form:
+  path: '/admin/shopify_product/add'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\ShopifyRedirect::addShopifyProduct'
+  requirements:
+    _permission: 'add shopify product entities'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_product.edit_form:
+  path: '/admin/shopify_product/{shopify_product}/edit'
+  defaults:
+    _entity_form: shopify_product.edit
+    _title: 'Edit Shopify product'
+  requirements:
+    _permission: 'edit shopify product entities'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_product.delete_form:
+  path: '/admin/shopify_product/{shopify_product}/delete'
+  defaults:
+    _entity_form: shopify_product.delete
+    _title: 'Delete Shopify product'
+  requirements:
+    _permission: 'delete shopify product entities'
+  options:
+    _admin_route: TRUE
+
+shopify_product.settings:
+  path: '/admin/structure/shopify_product'
+  defaults:
+   _form: '\Drupal\neg_shopify\Entity\Form\ShopifyProductSettingsForm'
+   _title: 'Shopify product settings'
+  requirements:
+    _permission: 'administer shopify product entities'
+  options:
+    _admin_route: TRUE
+
+
+# ShopifyProductVariant routing definition
+entity.shopify_product_variant.canonical:
+ path: '/admin/shopify_product_variant/{shopify_product_variant}'
+ defaults:
+   _entity_view: 'shopify_product_variant'
+   _title: 'Shopify product variant'
+ requirements:
+   _entity_access: 'shopify_product_variant.view'
+ options:
+   _admin_route: TRUE
