@@ -43,7 +43,7 @@ class ShopifyAddToCartForm extends FormBase {
     }
 
     $form['#action'] = '//' . Settings::shopInfo('domain') . '/cart/add';
-    $form['#attached']['library'][] = 'shopify/shopify.js';
+    $form['#attached']['library'][] = 'neg_shopify/shopify.js';
 
     // Data attribute used by shopify.js.
     $form['#attributes']['data-variant-id'] = $variant_id;

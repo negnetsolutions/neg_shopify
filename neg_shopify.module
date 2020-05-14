@@ -5,21 +5,288 @@
  * Shopify module.
  */
 
+use Drupal\Core\Url;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
 
 /**
  * Implements hook_theme().
  */
-function neg_shopify_widget_theme($existing, $type, $theme, $path) {
+function neg_shopify_theme($existing, $type, $theme, $path) {
   return [
+    'taxonomy_term__shopify_collections' => [
+      'template' => 'shopify-collection' ,
+      'base hook' => 'taxonomy_term',
+    ],
+    'shopify_product_grid' => [
+      'template' => 'product_grid',
+      'variables' => [
+        'products' => NULL,
+      ],
+    ],
+    'shopify_product' => [
+      'render element' => 'elements',
+    ],
+    'shopify_product_variant' => [
+      'render element' => 'elements',
+    ],
+    'shopify_cart' => [
+      'template' => 'shopify_cart',
+      'variables' => ['domain' => ''],
+    ],
   ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds "edit on shopify" link to the term operations for collections.
+ */
+function neg_shopify_form_taxonomy_overview_terms_alter(array &$form, FormStateInterface $form_state) {
+  $vocab = $form_state->get(['taxonomy', 'vocabulary']);
+
+  if ($vocab->id() == ShopifyProduct::SHOPIFY_COLLECTIONS_VID) {
+    foreach (Element::children($form['terms']) as $key) {
+      $term = $form['terms'][$key]['#term'];
+      $form['terms'][$key]['operations']['#links']['edit_on_shopify'] = [
+        'title' => t('Edit on Shopify'),
+        'url' => Url::fromUri('https://' . Settings::shopInfo('domain') . '/admin/collections/' . $term->field_shopify_collection_id->value),
+        'attributes' => ['target' => '_blank'],
+      ];
+      ksort($form['terms'][$key]['operations']['#links']);
+      $form['terms'][$key]['operations']['#links'] = array_reverse($form['terms'][$key]['operations']['#links']);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ *
+ * @todo: Doesn't work because link_templates['canonical'] override this.
+ *
+ * @see Drupal\Core\Entity\Entity::toUrl()
+ */
+function neg_shopify_entity_bundle_info_alter(&$bundles) {
+  if (isset($bundles['taxonomy_term']['shopify_tags'])) {
+    $bundles['taxonomy_term']['shopify_tags']['uri_callback'] = 'shopify_taxonomy_tag_term_uri';
+  }
+  if (isset($bundles['taxonomy_term']['shopify_collections'])) {
+    $bundles['taxonomy_term']['shopify_collections']['uri_callback'] = 'shopify_taxonomy_collection_term_uri';
+  }
+}
+
+/**
+ * Set the route for tag terms.
+ */
+function neg_shopify_taxonomy_tag_term_uri(Term $term) {
+  return Url::fromUri('internal:/' . Settings::storUrl('page_tag', $term->id()));
+}
+
+/**
+ * Set the route for collection terms.
+ */
+function neg_shopify_taxonomy_collection_term_uri(Term $term) {
+  return Url::fromUri('internal:/' . Settings::storUrl('page_collection', $term->id()));
+}
+
+/**
+ * Data that should be passed into drupalSettings.
+ */
+function neg_shopify_drupal_js_data() {
+  $info = Settings::shopInfo();
+  return [
+    'shop' => [
+      'domain' => $info->domain,
+      'access_token' => Settings::accessToken(),
+    ],
+  ];
+}
+
+/**
+ * Implements hook_entity_extra_field_info().
+ */
+function neg_shopify_entity_extra_field_info() {
+  $extra = [];
+  $extra['shopify_product']['shopify_product']['display']['add_to_cart_form'] = [
+    'label' => t('Add to cart form'),
+    'description' => t('Display variant options, quantity field, and "Add to Cart" button.'),
+    'visible' => TRUE,
+    'weight' => 100,
+  ];
+  $extra['shopify_product']['shopify_product']['display']['dynamic_product_image'] = [
+    'label' => t('Dynamic product image'),
+    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_product']['shopify_product']['display']['active_variant'] = [
+    'label' => t('Active variant'),
+    'description' => t('Renders the active variant.'),
+    'visible' => TRUE,
+    'weight' => 200,
+  ];
+  return $extra;
+}
+
+/**
+ * Implements hook_toolbar().
+ */
+function neg_shopify_toolbar() {
+  $items = [];
+  $links = neg_shopify_renderable_links();
+  // @todo: Need caching per user setup.
+  // @todo: Need better permission checking.
+  $items['shopify'] = [
+    '#type' => 'toolbar_item',
+    'tab' => [
+      '#type' => 'link',
+      '#title' => t('Shopify'),
+      '#url' => Url::fromRoute('neg_shopify.settings'),
+      '#attributes' => [
+        'title' => t('Shopify'),
+        'class' => ['toolbar-icon', 'toolbar-icon-shopify'],
+      ],
+    ],
+    'tray' => [
+      '#heading' => t('Shopify admin pages'),
+      'shopify_links' => [
+        '#theme' => 'item_list',
+        '#items' => $links,
+        '#attributes' => [
+          'class' => ['toolbar-menu'],
+        ],
+        '#attached' => [
+          'library' => [
+            'neg_shopify/shopify.toolbar',
+          ],
+        ],
+      ],
+    ],
+    '#weight' => -5,
+  ];
+
+  return $items;
+}
+
+/**
+ * Returns an array of Shopify admin links.
+ */
+function neg_shopify_renderable_links() {
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('Settings'),
+    '#url' => Url::fromRoute('neg_shopify.settings'),
+  ];
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('View Products'),
+    '#url' => Url::fromRoute('entity.shopify_product.collection'),
+  ];
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('View Collections'),
+    '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_collections/overview'),
+  ];
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('View Tags'),
+    '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_tags/overview'),
+  ];
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('Product Display'),
+    '#url' => Url::fromUri('internal:/admin/structure/shopify_product/display'),
+  ];
+  $links[] = [
+    '#type' => 'link',
+    '#title' => t('Variant Display'),
+    '#url' => Url::fromUri('internal:/admin/structure/shopify_product_variant/display'),
+  ];
+
+  $shop_domain = Settings::shopInfo('domain');
+  if (!empty($shop_domain)) {
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Shopify Admin &rarr;'),
+      '#url' => Url::fromUri('https://' . Settings::shopInfo('domain') . '/admin', ['attributes' => ['target' => '_blank']]),
+    ];
+  }
+  return $links;
 }
 
 /**
  * Implements hook_preprocess_paragraph().
  */
-function neg_shopify_widget_preprocess_paragraph(&$variables) {
-  $method = '_neg_shopify_widget_process_paragraph_' . $variables['paragraph']->getType();
+function neg_shopify_preprocess_taxonomy_term(&$variables) {
+  $term = $variables['term'];
+  $vid = $term->getVocabularyId();
+  $method = '_neg_shopify_preprocess_taxonomy_term_' . $vid;
+  if (function_exists($method)) {
+    $method($variables);
+  }
+}
+
+/**
+ * Preprocess Collections.
+ */
+function _neg_shopify_preprocess_taxonomy_term_shopify_collections(&$variables) {
+  ShopifyCollection::render($variables);
+}
+
+/**
+ * Prepares variables for shopify product templates.
+ *
+ * Default template: shopify-product.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - shopify_product: The shopify product object.
+ *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
+ */
+function template_preprocess_shopify_product(&$variables) {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['shopify_product'] = $variables['elements']['#shopify_product'];
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+}
+
+/**
+ * Prepares variables for shopify product variant templates.
+ *
+ * Default template: shopify-product-variant.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - shopify_product_variant: The shopify product variant object.
+ *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
+ */
+function template_preprocess_shopify_product_variant(&$variables) {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['shopify_product_variant'] = $variables['elements']['#shopify_product_variant'];
+
+  // Helpful $content variable for templates.
+  $variables += array('content' => array());
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+}
+
+/**
+ * Implements hook_preprocess_paragraph().
+ */
+function neg_shopify_preprocess_paragraph(&$variables) {
+  $method = '_neg_shopify_process_paragraph_' . $variables['paragraph']->getType();
 
   if (function_exists($method)) {
     $method($variables);
@@ -40,7 +307,7 @@ function neg_shopify_widget_preprocess_paragraph(&$variables) {
 /**
  * Implements hook_cron().
  */
-function neg_shopify_widget_cron() {
+function neg_shopify_cron() {
 
   $config = Settings::config();
   $runtime = time();

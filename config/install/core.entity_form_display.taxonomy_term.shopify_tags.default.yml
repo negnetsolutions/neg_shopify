@@ -1,3 +1,4 @@
+uuid: bbc9e2eb-0450-40ed-a10e-66c6c2e45f76
 langcode: en
 status: true
 dependencies:
@@ -14,6 +15,14 @@ content:
     type: path
     weight: 0
     settings: {  }
+    third_party_settings: {  }
+    region: content
+  status:
+    type: boolean_checkbox
+    settings:
+      display_label: true
+    weight: 100
+    region: content
     third_party_settings: {  }
 hidden:
   description: true

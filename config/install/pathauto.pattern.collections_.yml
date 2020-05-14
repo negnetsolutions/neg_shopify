@@ -1,0 +1,23 @@
+uuid: 787b5bf2-44eb-48b9-92db-a1f255d2d533
+langcode: en
+status: true
+dependencies:
+  module:
+    - ctools
+    - taxonomy
+id: collections_
+label: 'Shopify Collections'
+type: 'canonical_entities:taxonomy_term'
+pattern: '/collections/[term:name]'
+selection_criteria:
+  702e88f6-70e2-4799-a6f3-7064e73a5507:
+    id: 'entity_bundle:taxonomy_term'
+    bundles:
+      shopify_collections: shopify_collections
+    negate: false
+    context_mapping:
+      taxonomy_term: taxonomy_term
+    uuid: 702e88f6-70e2-4799-a6f3-7064e73a5507
+selection_logic: and
+weight: -5
+relationships: {  }

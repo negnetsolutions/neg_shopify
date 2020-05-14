@@ -34,14 +34,16 @@ class Settings {
    * Gets store url.
    */
   public static function storeUrl($display = 'main', $arg = NULL) {
-    $view = View::load('shopify_store');
-    if ($view instanceof View) {
-      $path = $view->getDisplay($display)['display_options']['path'];
-      if ($arg) {
-        return strtr($path, ['%' => $arg]);
-      }
-      return $path;
-    }
+    return 'https://' . self::shopInfo('domain');
+
+    // $view = View::load('shopify_store');
+    // if ($view instanceof View) {
+    //   $path = $view->getDisplay($display)['display_options']['path'];
+    //   if ($arg) {
+    //     return strtr($path, ['%' => $arg]);
+    //   }
+    //   return $path;
+    // }
   }
 
   /**
@@ -100,6 +102,21 @@ class Settings {
    */
   public static function log($message, $params = [], $log_level = 'notice') {
     \Drupal::logger('neg_shopify')->$log_level($message, $params);
+  }
+
+  /**
+   * Gets the store front api key.
+   */
+  public static function accessToken() {
+    $config = self::config();
+    return $config->get('store_front_access_token');
+  }
+
+  /**
+   * Gets products per page.
+   */
+  public static function productsPerPage() {
+    return self::config()->get('products_per_page');
   }
 
   /**

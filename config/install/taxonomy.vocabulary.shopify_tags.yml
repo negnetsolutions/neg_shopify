@@ -1,9 +1,11 @@
+uuid: ed7c0add-7cf4-4a6d-acf9-7acb590b883c
 langcode: en
 status: true
 dependencies:
   enforced:
     module:
-      - shopify
+      - neg_shopify
 name: 'Shopify Tags'
 vid: shopify_tags
 description: 'Tags that are dynamically pulled from Shopify.'
+weight: 0

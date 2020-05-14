@@ -14,6 +14,7 @@ use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
+use Drupal\Core\Render\RenderContext;
 
 /**
  * Defines the Shopify product entity.
@@ -67,6 +68,24 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     parent::preCreate($storage, $values);
     $values += [
       'user_id' => \Drupal::currentUser()->id(),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCacheTagsToInvalidate() {
+
+    // @todo Add bundle-specific listing cache tag?
+    //   https://www.drupal.org/node/2145751
+    if ($this
+      ->isNew()) {
+      return ['shopify_product'];
+    }
+    return [
+      $this->entityTypeId . ':' . $this
+        ->id(),
+      'shopify_product',
     ];
   }
 
@@ -237,6 +256,32 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   }
 
   /**
+   * Loads a view array.
+   */
+  public static function loadView(array $products, string $style = 'full', $defaultContext = TRUE) {
+
+    $view = [];
+
+    foreach ($products as $product) {
+      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($product, $style);
+
+      if ($defaultContext === FALSE) {
+        $rendered_view = NULL;
+        \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view, &$product) {
+          $rendered_view = render($build);
+        });
+      }
+      else {
+        $rendered_view = $build;
+      }
+
+      $view[] = $rendered_view;
+    }
+
+    return $view;
+  }
+
+  /**
    * Loads a product by it's product_id.
    *
    * @param string $product_id
@@ -266,7 +311,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     $query = \Drupal::entityQuery('shopify_product');
     $query->condition('product_id', $product_ids, 'NOT IN');
     $ids = $query->execute();
-    $products = ShopifyProduct::loadMultiple($ids);
+    $products = self::loadMultiple($ids);
 
     foreach ($products as $product) {
       $deleted_products[] = $product;
@@ -281,7 +326,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
    */
   public static function updateProduct(array $values) {
     try {
-      $entity = ShopifyProduct::loadByProductId($values['id']);
+      $entity = self::loadByProductId($values['id']);
       if (isset($values['admin_graphql_api_id'])) {
         unset($values['admin_graphql_api_id']);
       }

@@ -1,44 +1,43 @@
-uuid: 5ee6171f-8be0-4186-8d5e-2ad2d52ce76a
+uuid: 189a81be-c2cd-41dd-a68a-73668c212f94
 langcode: en
 status: true
 dependencies:
   config:
-    - core.entity_view_mode.shopify_product.full
     - responsive_image.styles.rs_image
   module:
     - neg_shopify
     - svg_image
     - text
-id: shopify_product.shopify_product.full
+id: shopify_product.shopify_product.default
 targetEntityType: shopify_product
 bundle: shopify_product
-mode: full
+mode: default
 content:
   active_variant:
-    weight: 7
+    weight: 200
     region: content
     settings: {  }
     third_party_settings: {  }
   add_to_cart_form:
-    weight: 8
+    weight: 100
     region: content
     settings: {  }
     third_party_settings: {  }
   body_html:
     label: hidden
     type: text_default
-    weight: 4
+    weight: -30
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
   collections:
     label: inline
     type: entity_reference_label
-    weight: 6
+    weight: -10
     settings:
       link: true
-    third_party_settings: {  }
     region: content
+    third_party_settings: {  }
   dynamic_product_image:
     type: responsive_image
     weight: 1
@@ -53,10 +52,10 @@ content:
         height: ''
     third_party_settings: {  }
   extra_images:
+    label: hidden
     type: responsive_image
-    weight: 3
+    weight: -35
     region: content
-    label: above
     settings:
       responsive_image_style: rs_image
       image_link: ''
@@ -66,34 +65,34 @@ content:
         height: ''
     third_party_settings: {  }
   image:
+    label: hidden
     type: responsive_image
-    weight: 2
-    region: content
-    label: above
+    weight: -40
     settings:
       responsive_image_style: rs_image
-      image_link: ''
+      image_link: content
       svg_render_as_image: '1'
       svg_attributes:
         width: ''
         height: ''
+    region: content
     third_party_settings: {  }
   tags:
     label: inline
     type: entity_reference_label
-    weight: 5
+    weight: -20
     settings:
       link: true
-    third_party_settings: {  }
     region: content
+    third_party_settings: {  }
   title:
     label: hidden
     type: string
-    weight: 0
+    weight: -50
+    region: content
     settings:
       link_to_entity: false
     third_party_settings: {  }
-    region: content
 hidden:
   handle: true
   options: true

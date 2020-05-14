@@ -3,13 +3,77 @@
 namespace Drupal\neg_shopify;
 
 use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\Entity\ShopifyProductSearch;
+use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Url;
 
 /**
  * ShopifyCollection Class.
  */
 class ShopifyCollection {
+
+  const PERPAGE = 5;
+
+  /**
+   * Render's Json.
+   */
+  public static function renderJson($collection_id, $page = 0, $perPage = FALSE) {
+    if ($perPage === FALSE) {
+      $perPage = Settings::productsPerPage();
+    }
+    $search = new ShopifyProductSearch([
+      'collection_id' => $collection_id,
+    ]);
+
+    $total = $search->count();
+    $products = $search->search($page, $perPage);
+    return [
+      'count' => $total,
+      'items' => ShopifyProduct::loadView($products, 'store_listing', FALSE),
+    ];
+  }
+
+  /**
+   * Renders a Shopify Collection.
+   */
+  public static function render(&$variables) {
+    $term = $variables['term'];
+
+    $variables['#attached']['library'][] = 'neg_shopify/collections';
+    $variables['attributes']['class'][] = 'shopify_collection';
+    $variables['attributes']['class'][] = 'autopager';
+    $variables['attributes']['data-perpage'] = Settings::productsPerPage();
+    $variables['attributes']['data-collection'] = $term->id();
+    $variables['attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
+
+    $search = new ShopifyProductSearch([
+      'collection_id' => $term->id(),
+    ]);
+
+    // Initial Page Render.
+    $products = $search->search(0, Settings::productsPerPage());
+
+    $variables['products'] = [
+      '#theme' => 'shopify_product_grid',
+      '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#cache' => [
+        'contexts' => ['user.roles'],
+        'tags' => self::cacheTags($term->id()),
+      ],
+    ];
+  }
+
+  /**
+   * Get's cache tags.
+   */
+  public static function cacheTags($collection_id) {
+    return [
+      'shopify_product',
+      'taxonomy_term:' . $collection_id,
+    ];
+  }
 
   /**
    * Loads a collection term based on the collection ID.

@@ -18,7 +18,11 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
     // Include our custom css.
-    // $build['#attached']['library'][] = 'neg_shopify/shopify.product.css';
+    $build['#attached']['library'][] = 'neg_shopify/shopify_product';
+
+    if (isset($build['body_html'])) {
+      $build['body_html'][0]['#format'] = 'html';
+    }
 
     if ($variant_id = \Drupal::request()->get('variant_id')) {
       $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
@@ -28,19 +32,19 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
     }
 
     if ($display->getComponent('dynamic_product_image')) {
+      $view = [];
       // Setup the image from the active variant.
       if ($active_variant instanceof ShopifyProductVariant) {
         if ($active_variant->image->target_id) {
-          $file = File::load($active_variant->image->target_id);
+          $view = $active_variant->image->view();
         }
         elseif ($entity->image->target_id) {
-          $file = File::load($entity->image->target_id);
+          $view = $entity->image->view();
         }
-        if ($file instanceof File) {
-          $build['dynamic_product_image'] = [
-            '#theme' => 'image',
-            '#uri' => $file->uri->value,
-          ];
+        if (count($view) > 0 && isset($view[0])) {
+          $build['dynamic_product_image'] = $view[0];
+          $build['dynamic_product_image']['#theme'] = 'responsive_image_formatter';
+          $build['dynamic_product_image']['#responsive_image_style_id'] = 'rs_image';
         }
       }
     }

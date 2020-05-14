@@ -1,8 +1,9 @@
+uuid: a511eaa2-d12b-4bf8-969e-8eb7289bcdff
 langcode: en
 status: true
 dependencies:
   module:
-    - shopify
+    - neg_shopify
 id: shopify_product_variant.shopify_product_variant.default
 targetEntityType: shopify_product_variant
 bundle: shopify_product_variant

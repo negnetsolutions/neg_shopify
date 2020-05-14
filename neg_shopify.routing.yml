@@ -6,6 +6,13 @@ neg_shopify.settings:
   requirements:
     _permission: 'administer site configuration'
 
+neg_shopify.products.json:
+  path: '/shopify/products.json'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\JsonController::products'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.webhook:
   path: '/shopify/webhook'
   defaults:

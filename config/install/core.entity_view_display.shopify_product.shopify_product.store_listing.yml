@@ -1,42 +1,43 @@
+uuid: 09ac61cb-14b9-4e26-826a-64d752adb7cf
 langcode: en
 status: true
 dependencies:
   config:
     - core.entity_view_mode.shopify_product.store_listing
+    - responsive_image.styles.rs_image
   module:
-    - image
-    - shopify
-    - text
+    - neg_shopify
+    - svg_image
 id: shopify_product.shopify_product.store_listing
 targetEntityType: shopify_product
 bundle: shopify_product
 mode: store_listing
 content:
-  body_html:
-    label: hidden
-    type: text_trimmed
-    weight: 2
-    settings:
-      trim_length: 250
-    third_party_settings: {  }
   image:
-    type: image
-    weight: 1
+    type: responsive_image
+    weight: 0
     label: hidden
     settings:
-      image_style: large
+      responsive_image_style: rs_image
       image_link: content
+      svg_render_as_image: '1'
+      svg_attributes:
+        width: ''
+        height: ''
     third_party_settings: {  }
+    region: content
   title:
     label: hidden
     type: string
-    weight: 0
+    weight: 1
     settings:
       link_to_entity: true
     third_party_settings: {  }
+    region: content
 hidden:
   active_variant: true
   add_to_cart_form: true
+  body_html: true
   collections: true
   dynamic_product_image: true
   extra_images: true

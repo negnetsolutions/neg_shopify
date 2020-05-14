@@ -68,6 +68,14 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['store_front_access_token'] = [
+      '#type' => 'textfield',
+      '#title' => t('Shopify Storefront Access Token'),
+      '#default_value' => $config->get('store_front_access_token'),
+      '#description' => t('Enter your Shopify Storefront Access Token'),
+      '#required' => TRUE,
+    ];
+
     // $form['frequency'] = [
     //   '#type' => 'select',
     //   '#title' => t('Sync Frequency'),
@@ -79,6 +87,18 @@ class SettingsForm extends ConfigFormBase {
     //   ],
     //   '#required' => TRUE,
     // ];
+
+    $form['product_display'] = [
+      '#type' => 'details',
+      '#title' => t('Product Display'),
+    ];
+    $form['product_display']['products_per_page'] = [
+      '#type' => 'number',
+      '#title' => t('Products to display per page'),
+      '#default_value' => ($config->get('products_per_page') !== NULL) ? $config->get('products_per_page') : 5,
+      '#description' => t('Enter the number of products to display on each page.'),
+      '#required' => TRUE,
+    ];
 
     if ($config->get('api_key') !== NULL) {
       $form['webhooks'] = [
@@ -210,6 +230,8 @@ class SettingsForm extends ConfigFormBase {
     $config = Settings::editableConfig();
 
     $config->set('shop_url', $form_state->getValue('shop_url'))
+      ->set('products_per_page', $form_state->getValue('products_per_page'))
+      ->set('store_front_access_token', $form_state->getValue('store_front_access_token'))
       ->set('api_key', $form_state->getValue('api_key'))
       ->set('api_secret', $form_state->getValue('api_secret'))
       ->set('api_password', $form_state->getValue('api_password'));

@@ -1,0 +1,28 @@
+shopify_product:
+  version: 0.01
+  css:
+    theme:
+      css/product.css: {}
+shopify.js:
+  version: 1.x
+  js:
+    js/shopify.js: {}
+shopify.toolbar:
+  version: 1.x
+  css:
+    theme:
+      css/shopify.toolbar.css: {}
+collections:
+  version: 0.01
+  js:
+    js/collections/collections.js: {}
+  dependencies:
+    - neg_shopify/autopager
+intersection-observer:
+  js:
+    js/intersection-observer.js: {}
+autopager:
+  js:
+    js/autopager/autopager.js: {}
+  dependencies:
+    - neg_shopify/intersection-observer

@@ -1,8 +1,9 @@
+uuid: 898660fc-14e2-4553-8b83-5c6ae6c16d8c
 langcode: en
 status: true
 dependencies:
   module:
-    - shopify
+    - neg_shopify
 id: shopify_product.full
 label: Full
 targetEntityType: shopify_product

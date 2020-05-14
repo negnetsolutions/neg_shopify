@@ -1,13 +1,20 @@
+uuid: d2b217fa-be6e-453a-845e-88378220ad13
 langcode: en
 status: true
 dependencies:
   module:
-    - shopify
+    - neg_shopify
 id: shopify_product.shopify_product.default
 targetEntityType: shopify_product
 bundle: shopify_product
 mode: default
-content: {  }
+content:
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
 hidden:
   body_html: true
   collections: true

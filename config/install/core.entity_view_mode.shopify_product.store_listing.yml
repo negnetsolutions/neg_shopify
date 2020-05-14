@@ -1,8 +1,9 @@
+uuid: 3c3c2299-1fea-45ea-bf20-0667d026f111
 langcode: en
 status: true
 dependencies:
   module:
-    - shopify
+    - neg_shopify
 id: shopify_product.store_listing
 label: 'Store Listing'
 targetEntityType: shopify_product

@@ -1,9 +1,11 @@
+uuid: 7bb76611-0f08-43ed-90ef-9e9bb35a459c
 langcode: en
 status: true
 dependencies:
   enforced:
     module:
-      - shopify
+      - neg_shopify
 name: 'Shopify Collections'
 vid: shopify_collections
 description: 'Product collections that are dynamically pulled from Shopify.'
+weight: 0
