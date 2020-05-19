@@ -5,13 +5,24 @@
     <figure class="image">
       <a href="{{ url }}">
         {{ content.field_header_image.0 }}
+        {% if header_title|render %}
         <figcaption>
-          {{ title }}
+          {{ header_title }}
         </figcaption>
+        {% endif %}
       </a>
     </figure>
   </header>
+  {% else %}
+  <header>
+    {% if header_title|render %}
+    <h1>
+      {{ header_title }}
+    </h1>
+    {% endif %}
+  </header>
   {% endif %}
+
   {{ products }}
 </section>
 {% endif %}

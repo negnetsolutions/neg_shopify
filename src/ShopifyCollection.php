@@ -89,7 +89,7 @@ class ShopifyCollection {
   public static function renderParagraph(&$variables) {
     $variables['attributes']['class'][] = 'shopify_paragraph_collection';
 
-    $limit = (isset($variables['products_to_display'])) ? $$variables['products_to_display'] : 5;
+    $limit = (isset($variables['products_to_display'])) ? (int) $variables['products_to_display'] : 5;
     $term = $variables['term'];
 
     $params = [

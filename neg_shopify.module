@@ -392,7 +392,8 @@ function neg_shopify_preprocess_paragraph(&$variables) {
 /**
  * Preproccess Shopify Product paragraph.
  */
-function _neg_google_reviews_process_paragraph_shopify_product(&$variables) {
+function _neg_shopify_process_paragraph_shopify_product(&$variables) {
+  $variables['attributes']['class'][] = 'col';
   $variables['attributes']['class'][] = 'paragraph';
   $variables['attributes']['class'][] = 'paragraph-shopify-product';
 
@@ -408,12 +409,17 @@ function _neg_google_reviews_process_paragraph_shopify_product(&$variables) {
 /**
  * Preproccess Collections paragraph.
  */
-function _neg_google_reviews_process_paragraph_shopify_collection(&$variables) {
+function _neg_shopify_process_paragraph_shopify_collection(&$variables) {
+  $variables['attributes']['class'][] = 'col';
   $variables['attributes']['class'][] = 'paragraph';
   $variables['attributes']['class'][] = 'paragraph-shopify-collection';
 
+  if (!$variables['paragraph']->field_header_title->isEmpty()) {
+    $variables['header_title'] = $variables['paragraph']->field_header_title->value;
+  }
+
   if (!$variables['paragraph']->field_products_to_display->isEmpty()) {
-    $variables['products_to_display'] = $$variables['paragraph']->field_products_to_display->value;
+    $variables['products_to_display'] = (int) $variables['paragraph']->field_products_to_display->value;
   }
 
   if (!$variables['paragraph']->field_collection->isEmpty()) {
