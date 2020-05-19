@@ -35,6 +35,9 @@ use Drupal\Core\Render\RenderContext;
  *       "edit" = "Drupal\neg_shopify\Entity\Form\ShopifyProductForm",
  *       "delete" = "Drupal\neg_shopify\Entity\Form\ShopifyProductDeleteForm",
  *     },
+ *     "route_provider" = {
+ *       "html" = "Drupal\neg_shopify\ShopifyProductHtmlRouteProvider",
+ *     },
  *     "access" = "Drupal\neg_shopify\ShopifyProductAccessControlHandler",
  *   },
  *   base_table = "shopify_product",
