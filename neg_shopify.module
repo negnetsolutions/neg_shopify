@@ -357,6 +357,7 @@ function template_preprocess_shopify_product(&$variables) {
 function template_preprocess_shopify_product_variant(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product_variant'] = $variables['elements']['#shopify_product_variant'];
+  $variables['shopify_product'] = $variables['shopify_product_variant']->getProduct();
 
   // Helpful $content variable for templates.
   $variables += array('content' => array());
@@ -369,6 +370,12 @@ function template_preprocess_shopify_product_variant(&$variables) {
   }
 
   $variables['currency'] = Settings::shopInfo()->currency;
+
+  $variables['url'] = $variables['shopify_product']->toUrl('canonical')->setOptions([
+    'query' => [
+      'variant_id' => $variables['shopify_product_variant']->get('variant_id')->value,
+    ],
+  ])->toString();
 }
 
 /**

@@ -13,10 +13,17 @@
  */
 #}
 <li>
-  {{ content.dynamic_product_image }}
+  <a href="{{ url }}">
+    {{ content.dynamic_product_image }}
+  </a>
   <div class="product_info">
-    {{ content.product_title }}
-    {{ content.product_vendor }}
+    <a href="{{ url }}">
+      {{ content.product_title }}
+      {{ content.product_vendor }}
+      <div class="variant_option">
+        {{ content.title.0 }}
+      </div>
+    </a>
   </div>
   <div class="item-qty">
     <input type="number" value="" />

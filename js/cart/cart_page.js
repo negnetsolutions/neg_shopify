@@ -64,7 +64,7 @@ const cartPage = new function () {
       _.cartWrapper.innerHTML = "<div class='cart-item-list text'><h2>Your cart is currently empty!</h2><p>No worries though, plenty to choose from right over <a href='" + drupalSettings.cart.emptyRedirect + "'>here</a>.</p></div";
     }
     else {
-      let subtotal = _.cartWrapper.querySelector('.subtotal > p');
+      let subtotal = _.cartWrapper.querySelector('.subtotal > .value');
       let itemList = _.cartWrapper.querySelector('.item-list');
 
       _.checkoutBtn.addEventListener('click', _.checkout);
