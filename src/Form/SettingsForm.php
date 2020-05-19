@@ -76,18 +76,6 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    // $form['frequency'] = [
-    //   '#type' => 'select',
-    //   '#title' => t('Sync Frequency'),
-    //   '#default_value' => $config->get('frequency'),
-    //   '#options' => [
-    //     '0' => 'Every Cron Run',
-    //     '21600' => 'Every 12 Hours',
-    //     '86400' => 'Every 24 Hours',
-    //   ],
-    //   '#required' => TRUE,
-    // ];
-
     $form['product_display'] = [
       '#type' => 'details',
       '#title' => t('Product Display'),
@@ -139,6 +127,18 @@ class SettingsForm extends ConfigFormBase {
         ]),
       ];
 
+      $form['products']['products_frequency'] = [
+        '#type' => 'select',
+        '#title' => t('Full Sync Frequency'),
+        '#default_value' => $config->get('products_frequency'),
+        '#options' => [
+          '0' => 'Every Cron Run',
+          '21600' => 'Every 12 Hours',
+          '86400' => 'Every 24 Hours',
+        ],
+        '#required' => TRUE,
+      ];
+
       $form['products']['reset_products'] = [
         '#type' => 'submit',
         '#value' => t('Reset Products Last Sync Time and Queue Sync'),
@@ -157,6 +157,18 @@ class SettingsForm extends ConfigFormBase {
         '#description' => t('Last sync time: @time', [
           '@time' => $collections_last_sync_time_formatted,
         ]),
+      ];
+
+      $form['collections']['collections_frequency'] = [
+        '#type' => 'select',
+        '#title' => t('Full Sync Frequency'),
+        '#default_value' => $config->get('collections_frequency'),
+        '#options' => [
+          '0' => 'Every Cron Run',
+          '21600' => 'Every 12 Hours',
+          '86400' => 'Every 24 Hours',
+        ],
+        '#required' => TRUE,
       ];
 
       $form['collections']['reset_collections'] = [
@@ -230,6 +242,8 @@ class SettingsForm extends ConfigFormBase {
     $config = Settings::editableConfig();
 
     $config->set('shop_url', $form_state->getValue('shop_url'))
+      ->set('products_frequency', $form_state->getValue('products_frequency'))
+      ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
       ->set('store_front_access_token', $form_state->getValue('store_front_access_token'))
       ->set('api_key', $form_state->getValue('api_key'))

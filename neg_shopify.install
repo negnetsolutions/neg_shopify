@@ -1,21 +1,64 @@
 <?php
 
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\neg_shopify\Settings;
+
 /**
- * Implements hook_update_N().
+ * Adds "shopify_product.is_available"
  */
-function example_update_8701() {
-  \Drupal::entityDefinitionUpdateManager()->installEntityType(new ConfigEntityType([
-    'id' => 'rest_resource_config',
-    'label' => new TranslatableMarkup('REST resource configuration'),
-    'config_prefix' => 'resource',
-    'admin_permission' => 'administer rest resources',
-    'label_callback' => 'getLabelFromPlugin',
-    'entity_keys' => ['id' => 'id'],
-    'config_export' => [
-      'id',
-      'plugin_id',
-      'granularity',
-      'configuration',
-    ],
-  ]));
+function neg_shopify_update_8702(&$sandbox) {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('shopify_product');
+  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_product');
+
+  $field_storage_definitions['is_available'] = BaseFieldDefinition::create('boolean')
+    ->setName('is_available')
+    ->setLabel(t('Available for Sale'))
+    ->setDefaultValue(FALSE)
+    ->setTargetEntityTypeId('shopify_product')
+    ->setTargetBundle(NULL)
+    ->setReadOnly(TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  return t('Add shopify_product.is_available');
+}
+
+/**
+ * Adds "shopify_product.low_price"
+ */
+function neg_shopify_update_8703(&$sandbox) {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('shopify_product');
+  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_product');
+
+  $field_storage_definitions['low_price'] = BaseFieldDefinition::create('decimal')
+    ->setName('low_price')
+    ->setTargetEntityTypeId('shopify_product')
+    ->setTargetBundle(NULL)
+    ->setLabel(t('Low Price'))
+    ->setReadOnly(TRUE)
+    ->setSettings([
+      'precision' => 10,
+      'scale' => 2,
+    ])
+    ->setDisplayOptions('view', [
+      'label' => 'above',
+      'type' => 'shopify_price',
+      'weight' => -4,
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'number',
+      'weight' => -4,
+    ])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  return t('Added shopify_product.low_price');
 }

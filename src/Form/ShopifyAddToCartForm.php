@@ -43,7 +43,9 @@ class ShopifyAddToCartForm extends FormBase {
     }
 
     $form['#action'] = '//' . Settings::shopInfo('domain') . '/cart/add';
-    $form['#attached']['library'][] = 'neg_shopify/shopify.js';
+
+    // Attach the cart library.
+    Settings::attachShopifyJs($form);
 
     // Data attribute used by shopify.js.
     $form['#attributes']['data-variant-id'] = $variant_id;
@@ -61,12 +63,14 @@ class ShopifyAddToCartForm extends FormBase {
     ];
 
     // Send the quantity value.
-    $form['quantity'] = [
-      '#type' => 'number',
-      '#title' => t('Quantity'),
-      '#default_value' => 1,
-      '#attributes' => ['min' => 0, 'max' => 999],
-    ];
+    if ($product->get('is_available')->value != FALSE) {
+      $form['quantity'] = [
+        '#type' => 'number',
+        '#title' => t('Quantity'),
+        '#default_value' => 1,
+        '#attributes' => ['min' => 0, 'max' => 999],
+      ];
+    }
 
     if (empty($variant_id)) {
       // No variant matches these options.
@@ -84,6 +88,11 @@ class ShopifyAddToCartForm extends FormBase {
           '#type' => 'submit',
           '#value' => t('Add to cart'),
           '#name' => 'add_to_cart',
+          '#attributes' => [
+            'onclick' => [
+              'return shopping_cart.addToCart(this);',
+            ],
+          ],
         ];
       }
       else {

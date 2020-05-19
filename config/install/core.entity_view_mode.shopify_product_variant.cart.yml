@@ -1,0 +1,10 @@
+uuid: 7e06ae23-1b8c-40d6-9c1a-44ea930480af
+langcode: en
+status: true
+dependencies:
+  module:
+    - neg_shopify
+id: shopify_product_variant.cart
+label: Cart
+targetEntityType: shopify_product_variant
+cache: true

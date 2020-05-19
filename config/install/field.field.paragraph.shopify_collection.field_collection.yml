@@ -1,0 +1,29 @@
+uuid: 500de93f-5c95-43a5-bee8-03f50bfbb0c5
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_collection
+    - paragraphs.paragraphs_type.shopify_collection
+    - taxonomy.vocabulary.shopify_collections
+id: paragraph.shopify_collection.field_collection
+field_name: field_collection
+entity_type: paragraph
+bundle: shopify_collection
+label: Collection
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      shopify_collections: shopify_collections
+    sort:
+      field: name
+      direction: asc
+    auto_create: false
+    auto_create_bundle: ''
+field_type: entity_reference

@@ -1,0 +1,25 @@
+uuid: 12aa274f-f80e-4b0e-9291-dc5e5caed394
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.shopify_product.field_product
+    - paragraphs.paragraphs_type.shopify_product
+id: paragraph.shopify_product.default
+targetEntityType: paragraph
+bundle: shopify_product
+mode: default
+content:
+  field_product:
+    weight: 0
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+hidden:
+  created: true
+  status: true

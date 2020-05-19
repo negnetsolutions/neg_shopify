@@ -15,7 +15,7 @@ class Sync {
    */
   public static function syncAllCollections() {
     $service = ShopifyService::instance();
-    $queue = Settings::queue();
+    $queue = Settings::collectionsQueue();
     $product_count = 0;
 
     if ($queue->numberOfItems() > 0) {

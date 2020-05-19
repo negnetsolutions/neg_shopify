@@ -6,7 +6,7 @@ namespace Drupal\neg_shopify\Plugin\QueueWorker;
  *
  * @QueueWorker(
  * id = "neg_shopify",
- * title = "Shopify Queue",
+ * title = "Shopify Product Queue",
  * cron = {"time" = 60}
  * )
  */

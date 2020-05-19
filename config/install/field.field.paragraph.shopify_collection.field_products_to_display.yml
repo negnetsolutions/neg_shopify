@@ -1,0 +1,25 @@
+uuid: 812a905b-5eff-4043-8f01-94a1cb062a3a
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_products_to_display
+    - paragraphs.paragraphs_type.shopify_collection
+id: paragraph.shopify_collection.field_products_to_display
+field_name: field_products_to_display
+entity_type: paragraph
+bundle: shopify_collection
+label: 'Products to display'
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: 5
+default_value_callback: ''
+settings:
+  min: 1
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

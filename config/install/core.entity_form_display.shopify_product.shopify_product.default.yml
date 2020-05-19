@@ -4,11 +4,19 @@ status: true
 dependencies:
   module:
     - neg_shopify
+    - path
 id: shopify_product.shopify_product.default
 targetEntityType: shopify_product
 bundle: shopify_product
 mode: default
 content:
+  low_price:
+    type: number
+    weight: -4
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
   path:
     type: path
     weight: 30

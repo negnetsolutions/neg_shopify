@@ -165,9 +165,34 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       $values['tags'] = NULL;
     }
 
+    $values['is_available'] = FALSE;
+    $values['low_price'] = 0;
+
     // Format variants as entities.
     if (isset($values['variants']) && is_array($values['variants'])) {
+      $available = 0;
+
       foreach ($values['variants'] as &$variant) {
+
+        if ($values['low_price'] === 0) {
+          $values['low_price'] = $variant['price'];
+        }
+        elseif ($variant['price'] < $values['low_price']) {
+          $values['low_price'] = $variant['price'];
+        }
+
+        $inventory_policy = $variant['inventory_policy'];
+        $inventory_quantity = $variant['inventory_quantity'];
+
+        if ($inventory_policy == 'deny') {
+          if ($inventory_quantity > 0) {
+            $available += $inventory_quantity;
+          }
+        }
+        else {
+          $available += 1;
+        }
+
         // Attempt to load this variant.
         $entity = ShopifyProductVariant::loadByVariantId($variant['id']);
         if ($entity instanceof ShopifyProductVariant) {
@@ -178,6 +203,10 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
         else {
           $variant = ShopifyProductVariant::create($variant);
         }
+      }
+
+      if ($available > 0) {
+        $values['is_available'] = TRUE;
       }
     }
 
@@ -194,7 +223,9 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
           'values' => $option_object['values'],
         ];
       }
-      $values['options'] = $stored_options;
+      $values['options'] = [
+        'options' => $stored_options,
+      ];
     }
     return $values;
   }
@@ -253,6 +284,39 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       $variant->delete();
     }
     parent::delete();
+  }
+
+  /**
+   * Get's an array of option names.
+   */
+  public function getOptionNames() {
+    $options = [];
+    $values = $this->get('options')->first()->getValue()['options'];
+    foreach ($values as $value) {
+      $options[] = $value['name'];
+    }
+
+    return $options;
+  }
+
+  /**
+   * Loads a view array.
+   */
+  public function getView(string $style = 'store_listing', $defaultContext = TRUE) {
+
+    $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($this, $style);
+
+    if ($defaultContext === FALSE) {
+      $rendered_view = NULL;
+      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
+        $rendered_view = render($build);
+      });
+    }
+    else {
+      $rendered_view = $build;
+    }
+
+    return $rendered_view;
   }
 
   /**
@@ -488,6 +552,31 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['is_available'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Available for Sale'))
+      ->setDefaultValue(FALSE)
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['low_price'] = BaseFieldDefinition::create('decimal')
+      ->setLabel(t('Low Price'))
+      ->setReadOnly(TRUE)
+      ->setSettings([
+        'precision' => 10,
+        'scale' => 2,
+      ])
+      ->setDisplayOptions('view', [
+        'label' => 'above',
+        'type' => 'shopify_price',
+        'weight' => -4,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'number',
+        'weight' => -4,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
     $fields['product_id'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Product ID'))
       ->setDefaultValue('')
@@ -627,10 +716,12 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
 
     $fields['options'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Options'))
+      ->setDescription(t('Product Options'))
       ->setDisplayOptions('form', [
         'type' => 'map',
         'weight' => 2,
       ])
+      ->setRequired(TRUE)
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 

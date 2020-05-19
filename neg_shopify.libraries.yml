@@ -3,10 +3,19 @@ shopify_product:
   css:
     theme:
       css/product.css: {}
+cart_page:
+  version: 0.01
+  js:
+    js/cart/cart_page.js: {}
+  dependencies:
+    - neg_shopify/shopify.js
+    - negnet_utility/closest
 shopify.js:
   version: 1.x
   js:
-    js/shopify.js: {}
+    js/cart/cart.js: {}
+  dependencies:
+    - core/drupalSettings
 shopify.toolbar:
   version: 1.x
   css:

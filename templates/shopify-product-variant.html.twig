@@ -12,6 +12,12 @@
  * @ingroup themeable
  */
 #}
-<div{{ attributes }}>
-  {{ content }}
+<div class="offers" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+  <meta itemprop="priceCurrency" content="{{ currency }}">
+  <link itemprop="availability" href="http://schema.org/{% if available %}InStock{% else %}OutOfStock{% endif %}">
+
+  {% if content.compare_at_price|render %}
+    <div class="compare_at_price">{{ content.compare_at_price }}</div>
+  {% endif %}
+  <div class="price{% if content.compare_at_price|render %} sale {% endif %}" itemprop="price">{{ content.price }}</div>
 </div>

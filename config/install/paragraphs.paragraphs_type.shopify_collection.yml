@@ -1,0 +1,10 @@
+uuid: 27fed88e-a2bb-471f-9b1e-fc6d81522fea
+langcode: en
+status: true
+dependencies: {  }
+id: shopify_collection
+label: 'Shopify Collection'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }

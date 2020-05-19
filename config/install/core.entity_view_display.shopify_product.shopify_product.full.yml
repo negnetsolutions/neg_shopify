@@ -15,46 +15,25 @@ bundle: shopify_product
 mode: full
 content:
   active_variant:
-    weight: 7
+    weight: 6
     region: content
     settings: {  }
     third_party_settings: {  }
   add_to_cart_form:
-    weight: 8
+    weight: 7
     region: content
     settings: {  }
     third_party_settings: {  }
   body_html:
     label: hidden
     type: text_default
-    weight: 4
+    weight: 5
     settings: {  }
     third_party_settings: {  }
     region: content
-  collections:
-    label: inline
-    type: entity_reference_label
-    weight: 6
-    settings:
-      link: true
-    third_party_settings: {  }
-    region: content
-  dynamic_product_image:
-    type: responsive_image
-    weight: 1
-    region: content
-    label: above
-    settings:
-      responsive_image_style: rs_image
-      image_link: ''
-      svg_render_as_image: '1'
-      svg_attributes:
-        width: ''
-        height: ''
-    third_party_settings: {  }
   extra_images:
     type: responsive_image
-    weight: 3
+    weight: 4
     region: content
     label: above
     settings:
@@ -67,7 +46,7 @@ content:
     third_party_settings: {  }
   image:
     type: responsive_image
-    weight: 2
+    weight: 3
     region: content
     label: above
     settings:
@@ -78,14 +57,14 @@ content:
         width: ''
         height: ''
     third_party_settings: {  }
-  tags:
-    label: inline
-    type: entity_reference_label
-    weight: 5
-    settings:
-      link: true
-    third_party_settings: {  }
+  product_type:
+    type: string
+    weight: 2
     region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
   title:
     label: hidden
     type: string
@@ -94,12 +73,23 @@ content:
       link_to_entity: false
     third_party_settings: {  }
     region: content
+  vendor:
+    type: string
+    weight: 1
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
 hidden:
+  collections: true
+  dynamic_product_image: true
   handle: true
+  is_available: true
+  low_price: true
   options: true
   product_id: true
-  product_type: true
   published_scope: true
+  tags: true
   user_id: true
   variants: true
-  vendor: true

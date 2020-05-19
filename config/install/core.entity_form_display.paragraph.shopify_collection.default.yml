@@ -1,0 +1,45 @@
+uuid: 95d23bc0-891d-497d-bf8e-599c44209a51
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.shopify_collection.field_collection
+    - field.field.paragraph.shopify_collection.field_header_image
+    - field.field.paragraph.shopify_collection.field_products_to_display
+    - image.style.thumbnail
+    - paragraphs.paragraphs_type.shopify_collection
+  module:
+    - svg_image
+id: paragraph.shopify_collection.default
+targetEntityType: paragraph
+bundle: shopify_collection
+mode: default
+content:
+  field_collection:
+    weight: 0
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: entity_reference_autocomplete
+    region: content
+  field_header_image:
+    weight: 1
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+    type: image_image
+    region: content
+  field_products_to_display:
+    weight: 2
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+    type: number
+    region: content
+hidden:
+  created: true
+  status: true

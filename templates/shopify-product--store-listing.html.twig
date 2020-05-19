@@ -1,0 +1,19 @@
+{%
+set classes = [
+'shopify-product',
+view_mode ? view_mode|clean_class,
+]
+%}
+<article{{ attributes.addClass(classes) }}>
+  <a href="{{ url }}">
+    <figure class="image">
+      {{ content.image.0 }}
+    </figure>
+    <div class="info">
+      {{ content.title }}
+    </div>
+    <div class="price">
+      {{ content.low_price }}
+    </div>
+  </a>
+</article>

@@ -13,6 +13,8 @@ class Settings {
   const CONFIGNAME = 'neg_shopify.settings';
   const WEBHOOKQUEUE = 'neg_shopify_webhook';
   const CRONQUEUE = 'neg_shopify';
+  const COLLECTIONSQUEUE = 'neg_shopify_collections';
+  const DEFAULT_SORT = 'date-descending';
 
   /**
    * Invalidates review cache.
@@ -35,15 +37,6 @@ class Settings {
    */
   public static function storeUrl($display = 'main', $arg = NULL) {
     return 'https://' . self::shopInfo('domain');
-
-    // $view = View::load('shopify_store');
-    // if ($view instanceof View) {
-    //   $path = $view->getDisplay($display)['display_options']['path'];
-    //   if ($arg) {
-    //     return strtr($path, ['%' => $arg]);
-    //   }
-    //   return $path;
-    // }
   }
 
   /**
@@ -89,6 +82,15 @@ class Settings {
   }
 
   /**
+   * Get Collections Queue.
+   */
+  public static function collectionsQueue() {
+    $queue_factory = \Drupal::service('queue');
+    $queue = $queue_factory->get(self::COLLECTIONSQUEUE);
+    return $queue;
+  }
+
+  /**
    * Get Queue.
    */
   public static function queue() {
@@ -105,11 +107,30 @@ class Settings {
   }
 
   /**
+   * Adds shopify js.
+   */
+  public static function attachShopifyJs(&$build) {
+    $build['#attached']['library'][] = 'neg_shopify/shopify.js';
+    $build['#attached']['drupalSettings']['cart'] = [
+      'endpoint' => Url::fromRoute('neg_shopify.cart.json')->toString(),
+      'cartPage' => Url::fromRoute('neg_shopify.cart')->toString(),
+      'emptyRedirect' => '/collections/all',
+    ];
+  }
+
+  /**
    * Gets the store front api key.
    */
   public static function accessToken() {
     $config = self::config();
     return $config->get('store_front_access_token');
+  }
+
+  /**
+   * Gets default sort order.
+   */
+  public static function defaultSortOrder() {
+    return self::DEFAULT_SORT;
   }
 
   /**

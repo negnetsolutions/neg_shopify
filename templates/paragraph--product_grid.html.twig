@@ -1,0 +1,8 @@
+{% if totalProducts > 0 %}
+<section class="items products">
+  {{ products }}
+  {% if showMore == true %}
+    <a class="more" href="{{ more_url }}">View More</a>
+  {% endif %}
+</section>
+{% endif %}

@@ -19,19 +19,26 @@ content:
     label: hidden
     settings:
       responsive_image_style: rs_image
-      image_link: content
+      image_link: ''
       svg_render_as_image: '1'
       svg_attributes:
         width: ''
         height: ''
     third_party_settings: {  }
     region: content
+  low_price:
+    label: above
+    type: shopify_price
+    weight: -4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
   title:
     label: hidden
     type: string
     weight: 1
     settings:
-      link_to_entity: true
+      link_to_entity: false
     third_party_settings: {  }
     region: content
 hidden:
@@ -42,6 +49,7 @@ hidden:
   dynamic_product_image: true
   extra_images: true
   handle: true
+  is_available: true
   options: true
   product_id: true
   product_type: true

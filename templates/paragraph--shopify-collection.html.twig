@@ -1,0 +1,17 @@
+{% if products|render %}
+<section {{ attributes }}>
+  {% if content.field_header_image|render %}
+  <header>
+    <figure class="image">
+      <a href="{{ url }}">
+        {{ content.field_header_image.0 }}
+        <figcaption>
+          {{ title }}
+        </figcaption>
+      </a>
+    </figure>
+  </header>
+  {% endif %}
+  {{ products }}
+</section>
+{% endif %}

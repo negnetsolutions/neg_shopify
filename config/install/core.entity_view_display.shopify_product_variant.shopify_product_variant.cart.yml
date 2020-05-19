@@ -1,0 +1,64 @@
+uuid: 17312208-e25c-4568-a6b6-9961bfdc63b2
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.shopify_product_variant.cart
+  module:
+    - neg_shopify
+id: shopify_product_variant.shopify_product_variant.cart
+targetEntityType: shopify_product_variant
+bundle: shopify_product_variant
+mode: cart
+content:
+  dynamic_product_image:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  price:
+    label: inline
+    type: shopify_price
+    weight: 4
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  product_title:
+    weight: 1
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  product_vendor:
+    weight: 3
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  title:
+    type: string
+    weight: 2
+    region: content
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+hidden:
+  barcode: true
+  compare_at_price: true
+  fulfillment_service: true
+  grams: true
+  image: true
+  inventory_management: true
+  inventory_policy: true
+  inventory_quantity: true
+  old_inventory_quantity: true
+  option1: true
+  option2: true
+  option3: true
+  position: true
+  requires_shipping: true
+  sku: true
+  taxable: true
+  user_id: true
+  variant_id: true
+  weight: true
+  weight_unit: true

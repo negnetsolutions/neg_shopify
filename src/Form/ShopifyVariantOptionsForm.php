@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Class ShopifyVariantOptionsForm.
@@ -25,43 +26,34 @@ class ShopifyVariantOptionsForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ShopifyProduct $product = NULL) {
-    // Disable caching of this form.
-    $form['#cache']['max-age'] = 0;
-    $options = $product->options->getValue();
+
+    // Set cache contexts and tags.
+    $form['#cache']['contexts'] = ['url.query_args'];
+    $form['#cache']['tags'] = $product->getCacheTags();
+
     $form_state->set('product', $product);
 
     $variant_id = \Drupal::request()->get('variant_id', FALSE);
-    $default_options = \Drupal::request()->get('options', []);
 
-    if (empty($default_options) && $variant_id) {
-      // No options set from the query.
-      // Set default options from the active variant.
-      $variant = ShopifyProductVariant::loadByVariantId($variant_id);
-      $variant_options = $variant->getFormattedOptions();
-      foreach ($options as $option) {
-        foreach ($option['values'] as $option_value) {
-          if (in_array($option_value, $variant_options)) {
-            $default_options[$option['id']] = $option_value;
-          }
-        }
+    // Load options.
+    $options = [];
+    $variants = $product->get('variants');
+
+    foreach ($variants as $i => $variant) {
+      if ($variant->entity->isAvailable()) {
+        $variantOptions = $variant->entity->getFormattedOptions();
+        $label = implode(' / ', $variantOptions);
+        $options[$variant->entity->get('variant_id')->value] = $label;
       }
     }
 
-    $form['options']['#tree'] = TRUE;
+    $form['options'] = [
+      '#type' => 'select',
+      '#options' => $options,
+      '#default_value' => ($variant_id) ? $variant_id : '',
+      '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
+    ];
 
-    foreach ($options as $option) {
-      if ($option['values'][0] == 'Default Title') {
-        // Skip variant options that don't really need options.
-        continue;
-      }
-      $form['options'][$option['id']] = [
-        '#type' => 'select',
-        '#options' => array_combine($option['values'], $option['values']),
-        '#title' => t('@name', ['@name' => $option['name']]),
-        '#default_value' => isset($default_options[$option['id']]) ? $default_options[$option['id']] : '',
-        '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
-      ];
-    }
     $form['update_variant'] = [
       '#type' => 'submit',
       '#value' => t('Update'),
@@ -82,7 +74,7 @@ class ShopifyVariantOptionsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->goToVariantWithOptions($form_state->getValue('options'), $form_state);
+    $this->goToVariant($form_state->getValue('options'), $form_state);
   }
 
   /**
@@ -95,60 +87,25 @@ class ShopifyVariantOptionsForm extends FormBase {
    *
    *   TODO: Move $options to the end.
    */
-  private function goToVariantWithOptions(array $options = [], FormStateInterface $form_state) {
-    $variant = $this->getVariantByOptions($form_state, $options);
+  private function goToVariant($variant_id, FormStateInterface $form_state) {
+
+    $variant = ShopifyProductVariant::loadByVariantId($variant_id);
+    $query = [];
+
     if ($variant instanceof ShopifyProductVariant) {
       // We have a matching variant we can redirect to.
-      $form_state->setRedirect('entity.shopify_product.canonical', [
-        'shopify_product' => $form_state->get('product')
-          ->id(),
-      ], [
-        'query' => [
-          'variant_id' => $variant->variant_id->value,
-          'options' => $options,
-        ],
-      ]);
+      $query = [
+        'variant_id' => $variant_id,
+      ];
     }
-    else {
-      // No variant matches.
-      $form_state->setRedirect('entity.shopify_product.canonical', [
-        'shopify_product' => $form_state->get('product')
-          ->id(),
-      ], [
-        'query' => [
-          'variant_id' => 0,
-          'options' => $options,
-        ],
-      ]);
-    }
-  }
 
-  /**
-   * Gets a variant that has options matching the passed option values.
-   *
-   * @param \Drupal\Core\Form\FormStateInterface $form_state
-   *   Form state object.
-   * @param array $options
-   *   Options from the form_state.
-   *
-   * @return \Drupal\shopify\Entity\ShopifyProductVariant
-   *   Shopify product variant.
-   */
-  private function getVariantByOptions(FormStateInterface $form_state, array $options = []) {
-    $valid_variant = NULL;
-    foreach ($form_state->get('product')->variants as $variant) {
-      $variant = ShopifyProductVariant::load($variant->target_id);
-      if ($variant instanceof ShopifyProductVariant) {
-        // Determine if this variants options match all of the passed options.
-        foreach ($options as $option) {
-          if (!in_array($option, $variant->getFormattedOptions())) {
-            continue 2;
-          }
-        }
-        $valid_variant = $variant;
-      }
-    }
-    return $valid_variant;
+    // Redirect.
+    $form_state->setRedirect('entity.shopify_product.canonical', [
+      'shopify_product' => $form_state->get('product')
+        ->id(),
+    ], [
+      'query' => $query,
+    ]);
   }
 
 }

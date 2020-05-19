@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 
 use Drupal\neg_shopify\ShopifyCollection;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Class JsonController.
@@ -27,18 +28,21 @@ class JsonController extends ControllerBase {
 
     $data = [];
 
+    $page = \Drupal::request()->query->get('page');
+    $perPage = \Drupal::request()->query->get('perpage');
+    $perPage = ($perPage === NULL) ? Settings::productsPerPage() : $perPage;
+    $sortOrder = \Drupal::request()->query->get('sort');
+    $sortOrder = ($sortOrder === NULL) ? Settings::defaultSortOrder() : $sortOrder;
+
     switch ($type) {
       case 'collection':
         $id = \Drupal::request()->query->get('id');
-        $page = \Drupal::request()->query->get('page');
-        $perPage = \Drupal::request()->query->get('perpage');
-        $perPage = ($perPage === NULL) ? ShopifyCollection::PERPAGE : $perPage;
 
         if ($id === NULL || $page === NULL) {
           throw new NotFoundHttpException();
         }
 
-        $data = ShopifyCollection::renderJson($id, $page, $perPage);
+        $data = ShopifyCollection::renderJson($id, $sortOrder, $page, $perPage);
         $tags = ShopifyCollection::cacheTags($id);
         break;
     }

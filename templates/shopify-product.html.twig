@@ -1,24 +1,28 @@
-{#
-/**
- * @file
- * Default theme implementation to display a product.
- *
- * Available variables:
- * - content: All product items. Use {{ content }} to print them all.
- * - attributes: HTML attributes for the containing element.
- * - view_mode: View mode; for example, "teaser" or "store_listing".
- * - shopify_product_variant: The shopify product object.
- *
- * @ingroup themeable
- */
-#}
 {%
 set classes = [
 'shopify-product',
-view_mode ? 'shopify-product--view-' ~ view_mode|clean_class,
+view_mode ? view_mode|clean_class,
 ]
 %}
 <article{{ attributes.addClass(classes) }}>
-  <h1>PRODUCT</h1>
-  {{ content }}
+  <meta itemprop="name" content="{{ content.title.0 }}">
+  <meta itemprop="url" content="{{ url }}">
+  <meta itemprop="image" content="">
+
+  <section class="info">
+    <h1 itemprop="name">
+      {{ content.title }}
+    </h1>
+    <h2 itemprop="brand">
+      {{ content.vendor }}
+    </h2>
+    {{ content.active_variant }}
+    <div class="description" itemprop="description">
+      {{ content.body_html.0 }}
+    </div>
+    {{ content.add_to_cart_form }}
+  </section>
+  <section class="images">
+    {{ content.extra_images }}
+  </section>
 </article>

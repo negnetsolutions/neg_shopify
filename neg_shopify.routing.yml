@@ -6,6 +6,29 @@ neg_shopify.settings:
   requirements:
     _permission: 'administer site configuration'
 
+neg_shopify.all:
+  path: '/collections/all'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\Collections::renderAll'
+    _title: 'Products'
+  requirements:
+    _permission: 'access content'
+
+neg_shopify.cart:
+  path: '/cart'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\CartController::render'
+    _title: 'Your Shopping Cart'
+  requirements:
+    _permission: 'access content'
+
+neg_shopify.cart.json:
+  path: '/cart.json'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\CartController::jsonEndpoint'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.products.json:
   path: '/shopify/products.json'
   defaults:

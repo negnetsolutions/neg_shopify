@@ -2,41 +2,41 @@ uuid: 88f47c34-bed0-46c8-98c1-3540811c6162
 langcode: en
 status: true
 dependencies:
-  config:
-    - responsive_image.styles.rs_image
   module:
     - neg_shopify
-    - svg_image
 id: shopify_product_variant.shopify_product_variant.default
 targetEntityType: shopify_product_variant
 bundle: shopify_product_variant
 mode: default
 content:
-  image:
-    type: responsive_image
+  compare_at_price:
+    type: number_decimal
     weight: 1
     region: content
     label: above
     settings:
-      responsive_image_style: rs_image
-      image_link: ''
-      svg_render_as_image: '1'
-      svg_attributes:
-        width: ''
-        height: ''
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
     third_party_settings: {  }
   price:
-    label: inline
-    type: shopify_price
+    type: number_decimal
     weight: 0
-    settings: {  }
-    third_party_settings: {  }
     region: content
+    label: inline
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
 hidden:
   barcode: true
-  compare_at_price: true
+  dynamic_product_image: true
   fulfillment_service: true
   grams: true
+  image: true
   inventory_management: true
   inventory_policy: true
   inventory_quantity: true
@@ -45,6 +45,8 @@ hidden:
   option2: true
   option3: true
   position: true
+  product_title: true
+  product_vendor: true
   requires_shipping: true
   sku: true
   taxable: true

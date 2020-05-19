@@ -1,0 +1,33 @@
+uuid: d0c9b302-2261-4f81-a364-e8a8161883d3
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.shopify_collection.field_collection
+    - field.field.paragraph.shopify_collection.field_header_image
+    - field.field.paragraph.shopify_collection.field_products_to_display
+    - paragraphs.paragraphs_type.shopify_collection
+    - responsive_image.styles.rs_image
+  module:
+    - svg_image
+id: paragraph.shopify_collection.default
+targetEntityType: paragraph
+bundle: shopify_collection
+mode: default
+content:
+  field_header_image:
+    weight: 0
+    label: above
+    settings:
+      responsive_image_style: rs_image
+      image_link: ''
+      svg_render_as_image: '1'
+      svg_attributes:
+        width: ''
+        height: ''
+    third_party_settings: {  }
+    type: responsive_image
+    region: content
+hidden:
+  field_collection: true
+  field_products_to_display: true

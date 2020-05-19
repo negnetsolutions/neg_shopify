@@ -1,0 +1,26 @@
+uuid: ff23e455-03ab-43d0-8371-b645494e77dd
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_product
+    - paragraphs.paragraphs_type.shopify_product
+id: paragraph.shopify_product.field_product
+field_name: field_product
+entity_type: paragraph
+bundle: shopify_product
+label: Product
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:shopify_product'
+  handler_settings:
+    target_bundles: null
+    sort:
+      field: created_at
+      direction: DESC
+    auto_create: false
+field_type: entity_reference

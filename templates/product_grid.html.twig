@@ -1,3 +1,17 @@
+<header class="controls">
+  <div class="count">{{ count }} products</div>
+  <div class="sort_order">
+    <label for="SortBy" class="label--hidden">Sort By</label>
+    <select name="sort_order" id="sort_order" class="">
+      <option value="date-descending"{% if defaultSort == 'date-descending' %} selected{% endif %}>Date, new to old</option>
+      <option value="date-ascending"{% if defaultSort == 'date-ascending' %} selected{% endif %}>Date, old to new</option>
+      <option value="price-descending"{% if defaultSort == 'price-descending' %} selected{% endif %}>Price, high to low</option>
+      <option value="price-ascending"{% if defaultSort == 'price-ascending' %} selected{% endif %}>Price, low to high</option>
+      <option value="title-ascending"{% if defaultSort == 'title-ascending' %} selected{% endif %}>Alphabetically, A-Z</option>
+      <option value="title-descending"{% if defaultSort == 'title-descending' %} selected{% endif %}>Alphabetically, Z-A</option>
+    </select>
+  </div>
+</header>
 <section class="items products">
   {{ products }}
 </section>

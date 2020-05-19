@@ -1,0 +1,21 @@
+uuid: 6269f3dc-229d-45ef-8017-3b2090301796
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.paragraph.shopify_product.field_product
+    - paragraphs.paragraphs_type.shopify_product
+id: paragraph.shopify_product.default
+targetEntityType: paragraph
+bundle: shopify_product
+mode: default
+content:
+  field_product:
+    weight: 0
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+hidden: {  }

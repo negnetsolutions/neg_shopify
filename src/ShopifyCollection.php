@@ -4,7 +4,6 @@ namespace Drupal\neg_shopify;
 
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
-use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Url;
@@ -14,21 +13,34 @@ use Drupal\Core\Url;
  */
 class ShopifyCollection {
 
-  const PERPAGE = 5;
-
   /**
    * Render's Json.
    */
-  public static function renderJson($collection_id, $page = 0, $perPage = FALSE) {
+  public static function renderJson($collection_id, $sortOrder = FALSE, $page = 0, $perPage = FALSE) {
+    if ($sortOrder === FALSE) {
+      $sortOrder = Settings::defaultSortOrder();
+    }
     if ($perPage === FALSE) {
       $perPage = Settings::productsPerPage();
     }
-    $search = new ShopifyProductSearch([
-      'collection_id' => $collection_id,
-    ]);
+
+    $params = [
+      'sort' => $sortOrder,
+    ];
+
+    if ($collection_id != 'all') {
+      $params['collection_id'] = $collection_id;
+      $tags = self::cacheTags($collection_id);
+    }
+    else {
+      $tags = self::cacheTags('all');
+    }
+
+    $search = new ShopifyProductSearch($params);
 
     $total = $search->count();
     $products = $search->search($page, $perPage);
+
     return [
       'count' => $total,
       'items' => ShopifyProduct::loadView($products, 'store_listing', FALSE),
@@ -36,31 +48,112 @@ class ShopifyCollection {
   }
 
   /**
+   * Renders Shopify All Collection.
+   */
+  public static function renderAll(&$variables) {
+
+    $variables['#attached']['library'][] = 'neg_shopify/collections';
+    $variables['#attributes']['class'][] = 'shopify_collection';
+    $variables['#attributes']['class'][] = 'autopager';
+    $variables['#attributes']['data-perpage'] = Settings::productsPerPage();
+    $variables['#attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
+    $variables['#attributes']['data-sort'] = Settings::defaultSortOrder();
+    $variables['#attributes']['data-collection'] = 'all';
+
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+    ];
+
+    $tags = self::cacheTags('all');
+    $search = new ShopifyProductSearch($params);
+
+    // Initial Page Render.
+    $products = $search->search(0, Settings::productsPerPage());
+    $total = $search->count();
+
+    $variables['#products'] = [
+      '#theme' => 'shopify_product_grid',
+      '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#count' => $total,
+      '#defaultSort' => Settings::defaultSortOrder(),
+      '#cache' => [
+        'contexts' => ['user.roles'],
+        'tags' => $tags,
+      ],
+    ];
+  }
+
+  /**
+   * Renders the collection paragraph.
+   */
+  public static function renderParagraph(&$variables) {
+    $variables['attributes']['class'][] = 'shopify_paragraph_collection';
+
+    $limit = (isset($variables['products_to_display'])) ? $$variables['products_to_display'] : 5;
+    $term = $variables['term'];
+
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+      'collection_id' => $term->id(),
+    ];
+
+    $tags = self::cacheTags($term->id());
+
+    $search = new ShopifyProductSearch($params);
+    $products = $search->search(0, $limit);
+    $totalProducts = $search->count();
+    $showMore = (count($products) < $totalProducts) ? TRUE : FALSE;
+
+    $variables['products'] = [
+      '#theme' => 'shopify_paragraph_product_grid',
+      '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#totalProducts' => $totalProducts,
+      '#showMore' => $showMore,
+      '#more_url' => Url::fromRoute('entity.taxonomy_term.canonical', [
+        'taxonomy_term' => $term->id(),
+      ])->toString(),
+      '#cache' => [
+        'contexts' => ['url', 'user.roles'],
+        'tags' => $tags,
+      ],
+    ];
+  }
+
+  /**
    * Renders a Shopify Collection.
    */
   public static function render(&$variables) {
-    $term = $variables['term'];
 
     $variables['#attached']['library'][] = 'neg_shopify/collections';
     $variables['attributes']['class'][] = 'shopify_collection';
     $variables['attributes']['class'][] = 'autopager';
     $variables['attributes']['data-perpage'] = Settings::productsPerPage();
-    $variables['attributes']['data-collection'] = $term->id();
     $variables['attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
+    $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
 
-    $search = new ShopifyProductSearch([
-      'collection_id' => $term->id(),
-    ]);
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+    ];
+
+    $term = $variables['term'];
+    $variables['attributes']['data-collection'] = $term->id();
+    $params['collection_id'] = $term->id();
+    $tags = self::cacheTags($term->id());
+
+    $search = new ShopifyProductSearch($params);
 
     // Initial Page Render.
     $products = $search->search(0, Settings::productsPerPage());
+    $total = $search->count();
 
     $variables['products'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#count' => $total,
+      '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
         'contexts' => ['user.roles'],
-        'tags' => self::cacheTags($term->id()),
+        'tags' => $tags,
       ],
     ];
   }

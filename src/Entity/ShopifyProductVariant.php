@@ -8,8 +8,12 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\file\FileInterface;
-use Drupal\neg_shopify\ShopifyProductVariantInterface;
 use Drupal\user\UserInterface;
+use Drupal\Core\Render\RenderContext;
+use Drupal\neg_shopify\ShopifyProductVariantInterface;
+use Drupal\neg_shopify\StoreFrontService;
+
+use Drupal\neg_shopify\ShopifyService;
 
 /**
  * Defines the Shopify product variant entity.
@@ -20,7 +24,7 @@ use Drupal\user\UserInterface;
  *   id = "shopify_product_variant",
  *   label = @Translation("Shopify product variant"),
  *   handlers = {
- *     "view_builder" = "Drupal\Core\Entity\EntityViewBuilder",
+ *     "view_builder" = "Drupal\neg_shopify\ShopifyProductVariantViewBuilder",
  *     "list_builder" = "Drupal\neg_shopify\ShopifyProductVariantListBuilder",
  *     "views_data" = "Drupal\neg_shopify\Entity\ShopifyProductVariantViewsData",
  *
@@ -85,10 +89,10 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     if (isset($values['image']) && !empty($values['image'])) {
       $file = self::setupProductImage($values['image']->src);
       if ($file instanceof FileInterface) {
-        $values['image'] = array(
+        $values['image'] = [
           'target_id' => $file->id(),
           'alt' => $values['image']->alt,
-        );
+        ];
       }
     }
     else {
@@ -102,6 +106,24 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     }
 
     return $values;
+  }
+
+  /**
+   * Checks to see is variant is available.
+   */
+  public function isAvailable() {
+    $policy = $this->get('inventory_policy')->first()->getValue()['value'];
+    $quantityAvailable = $this->get('inventory_quantity')->first()->getValue()['value'];
+
+    if ($policy == 'continue') {
+      return TRUE;
+    }
+
+    if ($quantityAvailable > 0) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -140,6 +162,26 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       $this->image->delete();
     }
     parent::delete();
+  }
+
+  /**
+   * Loads a view array.
+   */
+  public function loadView(string $style = 'cart', $defaultContext = TRUE) {
+
+    $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product_variant')->view($this, $style);
+
+    if ($defaultContext === FALSE) {
+      $rendered_view = NULL;
+      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
+        $rendered_view = render($build);
+      });
+    }
+    else {
+      $rendered_view = $build;
+    }
+
+    return $rendered_view;
   }
 
   /**
@@ -234,6 +276,73 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Get's selected options.
+   */
+  public function getSelectedOptions() {
+    $options = [];
+
+    $product = $this->getProduct();
+    $optionNames = $product->getOptionNames();
+    foreach ($optionNames as $i => $name) {
+      $optionVar = 'option' . ($i + 1);
+      $value = $this->$optionVar->value;
+      $options[] = [
+        'name' => $name,
+        'value' => $value,
+      ];
+    }
+
+    return $options;
+  }
+
+  /**
+   * Formats a selected options array to a storefront selectedOptions object.
+   */
+  protected function formatSelectedOptionForStoreFront($option) {
+  }
+
+  /**
+   * Fetchs the shopify storefront api id for this variant.
+   */
+  public function getStoreFrontId() {
+
+    if ($this->get('storefront_id')->isEmpty()) {
+      $product = $this->getProduct();
+      $handle = $product->handle->value;
+      $options = $this->getSelectedOptions();
+
+      // Encode Options.
+      $options = preg_replace('/"([^"]+)"\s*:\s*/', '$1:', json_encode($options));
+
+      $query = <<<EOF
+{
+  productByHandle(handle: "${handle}") {
+    variantBySelectedOptions (selectedOptions: {$options})
+    {
+      id
+    }
+  }
+}
+EOF;
+      $results = StoreFrontService::request($query);
+
+      if (!isset($results['data']) || !isset($results['data']['productByHandle']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']['id'])) {
+        return FALSE;
+      }
+
+      $id = $results['data']['productByHandle']['variantBySelectedOptions']['id'];
+      $this->set('storefront_id', $id);
+      $this->save();
+    }
+    else {
+      $id = $this->get('storefront_id')->value;
+    }
+
+    return $id;
+
+  }
+
+  /**
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
@@ -307,6 +416,11 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['storefront_id'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('StoreFront ID'))
+      ->setDefaultValue('')
+      ->setReadOnly(TRUE);
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
@@ -620,7 +734,6 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
-
     $fields['changed'] = BaseFieldDefinition::create('changed')
       ->setLabel(t('Changed'))
       ->setDescription(t('The time that the entity was last udpated.'));
@@ -634,7 +747,6 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setDescription(t('The time that the product was last updated.'));
 
     // @todo: option_values.
-
     return $fields;
   }
 

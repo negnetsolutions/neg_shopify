@@ -12,31 +12,71 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Plugin\Sync;
 
 /**
  * Implements hook_theme().
  */
 function neg_shopify_theme($existing, $type, $theme, $path) {
   return [
+    'paragraph__shopify_product' => [
+      'template' => 'paragraph--shopify-product',
+      'base hook' => 'paragraph',
+    ],
+    'paragraph__shopify_collection' => [
+      'template' => 'paragraph--shopify-collection',
+      'base hook' => 'paragraph',
+    ],
+    'paragraph__shopify_collections' => [
+      'template' => 'paragraph--shopify-collection',
+      'base hook' => 'paragraph',
+    ],
     'taxonomy_term__shopify_collections' => [
       'template' => 'shopify-collection' ,
       'base hook' => 'taxonomy_term',
+    ],
+    'shopify-collection-all' => [
+      'template' => 'shopify-collection' ,
+      'variables' => [
+        'attributes' => NULL,
+        'products' => NULL,
+        'name' => NULL,
+      ],
+    ],
+    'shopify_paragraph_product_grid' => [
+      'template' => 'paragraph--product_grid',
+      'variables' => [
+        'products' => NULL,
+        'totalProducts' => NULL,
+        'showMore' => NULL,
+        'more_url' => NULL,
+      ],
     ],
     'shopify_product_grid' => [
       'template' => 'product_grid',
       'variables' => [
         'products' => NULL,
+        'count' => NULL,
+        'defaultSort' => NULL,
       ],
+    ],
+    'neg_shopify_cart' => [
+      'template' => 'cart',
+      'variables' => [],
     ],
     'shopify_product' => [
       'render element' => 'elements',
     ],
+    'shopify_product__store_listing' => [
+      'template' => 'shopify-product--store-listing',
+      'base hook' => 'shopify_product',
+    ],
     'shopify_product_variant' => [
       'render element' => 'elements',
     ],
-    'shopify_cart' => [
-      'template' => 'shopify_cart',
-      'variables' => ['domain' => ''],
+    'shopify_product_variant__cart' => [
+      'template' => 'shopify-product-variant--cart',
+      'base hook' => 'shopify_product_variant',
     ],
   ];
 }
@@ -128,6 +168,30 @@ function neg_shopify_entity_extra_field_info() {
     'description' => t('Renders the active variant.'),
     'visible' => TRUE,
     'weight' => 200,
+  ];
+  $extra['shopify_product_variant']['shopify_product_variant']['display']['dynamic_product_image'] = [
+    'label' => t('Dynamic product image'),
+    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_product_variant']['shopify_product_variant']['display']['product_title'] = [
+    'label' => t('Product Title'),
+    'description' => t('Displays the parent product title'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_product_variant']['shopify_product_variant']['display']['product_vendor'] = [
+    'label' => t('Product Vendor'),
+    'description' => t('Displays the parent product vendor'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_product_variant']['shopify_product_variant']['display']['product_vendor'] = [
+    'label' => t('Product Vendor'),
+    'description' => t('Displays the parent product vendor'),
+    'visible' => TRUE,
+    'weight' => 150,
   ];
   return $extra;
 }
@@ -238,6 +302,24 @@ function _neg_shopify_preprocess_taxonomy_term_shopify_collections(&$variables) 
 }
 
 /**
+ * Implements theme_suggestions__shopify_product.
+ */
+function neg_shopify_theme_suggestions_shopify_product(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'shopify_product__' . $variables['elements']['#view_mode'];
+  return $suggestions;
+}
+
+/**
+ * Implements theme_suggestions__shopify_product_variant
+ */
+function neg_shopify_theme_suggestions_shopify_product_variant(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'shopify_product_variant__' . $variables['elements']['#view_mode'];
+  return $suggestions;
+}
+
+/**
  * Prepares variables for shopify product templates.
  *
  * Default template: shopify-product.html.twig.
@@ -258,6 +340,7 @@ function template_preprocess_shopify_product(&$variables) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
+  $variables['url'] = !$variables['shopify_product']->isNew() ? $variables['shopify_product']->toUrl('canonical')->toString() : NULL;
 }
 
 /**
@@ -280,6 +363,12 @@ function template_preprocess_shopify_product_variant(&$variables) {
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
+
+  if ($variables['shopify_product_variant']->get('compare_at_price')->value == 0) {
+    unset($variables['content']['compare_at_price']);
+  }
+
+  $variables['currency'] = Settings::shopInfo()->currency;
 }
 
 /**
@@ -294,15 +383,43 @@ function neg_shopify_preprocess_paragraph(&$variables) {
 }
 
 /**
- * Preproccess IG Paragraph.
+ * Preproccess Shopify Product paragraph.
  */
-// function _neg_google_reviews_process_paragraph_instagram_posts_widget(&$variables) {
-//   $variables['attributes']['class'][] = 'paragraph';
-//   $variables['attributes']['class'][] = 'paragraph-instagram-posts';
-//
-//   $view = new ListView($variables);
-//   $view->render(50);
-// }
+function _neg_google_reviews_process_paragraph_shopify_product(&$variables) {
+  $variables['attributes']['class'][] = 'paragraph';
+  $variables['attributes']['class'][] = 'paragraph-shopify-product';
+
+  if (!$variables['paragraph']->field_product->isEmpty()) {
+    $entity = $variables['paragraph']->field_product->entity;
+    if ($entity->get('is_available')->value == TRUE) {
+      $variables['product'] = $entity->getView('store_listing');
+    }
+  }
+
+}
+
+/**
+ * Preproccess Collections paragraph.
+ */
+function _neg_google_reviews_process_paragraph_shopify_collection(&$variables) {
+  $variables['attributes']['class'][] = 'paragraph';
+  $variables['attributes']['class'][] = 'paragraph-shopify-collection';
+
+  if (!$variables['paragraph']->field_products_to_display->isEmpty()) {
+    $variables['products_to_display'] = $$variables['paragraph']->field_products_to_display->value;
+  }
+
+  if (!$variables['paragraph']->field_collection->isEmpty()) {
+    $entity = $variables['paragraph']->field_collection->entity;
+    $variables['term'] = $entity;
+    $variables['title'] = $entity->getName();
+    $variables['url'] = Url::fromRoute('entity.taxonomy_term.canonical', [
+      'taxonomy_term' => $entity->id(),
+    ])->toString();
+    ShopifyCollection::renderParagraph($variables);
+  }
+
+}
 
 /**
  * Implements hook_cron().
@@ -311,23 +428,24 @@ function neg_shopify_cron() {
 
   $config = Settings::config();
   $runtime = time();
-  $cache_lifetime = $config->get('frequency');
-  $last_sync = $config->get('last_sync');
+
+  // Products.
+  $cache_lifetime = $config->get('products_frequency');
+  $last_sync = $config->get('last_product_sync');
   $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
   // Check if we need to sync.
-  if (($last_sync + $cache_lifetime) > $runtime) {
-    return;
+  if (($last_sync + $cache_lifetime) < $runtime) {
+    Sync::syncAllProducts();
   }
 
-  // $queue_factory = \Drupal::service('queue');
-  // $queue = $queue_factory->get('instagram_widget_sync');
-  //
-  // if ($queue->numberOfItems() == 0) {
-  //   $command = [
-  //     'op' => 'sync',
-  //   ];
-  //   $queue->createItem($command);
-  // }
+  // Collections.
+  $cache_lifetime = $config->get('collections_frequency');
+  $last_sync = $config->get('last_collection_sync');
+  $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
+  // Check if we need to sync.
+  if (($last_sync + $cache_lifetime) < $runtime) {
+    Sync::syncAllCollections();
+  }
 }

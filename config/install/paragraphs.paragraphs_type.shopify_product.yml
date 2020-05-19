@@ -1,0 +1,10 @@
+uuid: cac955f0-b80d-430a-8fe9-1e45b5023668
+langcode: en
+status: true
+dependencies: {  }
+id: shopify_product
+label: 'Shopify Product'
+icon_uuid: null
+icon_default: null
+description: ''
+behavior_plugins: {  }
