@@ -10,7 +10,7 @@ var autoPager = function (endpoint, el, perPage, first_page) {
   this.lastFetchCount = 0;
   this.isLoading = false;
   this.xobj = new XMLHttpRequest();
-  this.debug = true;
+  this.debug = false;
 
   this.log = function(message) {
     if (_.debug) {
