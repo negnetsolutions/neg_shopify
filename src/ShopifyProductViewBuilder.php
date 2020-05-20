@@ -17,9 +17,6 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
-    // Include our custom css.
-    $build['#attached']['library'][] = 'neg_shopify/shopify_product';
-
     if (isset($build['body_html'])) {
       $build['body_html'][0]['#format'] = 'html';
     }
