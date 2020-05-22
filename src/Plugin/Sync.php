@@ -3,12 +3,85 @@
 namespace Drupal\neg_shopify\Plugin;
 
 use Drupal\neg_shopify\ShopifyService;
+use Drupal\neg_shopify\ShopifyCollection;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\Settings;
 
 /**
  * Shopify Product Sync Class.
  */
 class Sync {
+
+  /**
+   * Deletes all products.
+   */
+  public static function deleteAllProducts() {
+    // Get the product queue.
+    $queue = Settings::queue();
+
+    // Empty the product queue.
+    Settings::emptyQueue($queue);
+
+    // Get all Products.
+    $query = \Drupal::entityQuery('shopify_product');
+    $ids = $query->execute();
+
+    foreach ($ids as $id) {
+      $queue->createItem([
+        'op' => 'deleteProduct',
+        'id' => $id,
+      ]);
+    }
+
+    \Drupal::messenger()->addStatus('Queue all products to be deleted!', TRUE);
+  }
+
+  /**
+   * Deletes all collections.
+   */
+  public static function deleteAllCollections() {
+
+    // Get the collections queue.
+    $queue = Settings::collectionsQueue();
+
+    // Empty the product queue.
+    Settings::emptyQueue($queue);
+
+    // Get all collections.
+    $ids = ShopifyCollection::loadAllIds();
+
+    foreach ($ids as $id) {
+      $queue->createItem([
+        'op' => 'deleteCollection',
+        'id' => $id,
+      ]);
+    }
+    \Drupal::messenger()->addStatus('Queue all collections to be deleted!', TRUE);
+  }
+
+  /**
+   * Deletes all tags.
+   */
+  public static function deleteAllTags() {
+
+    $query = \Drupal::entityQuery('taxonomy_term');
+    $query->condition('vid', ShopifyCollection::SHOPIFY_COLLECTION_TERM_VID);
+    $ids = $query->execute();
+
+    if ($ids) {
+      $terms = Term::loadMultiple($ids);
+      foreach ($terms as $term) {
+        try {
+          $term->delete();
+        }
+        catch (\Exception $e) {
+          \Drupal::messenger()->addError('Could not delete shopify tag id ' . $term->id(), TRUE);
+        }
+      }
+    }
+
+    \Drupal::messenger()->addStatus('Deleted all tags!', TRUE);
+  }
 
   /**
    * Full Collections Sync.
@@ -19,7 +92,7 @@ class Sync {
     $product_count = 0;
 
     if ($queue->numberOfItems() > 0) {
-      drupal_set_message('There are items in the queue to sync. Can not force sync until queue is clear!', 'error', TRUE);
+      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear', TRUE);
       return FALSE;
     }
 
@@ -51,7 +124,7 @@ class Sync {
       'op' => 'closeCollectionBatch',
     ]);
 
-    drupal_set_message('Queued Full Collection Sync for next cron run!', 'status', TRUE);
+    \Drupal::messenger()->addStatus('Queued Full Collection Sync for next cron run!', TRUE);
   }
 
   /**
@@ -63,7 +136,7 @@ class Sync {
     $product_count = 0;
 
     if ($queue->numberOfItems() > 0) {
-      drupal_set_message('There are items in the queue to sync. Can not force sync until queue is clear!', 'error', TRUE);
+      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear!', TRUE);
       return FALSE;
     }
 
@@ -104,7 +177,7 @@ class Sync {
       'op' => 'closeProductBatch',
     ]);
 
-    drupal_set_message('Queued Full Product Sync for next cron run!', 'status', TRUE);
+    \Drupal::messenger()->addStatus('Queued Full Product Sync for next cron run!', TRUE);
   }
 
 }

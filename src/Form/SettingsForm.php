@@ -184,8 +184,52 @@ class SettingsForm extends ConfigFormBase {
         '#value' => t('Queue Collection Sync Now'),
         '#submit' => ['::forceCollectionsSync'],
       ];
+
+      $form['delete'] = [
+        '#type' => 'details',
+        '#title' => t('Data Reset'),
+      ];
+
+      $form['delete']['delete_products'] = [
+        '#type' => 'submit',
+        '#value' => t('Delete All Products'),
+        '#submit' => ['::deleteAllProducts'],
+      ];
+
+      $form['delete']['delete_collections'] = [
+        '#type' => 'submit',
+        '#value' => t('Delete All Collections'),
+        '#submit' => ['::deleteAllCollections'],
+      ];
+
+      $form['delete']['delete_tags'] = [
+        '#type' => 'submit',
+        '#value' => t('Delete All Tags'),
+        '#submit' => ['::deleteAllTags'],
+      ];
     }
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Deletes all products.
+   */
+  public function deleteAllProducts(array &$form, FormStateInterface $form_state) {
+    Sync::deleteAllProducts();
+  }
+
+  /**
+   * Deletes all collections.
+   */
+  public function deleteAllCollections(array &$form, FormStateInterface $form_state) {
+    Sync::deleteAllCollections();
+  }
+
+  /**
+   * Deletes all tags.
+   */
+  public function deleteAllTags(array &$form, FormStateInterface $form_state) {
+    Sync::deleteAllTags();
   }
 
   /**

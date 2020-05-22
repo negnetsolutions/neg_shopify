@@ -13,6 +13,8 @@ use Drupal\Core\Url;
  */
 class ShopifyCollection {
 
+  const SHOPIFY_COLLECTION_TERM_VID = 'shopify_tags';
+
   /**
    * Render's Json.
    */

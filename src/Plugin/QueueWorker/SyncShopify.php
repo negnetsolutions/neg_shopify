@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify\Plugin\QueueWorker;
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Settings;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\ShopifyCollection;
 
 /**
@@ -32,6 +33,16 @@ class SyncShopify extends QueueWorkerBase {
 
         break;
 
+      case 'deleteProduct':
+        try {
+          $product = ShopifyProduct::load($data['id']);
+          $product->delete();
+        }
+        catch (\Exception $e) {
+          Settings::log('Could not delete shopify product id %id', ['%id' => $data['id']], 'error');
+        }
+        break;
+
       case 'deleteProducts':
         $products = ShopifyProduct::deleteOrphanedProducts([
           'published_status' => 'published',
@@ -53,6 +64,16 @@ class SyncShopify extends QueueWorkerBase {
         $config->set('last_product_sync', $last_updated);
         $config->save();
         Settings::log('Closing Product Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
+        break;
+
+      case 'deleteCollection':
+        $term = Term::load($data['id']);
+        try {
+          $term->delete();
+        }
+        catch (\Exception $e) {
+          Settings::log('Could not delete shopify collection id %id', ['%id' => $data['id']], 'error');
+        }
         break;
 
       case 'openColectionBatch':

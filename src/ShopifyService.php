@@ -131,7 +131,7 @@ class ShopifyService {
       return $this->client->Webhook($id)->delete();
     }
     catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error', TRUE);
+      \Drupal::messenger()->addError($e->getMessage(), TRUE);
       return FALSE;
     }
   }
@@ -150,7 +150,7 @@ class ShopifyService {
       return $this->webhookService->post($params);
     }
     catch (\Exception $e) {
-      drupal_set_message($e->getMessage(), 'error', TRUE);
+      \Drupal::messenger()->addError($e->getMessage(), TRUE);
       return FALSE;
     }
   }

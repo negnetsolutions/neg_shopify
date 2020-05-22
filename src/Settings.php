@@ -64,6 +64,24 @@ class Settings {
   }
 
   /**
+   * Emptys a queue.
+   */
+  public static function emptyQueue($queue) {
+    while ($item = $queue->claimItem()) {
+      try {
+        $queue->deleteItem($item);
+      }
+      catch (SuspendQueueException $e) {
+        $queue->releaseItem($item);
+        break;
+      }
+      catch (\Exception $e) {
+        self::log($e->getMessage());
+      }
+    }
+  }
+
+  /**
    * Get Webhook Queue Worker.
    */
   public static function webhookQueueWorker() {
