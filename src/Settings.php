@@ -27,9 +27,7 @@ class Settings {
    * Gets the webhook route urls.
    */
   public static function webhookRouteUrl() {
-    // TODO.
-    return 'https://d0a1489b.ngrok.io/shopify/webhook';
-    // return Url::fromRoute('neg_shopify.webhook', ['absolute' => TRUE])->setAbsolute()->toString();
+    return Url::fromRoute('neg_shopify.webhook', ['absolute' => TRUE])->setAbsolute()->toString();
   }
 
   /**
