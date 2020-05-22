@@ -20,9 +20,11 @@
     <a href="{{ url }}">
       {{ content.product_title }}
       {{ content.product_vendor }}
+      {% if content.title.0|render != "Default Title" %}
       <div class="variant_option">
         {{ content.title.0 }}
       </div>
+      {% endif %}
     </a>
   </div>
   <div class="item-qty">
