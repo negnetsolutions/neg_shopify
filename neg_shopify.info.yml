@@ -4,3 +4,7 @@ description: "Integrates Shopify with Drupal 8"
 core: 8.x
 dependencies:
   - neg_paragraphs
+  - negnet_utility
+  - taxonomy
+  - image
+  - responsive_image

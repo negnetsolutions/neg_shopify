@@ -1,0 +1,20 @@
+uuid: dc97f3ad-53da-4a1b-8f29-b71e4fa87984
+langcode: en
+status: true
+dependencies:
+  module:
+    - neg_shopify
+    - paragraphs
+id: paragraph.field_product
+field_name: field_product
+entity_type: paragraph
+type: entity_reference
+settings:
+  target_type: shopify_product
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false
