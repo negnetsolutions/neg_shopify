@@ -450,7 +450,7 @@ function neg_shopify_cron() {
   $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
   // Check if we need to sync.
-  if ($cache_lifetime !== 0 && ($last_sync + $cache_lifetime) < $runtime) {
+  if ($cache_lifetime > 0 && (($last_sync + $cache_lifetime) < $runtime)) {
     Sync::syncAllProducts();
   }
 
@@ -462,7 +462,7 @@ function neg_shopify_cron() {
   $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
   // Check if we need to sync.
-  if ($cache_lifetime !== 0 && ($last_sync + $cache_lifetime) < $runtime) {
+  if ($cache_lifetime > 0 && (($last_sync + $cache_lifetime) < $runtime)) {
     Sync::syncAllCollections();
   }
 }
