@@ -1,0 +1,19 @@
+uuid: 810d9877-15ee-401b-815d-e6558d70103f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.paragraph.field_header_title
+    - paragraphs.paragraphs_type.shopify_collection
+id: paragraph.shopify_collection.field_header_title
+field_name: field_header_title
+entity_type: paragraph
+bundle: shopify_collection
+label: 'Header Title'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

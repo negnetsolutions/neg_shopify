@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.paragraph.shopify_collection.field_collection
     - field.field.paragraph.shopify_collection.field_header_image
+    - field.field.paragraph.shopify_collection.field_header_title
     - field.field.paragraph.shopify_collection.field_products_to_display
     - paragraphs.paragraphs_type.shopify_collection
     - responsive_image.styles.rs_image
@@ -27,6 +28,14 @@ content:
         height: ''
     third_party_settings: {  }
     type: responsive_image
+    region: content
+  field_header_title:
+    weight: 1
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
     region: content
 hidden:
   field_collection: true

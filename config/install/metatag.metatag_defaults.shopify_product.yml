@@ -1,0 +1,11 @@
+uuid: 292475e1-2b86-47cf-9aac-5cd05c2c867f
+langcode: en
+status: true
+dependencies: {  }
+id: shopify_product
+label: 'Shopify product'
+tags:
+  description: '[shopify_product:body_html:value]'
+  title: '[shopify_product:title]'
+  og_type: product
+  og_image: '[shopify_product:image]'

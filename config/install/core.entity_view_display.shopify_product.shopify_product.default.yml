@@ -99,6 +99,7 @@ hidden:
   product_id: true
   product_type: true
   published_scope: true
+  search_api_excerpt: true
   user_id: true
   variants: true
   vendor: true

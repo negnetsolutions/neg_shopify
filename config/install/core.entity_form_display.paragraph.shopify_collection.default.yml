@@ -5,6 +5,7 @@ dependencies:
   config:
     - field.field.paragraph.shopify_collection.field_collection
     - field.field.paragraph.shopify_collection.field_header_image
+    - field.field.paragraph.shopify_collection.field_header_title
     - field.field.paragraph.shopify_collection.field_products_to_display
     - image.style.thumbnail
     - paragraphs.paragraphs_type.shopify_collection
@@ -33,8 +34,16 @@ content:
     third_party_settings: {  }
     type: image_image
     region: content
-  field_products_to_display:
+  field_header_title:
     weight: 2
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textfield
+    region: content
+  field_products_to_display:
+    weight: 3
     settings:
       placeholder: ''
     third_party_settings: {  }
