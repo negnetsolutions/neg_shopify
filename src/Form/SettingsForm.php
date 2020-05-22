@@ -132,8 +132,9 @@ class SettingsForm extends ConfigFormBase {
         '#title' => t('Full Sync Frequency'),
         '#default_value' => $config->get('products_frequency'),
         '#options' => [
-          '0' => 'Every Cron Run',
-          '21600' => 'Every 12 Hours',
+          '0' => 'Never',
+          '21600' => 'Every 6 Hours',
+          '43200' => 'Every 12 Hours',
           '86400' => 'Every 24 Hours',
         ],
         '#required' => TRUE,
@@ -164,8 +165,9 @@ class SettingsForm extends ConfigFormBase {
         '#title' => t('Full Sync Frequency'),
         '#default_value' => $config->get('collections_frequency'),
         '#options' => [
-          '0' => 'Every Cron Run',
-          '21600' => 'Every 12 Hours',
+          '0' => 'Never',
+          '21600' => 'Every 6 Hours',
+          '43200' => 'Every 12 Hours',
           '86400' => 'Every 24 Hours',
         ],
         '#required' => TRUE,

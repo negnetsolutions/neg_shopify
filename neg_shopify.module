@@ -444,21 +444,25 @@ function neg_shopify_cron() {
 
   // Products.
   $cache_lifetime = $config->get('products_frequency');
+  $cache_lifetime = ($cache_lifetime === NULL) ? 0 : $cache_lifetime;
+
   $last_sync = $config->get('last_product_sync');
   $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
   // Check if we need to sync.
-  if (($last_sync + $cache_lifetime) < $runtime) {
+  if ($cache_lifetime !== 0 && ($last_sync + $cache_lifetime) < $runtime) {
     Sync::syncAllProducts();
   }
 
   // Collections.
   $cache_lifetime = $config->get('collections_frequency');
+  $cache_lifetime = ($cache_lifetime === NULL) ? 0 : $cache_lifetime;
+
   $last_sync = $config->get('last_collection_sync');
   $last_sync = ($last_sync === NULL) ? 0 : $last_sync;
 
   // Check if we need to sync.
-  if (($last_sync + $cache_lifetime) < $runtime) {
+  if ($cache_lifetime !== 0 && ($last_sync + $cache_lifetime) < $runtime) {
     Sync::syncAllCollections();
   }
 }
