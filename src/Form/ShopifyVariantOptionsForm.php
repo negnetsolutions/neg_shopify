@@ -43,23 +43,35 @@ class ShopifyVariantOptionsForm extends FormBase {
       if ($variant->entity->isAvailable()) {
         $variantOptions = $variant->entity->getFormattedOptions();
         $label = implode(' / ', $variantOptions);
+        if ($label === 'Default Title') {
+          break;
+        }
         $options[$variant->entity->get('variant_id')->value] = $label;
       }
     }
 
-    $form['options'] = [
-      '#type' => 'select',
-      '#options' => $options,
-      '#default_value' => ($variant_id) ? $variant_id : '',
-      '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
-    ];
+    if (count($options) === 0) {
+      $form['options'] = [
+        '#type' => 'hidden',
+        '#default_value' => ($variant_id) ? $variant_id : '',
+      ];
+    }
+    else {
+      $form['options'] = [
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => ($variant_id) ? $variant_id : '',
+        '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
+      ];
 
-    $form['update_variant'] = [
-      '#type' => 'submit',
-      '#value' => t('Update'),
-      '#name' => 'update_variant',
-      '#attributes' => ['style' => 'display:none;'],
-    ];
+      $form['update_variant'] = [
+        '#type' => 'submit',
+        '#value' => t('Update'),
+        '#name' => 'update_variant',
+        '#attributes' => ['style' => 'display:none;'],
+      ];
+
+    }
 
     return $form;
   }

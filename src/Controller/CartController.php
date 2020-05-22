@@ -392,8 +392,13 @@ EOF;
       $cart = $this->getCart();
       foreach ($cart['items'] as &$item) {
         $variant = ShopifyProductVariant::loadByVariantId($item['variantId']);
-        $view = $variant->loadView('cart', FALSE);
-        $item['view'] = $view;
+        if ($variant) {
+          $view = $variant->loadView('cart', FALSE);
+          $item['view'] = $view;
+        }
+        else {
+          $view = '';
+        }
       }
       $params['cart'] = $cart;
     }
