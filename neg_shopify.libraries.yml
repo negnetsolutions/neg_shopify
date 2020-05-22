@@ -21,12 +21,4 @@ collections:
   js:
     js/collections/collections.js: {}
   dependencies:
-    - neg_shopify/autopager
-intersection-observer:
-  js:
-    js/intersection-observer.js: {}
-autopager:
-  js:
-    js/autopager/autopager.js: {}
-  dependencies:
-    - neg_shopify/intersection-observer
+    - negnet_utility/autopager
