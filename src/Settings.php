@@ -50,9 +50,11 @@ class Settings {
   public static function shopInfo($key = '', $refresh = FALSE) {
     if ($refresh) {
       $info = ShopifyService::instance()->shopInfo();
+      // Convert to object.
+      $info = json_decode(json_encode($info), FALSE);
       \Drupal::state()->set('shopify.shop_info', $info);
     }
-    $info = \Drupal::state()->get('shopify.shop_info', new \stdClass());
+    $info = \Drupal::state()->get('shopify.shop_info', []);
     if (!empty($key)) {
       return isset($info->{$key}) ? $info->{$key} : '';
     }
