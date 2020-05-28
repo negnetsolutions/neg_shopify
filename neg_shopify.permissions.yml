@@ -1,3 +1,7 @@
+view shopify toolbar:
+  title: 'View Shopify Toolbar'
+  description: 'Allow to access the shopify admin toolbar.'
+
 administer shopify product entities:
   title: 'Administer Shopify product entities'
   description: 'Allow to access the administration form to configure Shopify product entities.'

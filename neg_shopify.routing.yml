@@ -4,7 +4,7 @@ neg_shopify.settings:
     _form: '\Drupal\neg_shopify\Form\SettingsForm'
     _title: 'Shopify Settings'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'Administer Shopify API'
 
 neg_shopify.all:
   path: '/collections/all'

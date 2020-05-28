@@ -201,37 +201,43 @@ function neg_shopify_entity_extra_field_info() {
  */
 function neg_shopify_toolbar() {
   $items = [];
-  $links = neg_shopify_renderable_links();
-  // @todo: Need caching per user setup.
-  // @todo: Need better permission checking.
-  $items['shopify'] = [
-    '#type' => 'toolbar_item',
-    'tab' => [
-      '#type' => 'link',
-      '#title' => t('Shopify'),
-      '#url' => Url::fromRoute('neg_shopify.settings'),
-      '#attributes' => [
-        'title' => t('Shopify'),
-        'class' => ['toolbar-icon', 'toolbar-icon-shopify'],
-      ],
-    ],
-    'tray' => [
-      '#heading' => t('Shopify admin pages'),
-      'shopify_links' => [
-        '#theme' => 'item_list',
-        '#items' => $links,
+
+  $user = \Drupal::currentUser();
+
+  if ($user->hasPermission('view shopify toolbar')) {
+    $links = neg_shopify_renderable_links();
+    $items['shopify'] = [
+      '#type' => 'toolbar_item',
+      'tab' => [
+        '#type' => 'link',
+        '#title' => t('Shopify'),
+        '#url' => Url::fromRoute('neg_shopify.settings'),
         '#attributes' => [
-          'class' => ['toolbar-menu'],
+          'title' => t('Shopify'),
+          'class' => ['toolbar-icon', 'toolbar-icon-shopify'],
         ],
-        '#attached' => [
-          'library' => [
-            'neg_shopify/shopify.toolbar',
+      ],
+      'tray' => [
+        '#heading' => t('Shopify admin pages'),
+        'shopify_links' => [
+          '#theme' => 'item_list',
+          '#items' => $links,
+          '#attributes' => [
+            'class' => ['toolbar-menu'],
+          ],
+          '#attached' => [
+            'library' => [
+              'neg_shopify/shopify.toolbar',
+            ],
           ],
         ],
       ],
-    ],
-    '#weight' => -5,
-  ];
+      '#weight' => -5,
+      '#cache' => [
+        'contexts' => ['user.roles'],
+      ],
+    ];
+  }
 
   return $items;
 }
@@ -240,36 +246,44 @@ function neg_shopify_toolbar() {
  * Returns an array of Shopify admin links.
  */
 function neg_shopify_renderable_links() {
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('Settings'),
-    '#url' => Url::fromRoute('neg_shopify.settings'),
-  ];
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('View Products'),
-    '#url' => Url::fromRoute('entity.shopify_product.collection'),
-  ];
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('View Collections'),
-    '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_collections/overview'),
-  ];
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('View Tags'),
-    '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_tags/overview'),
-  ];
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('Product Display'),
-    '#url' => Url::fromUri('internal:/admin/structure/shopify_product/display'),
-  ];
-  $links[] = [
-    '#type' => 'link',
-    '#title' => t('Variant Display'),
-    '#url' => Url::fromUri('internal:/admin/structure/shopify_product_variant/display'),
-  ];
+
+  $user = \Drupal::currentUser();
+
+  if ($user->hasPermission('administer shopify api')) {
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Settings'),
+      '#url' => Url::fromRoute('neg_shopify.settings'),
+    ];
+  }
+
+  if ($user->hasPermission('administer shopify')) {
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('View Products'),
+      '#url' => Url::fromRoute('entity.shopify_product.collection'),
+    ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('View Collections'),
+      '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_collections/overview'),
+    ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('View Tags'),
+      '#url' => Url::fromUri('internal:/admin/structure/taxonomy/manage/shopify_tags/overview'),
+    ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Product Display'),
+      '#url' => Url::fromUri('internal:/admin/structure/shopify_product/display'),
+    ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Variant Display'),
+      '#url' => Url::fromUri('internal:/admin/structure/shopify_product_variant/display'),
+    ];
+  }
 
   $shop_domain = Settings::shopInfo('domain');
   if (!empty($shop_domain)) {
