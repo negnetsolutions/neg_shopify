@@ -5,6 +5,7 @@ cart_page:
   dependencies:
     - neg_shopify/shopify.js
     - negnet_utility/closest
+    - negnet_utility/createElementFromHTML
 shopify.js:
   version: 1.x
   js:

@@ -9,14 +9,6 @@ const cartPage = new function () {
   this.cartWrapper = this.el.querySelector('.cart_wrapper');
   this.checkoutBtn = this.cartWrapper.querySelector('.checkout-btn');
 
-  this.createElementFromHTML = function (htmlString) {
-    var div = document.createElement('div');
-    div.innerHTML = htmlString.trim();
-
-    // Change this to div.childNodes to support multiple top-level nodes
-    return div.firstChild; 
-  }
-
   this.updateItemCount = function updateItemCount(e) {
     const target = e.target;
 
@@ -77,7 +69,7 @@ const cartPage = new function () {
       // Build the cart items view.
       let fragment = document.createDocumentFragment();
       for (let i = 0; i < cart.items.length; i++) {
-        let el = _.createElementFromHTML(cart.items[i].view);
+        let el = createElementFromHTML(cart.items[i].view);
         let number = el.querySelector('.item-qty input');
         number.value = cart.items[i].quantity;
         el.setAttribute('data-variant-id', cart.items[i].variantId);
