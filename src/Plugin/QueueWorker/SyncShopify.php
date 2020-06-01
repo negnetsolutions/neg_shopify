@@ -57,12 +57,10 @@ class SyncShopify extends QueueWorkerBase {
         break;
 
       case 'closeProductBatch':
-        $config = Settings::editableConfig();
         $last_updated = time();
         $datetime = new \DateTime();
         $last_updated_human = $datetime->format('Y-m-d H:i');
-        $config->set('last_product_sync', $last_updated);
-        $config->save();
+        \Drupal::state()->set('neg_shopify.last_product_sync', $last_updated);
         Settings::log('Closing Product Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
         break;
 
@@ -109,8 +107,7 @@ class SyncShopify extends QueueWorkerBase {
         $last_updated = time();
         $datetime = new \DateTime();
         $last_updated_human = $datetime->format('Y-m-d H:i');
-        $config->set('last_collection_sync', $last_updated);
-        $config->save();
+        \Drupal::state()->set('neg_shopify.last_collection_sync', $last_updated);
         Settings::log('Closing Collection Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
         break;
 

@@ -116,8 +116,8 @@ class SettingsForm extends ConfigFormBase {
         '#submit' => ['::installHooks'],
       ];
 
-      $products_last_sync_time_formatted = date('r', $config->get('last_product_sync'));
-      $collections_last_sync_time_formatted = date('r', $config->get('last_collection_sync'));
+      $products_last_sync_time_formatted = date('r', \Drupal::state()->get('neg_shopify.last_product_sync', 0));
+      $collections_last_sync_time_formatted = date('r', \Drupal::state()->get('neg_shopify.last_collection_sync', 0));
 
       $form['products'] = [
         '#type' => 'details',
@@ -250,9 +250,7 @@ class SettingsForm extends ConfigFormBase {
    * Forces a collections resync.
    */
   public function resetCollectionSync(array &$form, FormStateInterface $form_state) {
-    $config = Settings::editableConfig();
-    $config->clear('last_collection_sync');
-    $config->save();
+    \Drupal::state()->set('neg_shopify.last_collection_sync', 0);
     Sync::syncAllCollections();
   }
 
@@ -267,9 +265,7 @@ class SettingsForm extends ConfigFormBase {
    * Forces a resync.
    */
   public function resetProductsSync(array &$form, FormStateInterface $form_state) {
-    $config = Settings::editableConfig();
-    $config->clear('last_product_sync');
-    $config->save();
+    \Drupal::state()->set('neg_shopify.last_product_sync', 0);
     Sync::syncAllProducts();
   }
 

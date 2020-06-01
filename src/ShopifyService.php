@@ -71,9 +71,7 @@ class ShopifyService {
    * Gets the last updated date.
    */
   public static function getLastProductUpdatedDate() {
-    $config = Settings::config();
-    $ts = $config->get('last_product_sync');
-    $ts = ($ts === NULL) ? 0 : $ts;
+    $ts = \Drupal::state()->get('neg_shopify.last_product_sync', 0);
 
     return self::formatTimestamp($ts);
   }
@@ -82,10 +80,7 @@ class ShopifyService {
    * Gets the last updated date.
    */
   public static function getLastCollectionUpdatedDate() {
-    $config = Settings::config();
-    $ts = $config->get('last_collection_sync');
-    $ts = ($ts === NULL) ? 0 : $ts;
-
+    $ts = \Drupal::state()->get('neg_shopify.last_collection_sync', 0);
     return self::formatTimestamp($ts);
   }
 
