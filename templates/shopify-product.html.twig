@@ -20,9 +20,22 @@ view_mode ? view_mode|clean_class,
     <div class="description" itemprop="description">
       {{ content.body_html.0 }}
     </div>
-    {{ content.add_to_cart_form }}
+
+    <section class="addToCart">
+      {{ content.add_to_cart_form }}
+    </section>
   </section>
   <section class="images">
-    {{ content.extra_images }}
+    <figure class="image" rel="lightbox">
+      {{ content.image }}
+    </figure>
+    {% if content.extra_images | render %}
+
+    <div class="extra_images">
+      {{ content.extra_images }}
+    </div>
+    {% endfor %}
   </section>
+
+  {{ content.related_items }}
 </article>

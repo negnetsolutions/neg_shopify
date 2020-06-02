@@ -5,6 +5,7 @@ core: 8.x
 dependencies:
   - neg_paragraphs
   - negnet_utility
+  - form_options_attributes
   - taxonomy
   - image
   - responsive_image

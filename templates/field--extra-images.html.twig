@@ -1,0 +1,7 @@
+{% for item in items %}
+  {% if loop.index != 1 %}
+  <figure rel="lightbox" class="extra_image">
+    {{ item }}
+  </figure>
+  {% endif %}
+{% endfor %}

@@ -19,6 +19,10 @@ use Drupal\neg_shopify\Plugin\Sync;
  */
 function neg_shopify_theme($existing, $type, $theme, $path) {
   return [
+    'field__extra_images' => [
+      'template' => 'field--extra-images',
+      'base hook' => 'field',
+    ],
     'paragraph__shopify_product' => [
       'template' => 'paragraph--shopify-product',
       'base hook' => 'paragraph',
