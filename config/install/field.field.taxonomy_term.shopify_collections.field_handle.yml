@@ -1,0 +1,19 @@
+uuid: 5f3b5a29-b7c2-4113-a303-8787a7162aad
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_handle
+    - taxonomy.vocabulary.shopify_collections
+id: taxonomy_term.shopify_collections.field_handle
+field_name: field_handle
+entity_type: taxonomy_term
+bundle: shopify_collections
+label: Handle
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string

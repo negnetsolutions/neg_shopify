@@ -1,4 +1,4 @@
-uuid: 74cea691-0691-4b35-895e-6f8c93d8ef59
+uuid: 95c3ca5a-c899-4e8f-97bb-f400a991fd45
 langcode: en
 status: true
 dependencies:
@@ -9,38 +9,21 @@ dependencies:
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_pub
     - taxonomy.vocabulary.shopify_collections
   module:
-    - path
-_core:
-  default_config_hash: VHQl-dWaiBQrehr-nr6wlniXv-XqLm_YeNQkBpvUaBs
+    - text
 id: taxonomy_term.shopify_collections.default
 targetEntityType: taxonomy_term
 bundle: shopify_collections
 mode: default
 content:
-  field_handle:
-    weight: 101
-    settings:
-      size: 60
-      placeholder: ''
-    third_party_settings: {  }
-    type: string_textfield
-    region: content
-  path:
-    type: path
+  description:
+    label: hidden
+    type: text_default
     weight: 0
+    region: content
     settings: {  }
     third_party_settings: {  }
-    region: content
-  status:
-    type: boolean_checkbox
-    settings:
-      display_label: true
-    weight: 100
-    region: content
-    third_party_settings: {  }
 hidden:
-  description: true
+  field_handle: true
   field_shopify_collection_id: true
   field_shopify_collection_image: true
   field_shopify_collection_pub: true
-  name: true

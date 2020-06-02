@@ -227,6 +227,7 @@ class ShopifyCollection {
       ];
       $date = strtotime($collection['published_at']);
       $term->field_shopify_collection_pub = $date ? $date : 0;
+      $term->field_handle = $collection['handle'];
     }
     if ($term->save() && isset($collection['image']['src'])) {
       // Save the image for this term.
@@ -259,6 +260,7 @@ class ShopifyCollection {
         'value' => $collection['body_html'],
         'format' => filter_default_format(),
       ],
+      'field_handle' => $collection['handle'],
       'field_shopify_collection_id' => $collection['id'],
       'field_shopify_collection_pub' => $date ? $date : 0,
     ]);

@@ -5,19 +5,21 @@ dependencies:
   module:
     - ctools
     - taxonomy
+_core:
+  default_config_hash: 6zAoYrFSvU-DqiFoBs50ogqeM6Qf0KKrqDLEwkAQ5F4
 id: collections_
 label: 'Shopify Collections'
 type: 'canonical_entities:taxonomy_term'
-pattern: '/collections/[term:name]'
+pattern: '/collections/[term:field_handle]'
 selection_criteria:
-  702e88f6-70e2-4799-a6f3-7064e73a5507:
+  387de52a-fd84-40c5-b04c-e32bceef20f0:
     id: 'entity_bundle:taxonomy_term'
     bundles:
       shopify_collections: shopify_collections
     negate: false
     context_mapping:
       taxonomy_term: taxonomy_term
-    uuid: 702e88f6-70e2-4799-a6f3-7064e73a5507
+    uuid: 387de52a-fd84-40c5-b04c-e32bceef20f0
 selection_logic: and
 weight: -5
 relationships: {  }
