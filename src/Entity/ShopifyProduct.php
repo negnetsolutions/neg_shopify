@@ -323,6 +323,66 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   }
 
   /**
+   * Renders related products into array.
+   */
+  public function renderRelatedItems() {
+    $items = $this->getRelatedItems();
+    $view = [];
+
+    foreach ($items as $item) {
+      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($item, 'store_listing');
+      $view[] = $build;
+    }
+
+    return $view;
+  }
+
+  /**
+   * Fetches related items.
+   */
+  public function getRelatedItems(int $limit = 5) {
+
+    // Get this item's tags.
+    $tags = [];
+    foreach ($this->get('tags')->getIterator() as $e) {
+      $tags[] = $e->getValue()['target_id'];
+    }
+
+    $query = <<<EOL
+SELECT DISTINCT
+	product.id as id,
+	count(t.tid)
+FROM
+	shopify_product product,
+	taxonomy_term_data t,
+	shopify_product__tags tags
+WHERE
+	tags.entity_id = product.id
+	AND tags.tags_target_id = t.tid
+	AND product.is_available = 1
+	AND product.image__target_id is not null
+  AND product.id != :id
+  AND t.tid IN (:tags)
+GROUP BY
+	product.id
+ORDER BY
+	count(t.tid) DESC,
+	product.created_at
+EOL;
+    $result = \Drupal::database()
+      ->queryRange($query, 0, $limit, [
+        ':id' => $this->id(),
+        ':tags' => implode(',', $tags),
+      ]);
+    $ids = [];
+    foreach ($result as $record) {
+      $ids[] = $record->id;
+    }
+
+    return self::loadMultiple($ids);
+  }
+
+  /**
    * Loads a view array.
    */
   public static function loadView(array $products, string $style = 'full', $defaultContext = TRUE) {

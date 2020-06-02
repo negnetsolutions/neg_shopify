@@ -28,6 +28,17 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       $active_variant = ShopifyProductVariant::load($entity->variants->get(0)->target_id);
     }
 
+    if ($display->getComponent('related_items')) {
+
+      $items = $entity->renderRelatedItems();
+      if (count($items) > 0) {
+        $build['related_items'] = [
+          '#theme' => 'shopify_related_items',
+          '#items' => $items,
+        ];
+      }
+    }
+
     if ($display->getComponent('dynamic_product_image')) {
       $view = [];
       // Setup the image from the active variant.

@@ -56,6 +56,12 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'more_url' => NULL,
       ],
     ],
+    'shopify_related_items' => [
+      'template' => 'related_items',
+      'variables' => [
+        'items' => NULL,
+      ],
+    ],
     'shopify_product_grid' => [
       'template' => 'product_grid',
       'variables' => [
@@ -172,6 +178,12 @@ function neg_shopify_entity_extra_field_info() {
     'description' => t('Renders the active variant.'),
     'visible' => TRUE,
     'weight' => 200,
+  ];
+  $extra['shopify_product']['shopify_product']['display']['related_items'] = [
+    'label' => t('Related Items'),
+    'description' => t('Displays related items'),
+    'visible' => FALSE,
+    'weight' => 255,
   ];
   $extra['shopify_product_variant']['shopify_product_variant']['display']['dynamic_product_image'] = [
     'label' => t('Dynamic product image'),
