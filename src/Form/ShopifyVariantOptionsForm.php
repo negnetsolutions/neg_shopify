@@ -6,7 +6,9 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
-use Drupal\neg_shopify\Settings;
+use Drupal\Core\Cache\CacheableRedirectResponse;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Url;
 
 /**
  * Class ShopifyVariantOptionsForm.
@@ -37,16 +39,40 @@ class ShopifyVariantOptionsForm extends FormBase {
 
     // Load options.
     $options = [];
+    $optionsAttributes = [];
     $variants = $product->get('variants');
 
     foreach ($variants as $i => $variant) {
-      if ($variant->entity->isAvailable()) {
-        $variantOptions = $variant->entity->getFormattedOptions();
-        $label = implode(' / ', $variantOptions);
-        if ($label === 'Default Title') {
-          break;
+
+      $attributes = [];
+
+      if (!$variant->entity->isAvailable()) {
+
+        $attributes['disabled'] = 'disabled';
+      }
+
+      $variantOptions = $variant->entity->getFormattedOptions();
+      $label = implode(' / ', $variantOptions);
+      if ($label === 'Default Title') {
+        break;
+      }
+
+      $key = $variant->entity->get('variant_id')->value;
+      $options[$key] = $label;
+      $optionsAttributes[$key] = $attributes;
+    }
+
+    // Check to see if variant_id is false and this is the first index.
+    if ($variant_id === FALSE) {
+      $keys = array_keys($optionsAttributes);
+      if (isset($optionsAttributes[$keys[0]]['disabled'])) {
+        // The default attribute is disabled. We need to try to
+        // redirect to an available product.
+        foreach ($optionsAttributes as $key => $attributes) {
+          if (!isset($attributes['disabled'])) {
+            return $this->goToVariantNow($key, $form_state);
+          }
         }
-        $options[$variant->entity->get('variant_id')->value] = $label;
       }
     }
 
@@ -60,7 +86,8 @@ class ShopifyVariantOptionsForm extends FormBase {
       $form['options'] = [
         '#type' => 'select',
         '#options' => $options,
-        '#default_value' => ($variant_id) ? $variant_id : '',
+        '#options_attributes' => $optionsAttributes,
+        '#default_value' => ($variant_id) ? $variant_id : array_keys($options)[0],
         '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
       ];
 
@@ -87,6 +114,36 @@ class ShopifyVariantOptionsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->goToVariant($form_state->getValue('options'), $form_state);
+  }
+
+  /**
+   * Redirects to variant page immediately.
+   */
+  private function goToVariantNow($variant_id, FormStateInterface $form_state) {
+
+    // We found an available product.
+    $query = [
+      'variant_id' => $variant_id,
+    ];
+
+    $src = Url::fromRoute('entity.shopify_product.canonical', [
+      'shopify_product' => $form_state->get('product')->id(),
+    ], [
+      'query' => $query,
+    ])->toString();
+
+    $redirect = new CacheableRedirectResponse($src, 302);
+
+    $build = [
+      '#cache' => [
+        'contexts' => ['url.query_args'],
+        'tags' => $form_state->get('product')->getCacheTags(),
+      ],
+    ];
+    $redirect->addCacheableDependency(CacheableMetadata::createFromRenderArray($build));
+    $redirect->setEtag($src);
+    $redirect->send();
+    exit;
   }
 
   /**
