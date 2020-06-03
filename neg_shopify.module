@@ -13,6 +13,7 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Plugin\Sync;
+use Drupal\image\Entity\ImageStyle;
 
 /**
  * Implements hook_theme().
@@ -363,6 +364,11 @@ function neg_shopify_theme_suggestions_shopify_product_variant(array $variables)
 function template_preprocess_shopify_product(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product'] = $variables['elements']['#shopify_product'];
+
+  if ($variables['shopify_product']->image->target_id) {
+    $path = $variables['shopify_product']->image->entity->getFileUri();
+    $variables['imagethumbnail'] = ImageStyle::load('rs_image_800w')->buildUrl($path);
+  }
 
   // Helpful $content variable for templates.
   $variables += ['content' => []];

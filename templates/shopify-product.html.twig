@@ -5,9 +5,10 @@ view_mode ? view_mode|clean_class,
 ]
 %}
 <article{{ attributes.addClass(classes) }}>
-  <meta itemprop="name" content="{{ content.title.0 }}">
   <meta itemprop="url" content="{{ url }}">
-  <meta itemprop="image" content="">
+  {% if imagethumbnail|render %}
+    <meta itemprop="image" content="{{ imagethumbnail }}">
+  {% endif %}
 
   <section class="info">
     <h1 itemprop="name">
