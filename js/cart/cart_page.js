@@ -64,7 +64,12 @@ const cartPage = new function () {
       itemList.addEventListener('click', _.removeItem);
 
       // Set subtotal.
-      const price = "$" + (cart.total / 100).toFixed(2);
+      var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      });
+
+      const price = formatter.format(cart.total / 100);
 
       // Build the cart items view.
       let fragment = document.createDocumentFragment();

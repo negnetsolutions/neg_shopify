@@ -4,14 +4,36 @@ const shopping_cart = new function (){
   this.cart = [];
   this.endpoint = drupalSettings.cart.endpoint;
   this.cartObservers = [];
+  this.debug = true;
+
+  this.getCache = function getCache(name) {
+    if (window.sessionStorage) {
+      return sessionStorage.getItem(name);
+    }
+
+    return null;
+  };
+
+  this.setCache = function setCache(name, value) {
+    if (window.sessionStorage) {
+      _.log('Caching Cart Data');
+      sessionStorage.setItem(name, value);
+    }
+  };
 
   this.registerObserver = function registerObserver(callback) {
     _.cartObservers.push(callback);
   }
 
+  this.log = function log(message) {
+    if (_.debug === true) {
+      console.debug(message);
+    }
+  };
+
   this.request = function loadJSON(params, callback) {
 
-    console.debug(params);
+    _.log(params);
     params.json = true;
     params.update = true;
 
@@ -29,48 +51,73 @@ const shopping_cart = new function (){
     _.xobj.onreadystatechange = function () {
       if (_.xobj.readyState === 4 && _.xobj.status === 200) {
         var data = JSON.parse(_.xobj.responseText);
-        _.cart = data.cart;
+        // Process data.
+        _.handleData(data);
 
-        if (typeof data.redirectToCart !== 'undefined') {
-          window.location = drupalSettings.cart.cartPage;
-          return;
+        if (typeof data.cart !== 'undefined') {
+          // Clear any redirects from the cache.
+          delete data.redirectToCart;
+          delete data.redirect;
+
+          // Save data for cache.
+          _.setCache('cart', JSON.stringify(data));
         }
-
-        if (typeof data.redirect !== 'undefined') {
-          window.location = data.redirect;
-          return;
-        }
-
-        if (data.cart.hasOwnProperty("checkoutStarted") && data.cart.checkoutStarted === true) {
-          // Check to see if this is the cart page.
-          if (window.location.pathname === drupalSettings.cart.cartPage) {
-            console.debug("Checkout Stopped");
-            _.stopCheckout();
-          }
-          else {
-            console.debug("Checkout finished. Clearing cart...");
-            _.resetCart();
-            return;
-          }
-        }
-
-        if (typeof callback !== 'undefined') {
-          callback.call(_, data);
-        }
-
-        if (typeof data.cart.items !== 'undefined') {
-          // Notify observers.
-          for (let i = 0; i < _.cartObservers.length; i++) {
-            _.cartObservers[i](data.cart);
-          }
-        }
-
       }
     };
     _.xobj.send(null);
   };
 
+  this.handleData = function handleData(data) {
+    _.cart = data.cart;
+
+    if (typeof data.redirectToCart !== 'undefined') {
+      window.location = drupalSettings.cart.cartPage;
+      return false;
+    }
+
+    if (typeof data.redirect !== 'undefined') {
+      window.location = data.redirect;
+      return false;
+    }
+
+    if (data.cart.hasOwnProperty("checkoutStarted") && data.cart.checkoutStarted === true) {
+      // Check to see if this is the cart page.
+      if (window.location.pathname === drupalSettings.cart.cartPage) {
+        console.debug("Checkout Stopped");
+        _.stopCheckout();
+      }
+      else {
+        console.debug("Checkout finished. Clearing cart...");
+        _.resetCart();
+        return false;
+      }
+    }
+
+    if (typeof callback !== 'undefined') {
+      callback.call(_, data);
+    }
+
+    if (typeof data.cart.items !== 'undefined') {
+      // Notify observers.
+      for (let i = 0; i < _.cartObservers.length; i++) {
+        _.cartObservers[i](data.cart);
+      }
+    }
+
+    return true;
+  };
+
   this.loadCart = function loadCart() {
+    const data = _.getCache('cart');
+
+    if (data !== null) {
+      setTimeout(function() {
+        _.log('Using Cached Cart Data');
+        _.handleData(JSON.parse(data));
+      }, 30);
+      return;
+    }
+
     _.request(
       {
         request: 'render'
