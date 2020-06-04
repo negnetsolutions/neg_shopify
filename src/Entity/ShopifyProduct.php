@@ -349,7 +349,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     }
 
     $query = <<<EOL
-SELECT DISTINCT
+SELECT
 	product.id as id,
 	count(t.tid)
 FROM
@@ -364,11 +364,12 @@ WHERE
   AND product.id != :id
   AND t.tid IN (:tags[])
 GROUP BY
-	product.id
+	product.id, product.created_at
 ORDER BY
 	count(t.tid) DESC,
 	product.created_at
 EOL;
+
     $result = \Drupal::database()
       ->queryRange($query, 0, $limit, [
         ':id' => $this->id(),
