@@ -5,19 +5,24 @@ const shopping_cart = new function (){
   this.endpoint = drupalSettings.cart.endpoint;
   this.cartObservers = [];
   this.debug = true;
+  this.cacheTTL = 60000; // 60 second cache.
 
   this.getCache = function getCache(name) {
-    if (window.sessionStorage) {
-      return sessionStorage.getItem(name);
+    if (window.localStorage) {
+      const created = localStorage.getItem('created_' + name);
+      if (Number(created) + _.cacheTTL > Number(Date.now())) {
+        return localStorage.getItem(name);
+      }
     }
 
     return null;
   };
 
   this.setCache = function setCache(name, value) {
-    if (window.sessionStorage) {
+    if (window.localStorage) {
       _.log('Caching Cart Data');
-      sessionStorage.setItem(name, value);
+      localStorage.setItem(name, value);
+      localStorage.setItem('created_' + name, Date.now());
     }
   };
 
