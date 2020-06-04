@@ -362,7 +362,7 @@ WHERE
 	AND product.is_available = 1
 	AND product.image__target_id is not null
   AND product.id != :id
-  AND t.tid IN (:tags)
+  AND t.tid IN (:tags[])
 GROUP BY
 	product.id
 ORDER BY
@@ -372,7 +372,7 @@ EOL;
     $result = \Drupal::database()
       ->queryRange($query, 0, $limit, [
         ':id' => $this->id(),
-        ':tags' => implode(',', $tags),
+        ':tags[]' => $tags,
       ]);
     $ids = [];
     foreach ($result as $record) {
