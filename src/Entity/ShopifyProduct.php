@@ -348,6 +348,10 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       $tags[] = $e->getValue()['target_id'];
     }
 
+    if (count($tags) === 0) {
+      return [];
+    }
+
     $query = <<<EOL
 SELECT
 	product.id as id,

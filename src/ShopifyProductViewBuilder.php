@@ -72,7 +72,8 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
 
     }
 
-    if ($display->getComponent('add_to_cart_form')) {
+    $form = $display->getComponent('add_to_cart_form');
+    if ($form) {
 
       if ($build['#view_mode'] === 'full') {
         if ($entity->get('is_available')->value != FALSE) {
