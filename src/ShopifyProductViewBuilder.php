@@ -72,19 +72,20 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
 
     }
 
-    $form = $display->getComponent('add_to_cart_form');
-    if ($form) {
+    if ($display->getComponent('add_to_cart_form')) {
 
-      if ($entity->get('is_available')->value != FALSE) {
-        // Need to display the add to cart form.
-        $build['add_to_cart_form']['variant_options'] = \Drupal::formBuilder()
-          ->getForm('Drupal\neg_shopify\Form\ShopifyVariantOptionsForm', $entity);
+      if ($build['#view_mode'] === 'full') {
+        if ($entity->get('is_available')->value != FALSE) {
+          // Need to display the add to cart form.
+          $build['add_to_cart_form']['variant_options'] = \Drupal::formBuilder()
+            ->getForm('Drupal\neg_shopify\Form\ShopifyVariantOptionsForm', $entity);
+        }
+
+        $build['add_to_cart_form']['add_to_cart'] = \Drupal::formBuilder()
+          ->getForm('Drupal\neg_shopify\Form\ShopifyAddToCartForm', $entity);
+
+        $build['add_to_cart_form']['#weight'] = $form['weight'];
       }
-
-      $build['add_to_cart_form']['add_to_cart'] = \Drupal::formBuilder()
-        ->getForm('Drupal\neg_shopify\Form\ShopifyAddToCartForm', $entity);
-
-      $build['add_to_cart_form']['#weight'] = $form['weight'];
     }
   }
 
