@@ -66,7 +66,7 @@ function neg_shopify_update_8703(&$sandbox) {
 /**
  * Adds "shopify_product.vendor_slug and indexes."
  */
-function neg_shopify_update_8704(&$sandbox) {
+function neg_shopify_update_8709(&$sandbox) {
   $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
   $entity_type = $definition_update_manager->getEntityType('shopify_product');
   $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
