@@ -15,6 +15,7 @@ use Drupal\neg_shopify\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Defines the Shopify product entity.
@@ -159,7 +160,9 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     }
 
     if (isset($values['vendor'])) {
-      $values['vendor_slug'] = self::slugify($values['vendor']);
+      $slug = self::slugify($values['vendor']);
+      $values['vendor_slug'] = $slug;
+      Cache::invalidateTags(['shopify_vendor:' . $slug]);
     }
 
     if (!isset($values['extra_images']) || empty($values['extra_images'])) {

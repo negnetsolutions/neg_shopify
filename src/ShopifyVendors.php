@@ -44,7 +44,7 @@ class ShopifyVendors {
       '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
         'contexts' => ['user.roles'],
-        'tags' => ['shopify_product_list'],
+        'tags' => ['shopify_vendor:' . $slug],
       ],
     ];
   }
@@ -65,7 +65,7 @@ class ShopifyVendors {
       'vendor_slug' => $slug,
     ];
 
-    $tags = ['shopify_product_list'];
+    $tags = ['shopify_vendor:' . $slug];
 
     $search = new ShopifyProductSearch($params);
 
