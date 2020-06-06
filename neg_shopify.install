@@ -64,7 +64,7 @@ function neg_shopify_update_8703(&$sandbox) {
 }
 
 /**
- * Adds "shopify_product.vendor_slug"
+ * Adds "shopify_product.vendor_slug and indexes."
  */
 function neg_shopify_update_8704(&$sandbox) {
   $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
@@ -88,17 +88,9 @@ function neg_shopify_update_8704(&$sandbox) {
 
   $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
 
-  return t('Added shopify_product.vendor_slug');
-}
-
-/**
- * Adds "shopify_product indexes"
- */
-function neg_shopify_update_8708(&$sandbox) {
-
   db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__avaiable (is_available)");
   db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__vendor_slug (vendor_slug)");
   db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__low_price (low_price)");
 
-  return t('Added shopify_product indexes');
+  return t('Added shopify_product.vendor_slug');
 }
