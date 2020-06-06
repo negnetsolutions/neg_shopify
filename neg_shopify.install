@@ -88,9 +88,9 @@ function neg_shopify_update_8709(&$sandbox) {
 
   $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
 
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__avaiable (is_available)");
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__vendor_slug (vendor_slug)");
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_product__low_price (low_price)");
+  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__avaiable (is_available)");
+  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__vendor_slug (vendor_slug)");
+  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__low_price (low_price)");
 
   return t('Added shopify_product.vendor_slug');
 }
