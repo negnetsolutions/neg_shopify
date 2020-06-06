@@ -15,7 +15,9 @@ view_mode ? view_mode|clean_class,
       {{ content.title }}
     </h1>
     <h2 itemprop="brand">
-      {{ content.vendor }}
+      <a href="{{ vendor_url}} ">
+        {{ content.vendor }}
+      </a>
     </h2>
     {{ content.active_variant }}
     <div class="description" itemprop="description">

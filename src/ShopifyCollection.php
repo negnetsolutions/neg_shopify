@@ -60,7 +60,8 @@ class ShopifyCollection {
     $variables['#attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['#attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['#attributes']['data-sort'] = Settings::defaultSortOrder();
-    $variables['#attributes']['data-collection'] = 'all';
+    $variables['#attributes']['data-id'] = 'all';
+    $variables['#attributes']['data-type'] = 'collection';
 
     $params = [
       'sort' => Settings::defaultSortOrder(),
@@ -132,13 +133,14 @@ class ShopifyCollection {
     $variables['attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
+    $variables['#attributes']['data-type'] = 'collection';
 
     $params = [
       'sort' => Settings::defaultSortOrder(),
     ];
 
     $term = $variables['term'];
-    $variables['attributes']['data-collection'] = $term->id();
+    $variables['attributes']['data-id'] = $term->id();
     $params['collection_id'] = $term->id();
     $tags = self::cacheTags($term->id());
 

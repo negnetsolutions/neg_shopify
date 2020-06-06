@@ -25,6 +25,7 @@ use Drupal\Core\Render\RenderContext;
  *   id = "shopify_product",
  *   label = @Translation("Shopify product"),
  *   handlers = {
+ *     "storage_schema" = "Drupal\neg_shopify\Entity\ShopifyProductStorageSchema",
  *     "view_builder" = "Drupal\neg_shopify\ShopifyProductViewBuilder",
  *     "list_builder" = "Drupal\neg_shopify\ShopifyProductListBuilder",
  *     "views_data" = "Drupal\neg_shopify\ShopifyProductViewsData",
@@ -62,6 +63,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
 
   const SHOPIFY_COLLECTIONS_VID = 'shopify_collections';
   const SHOPIFY_TAGS_VID = 'shopify_tags';
+  const SHOPIFY_VENDORS_VID = 'shopify_vendors';
 
   /**
    * {@inheritdoc}
@@ -156,6 +158,10 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       }
     }
 
+    if (isset($values['vendor'])) {
+      $values['vendor_slug'] = self::slugify($values['vendor']);
+    }
+
     if (!isset($values['extra_images']) || empty($values['extra_images'])) {
       $values['extra_images'] = [];
     }
@@ -231,6 +237,35 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       ];
     }
     return $values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function slugify($text) {
+    // Replace non letter or digits by -.
+    $text = preg_replace('~[^\pL\d]+~u', '-', $text);
+
+    // Transliterate.
+    $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+
+    // Remove unwanted characters.
+    $text = preg_replace('~[^-\w]+~', '', $text);
+
+    // Trim.
+    $text = trim($text, '-');
+
+    // Remove duplicate -.
+    $text = preg_replace('~-+~', '-', $text);
+
+    // Lowercase.
+    $text = strtolower($text);
+
+    if (empty($text)) {
+      return 'n-a';
+    }
+
+    return $text;
   }
 
   /**
@@ -781,6 +816,17 @@ EOL;
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['vendor_slug'] = BaseFieldDefinition::create('string')
+      ->setLabel(t('Vendor Slug'))
+      ->setReadOnly(TRUE)
+      ->setDefaultValue('')
+      ->setDisplayOptions('form', [
+        'type' => 'string_textfield',
+        'weight' => 2,
+      ])
+      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('view', FALSE);
 
     $fields['options'] = BaseFieldDefinition::create('map')
       ->setLabel(t('Options'))

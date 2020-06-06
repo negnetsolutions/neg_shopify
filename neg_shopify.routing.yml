@@ -6,6 +6,14 @@ neg_shopify.settings:
   requirements:
     _permission: 'Administer Shopify API'
 
+neg_shopify.vendors:
+  path: '/vendors/{vendor}'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\Vendors::render'
+    _title_callback: '\Drupal\neg_shopify\Controller\Vendors::getTitle'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.all:
   path: '/collections/all'
   defaults:

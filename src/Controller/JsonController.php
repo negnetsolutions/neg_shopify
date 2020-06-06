@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 
 use Drupal\neg_shopify\ShopifyCollection;
+use Drupal\neg_shopify\ShopifyVendors;
 use Drupal\neg_shopify\Settings;
 
 /**
@@ -35,6 +36,17 @@ class JsonController extends ControllerBase {
     $sortOrder = ($sortOrder === NULL) ? Settings::defaultSortOrder() : $sortOrder;
 
     switch ($type) {
+      case 'vendor':
+        $slug = \Drupal::request()->query->get('id');
+
+        if ($slug === NULL || $page === NULL) {
+          throw new NotFoundHttpException();
+        }
+
+        $data = ShopifyVendors::renderJson($slug, $sortOrder, $page, $perPage);
+        $tags = ['shopify_product_list'];
+        break;
+
       case 'collection':
         $id = \Drupal::request()->query->get('id');
 

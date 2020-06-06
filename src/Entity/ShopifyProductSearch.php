@@ -54,6 +54,10 @@ class ShopifyProductSearch {
     // Make sure is available.
     $query->condition('is_available', TRUE);
 
+    if (isset($params['vendor_slug'])) {
+      $query->condition('vendor_slug', $params['vendor_slug']);
+    }
+
     if (isset($params['collection_id'])) {
       $query->condition('collections', $params['collection_id']);
     }

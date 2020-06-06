@@ -370,6 +370,10 @@ function template_preprocess_shopify_product(&$variables) {
     $variables['imagethumbnail'] = ImageStyle::load('rs_image_800w')->buildUrl($path);
   }
 
+  $variables['vendor_url'] = Url::fromRoute('neg_shopify.vendors', [
+    'vendor' => $variables['shopify_product']->get('vendor')->value,
+  ])->toString();
+
   // Helpful $content variable for templates.
   $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {

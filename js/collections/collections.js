@@ -6,8 +6,8 @@ var Collections = function (el, opts) {
 
   this.fetchOptions = {
     'perpage': el.dataset.perpage,
-    'id': el.dataset.collection,
-    'type': 'collection',
+    'id': el.dataset.id,
+    'type': el.dataset.type,
     'sort': el.dataset.sort,
   };
 
