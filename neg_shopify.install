@@ -62,35 +62,3 @@ function neg_shopify_update_8703(&$sandbox) {
 
   return t('Added shopify_product.low_price');
 }
-
-/**
- * Adds "shopify_product.vendor_slug and indexes."
- */
-function neg_shopify_update_8709(&$sandbox) {
-  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
-  $entity_type = $definition_update_manager->getEntityType('shopify_product');
-  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
-  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_product');
-
-  $field_storage_definitions['vendor_slug'] = BaseFieldDefinition::create('string')
-    ->setName('vendor_slug')
-    ->setTargetEntityTypeId('shopify_product')
-    ->setTargetBundle(NULL)
-    ->setReadOnly(TRUE)
-    ->setLabel(t('Vendor Slug'))
-    ->setDefaultValue('')
-    ->setDisplayOptions('form', [
-      'type' => 'string_textfield',
-      'weight' => 2,
-    ])
-    ->setDisplayConfigurable('form', FALSE)
-    ->setDisplayConfigurable('view', FALSE);
-
-  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
-
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__avaiable (is_available)");
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__vendor_slug (vendor_slug)");
-  db_query("ALTER TABLE shopify_product ADD INDEX shopify_p__low_price (low_price)");
-
-  return t('Added shopify_product.vendor_slug');
-}
