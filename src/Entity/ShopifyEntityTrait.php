@@ -2,6 +2,8 @@
 
 namespace Drupal\neg_shopify\Entity;
 
+use Drupal\Core\File\FileSystemInterface;
+
 /**
  * Class ShopifyEntityTrait.
  */
@@ -23,11 +25,11 @@ trait ShopifyEntityTrait {
    */
   public static function setupProductImage($image_url) {
     $directory = file_build_uri('shopify_images');
-    if (!file_prepare_directory($directory, FILE_CREATE_DIRECTORY)) {
+    if (!FileSystemInterface::prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY)) {
       // If our directory doesn't exist and can't be created, use the default.
       $directory = NULL;
     }
-    $file = system_retrieve_file($image_url, $directory, TRUE, FILE_EXISTS_REPLACE);
+    $file = system_retrieve_file($image_url, $directory, TRUE, FileSystemInterface::EXISTS_REPLACE);
     return $file;
   }
 

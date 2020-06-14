@@ -291,7 +291,7 @@ class ShopifyCollection {
       // If our directory doesn't exist and can't be created, use the default.
       $directory = NULL;
     }
-    $file = system_retrieve_file($image_url, $directory, TRUE, FILE_EXISTS_REPLACE);
+    $file = system_retrieve_file($image_url, $directory, TRUE, FileSystemInterface::EXISTS_REPLACE);
     $term->field_shopify_collection_image = $file;
     $term->save();
   }

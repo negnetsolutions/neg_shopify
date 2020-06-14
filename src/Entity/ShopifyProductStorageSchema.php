@@ -3,7 +3,7 @@
 namespace Drupal\neg_shopify\Entity;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Entity\ContentEntityTypeInterface;
 
 /**
  * Defines the node schema handler.
