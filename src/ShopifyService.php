@@ -153,11 +153,15 @@ class ShopifyService {
   /**
    * Gets webhooks.
    */
-  public function getWebhooks() {
+  public function getWebhooks($params = []) {
 
-    $hooks = $this->webhookService->get([
-      'limit' => 250,
-    ]);
+    if (count($params) === 0) {
+      $params = [
+        'limit' => 250,
+      ];
+    }
+
+    $hooks = $this->webhookService->get($params);
 
     $next = $this->webhookService->getNextLink();
     if ($next !== NULL) {
@@ -178,14 +182,14 @@ class ShopifyService {
       $smart_collections = $this->smartCollectionService->get($options);
       $next = $this->smartCollectionService->getNextLink();
       if ($next !== NULL) {
-        $smart_collections = array_merge($smart_collections, $this->fetchPagedCollections($this->processPageCursor($next), 'smart'));
+        $smart_collections = array_merge($smart_collections, $this->fetchCollections($this->processPageCursor($next), 'smart'));
       }
     }
     if ($type == 'both' || $type == 'custom') {
       $custom_collections = $this->customCollectionService->get($options);
       $next = $this->customCollectionService->getNextLink();
       if ($next !== NULL) {
-        $custom_collections = array_merge($custom_collections, $this->fetchPagedCollections($this->processPageCursor($next), 'custom'));
+        $custom_collections = array_merge($custom_collections, $this->fetchCollections($this->processPageCursor($next), 'custom'));
       }
     }
 

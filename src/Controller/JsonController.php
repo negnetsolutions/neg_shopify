@@ -34,6 +34,7 @@ class JsonController extends ControllerBase {
     $perPage = ($perPage === NULL) ? Settings::productsPerPage() : $perPage;
     $sortOrder = \Drupal::request()->query->get('sort');
     $sortOrder = ($sortOrder === NULL) ? Settings::defaultSortOrder() : $sortOrder;
+    $tags = [];
 
     switch ($type) {
       case 'vendor':

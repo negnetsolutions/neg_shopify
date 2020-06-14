@@ -437,7 +437,7 @@ EOL;
 
       if ($defaultContext === FALSE) {
         $rendered_view = NULL;
-        \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view, &$product) {
+        \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
           $rendered_view = render($build);
         });
       }
@@ -539,9 +539,6 @@ EOL;
    *
    * @param array $props
    *   Key/value pair of properties to query by.
-   *
-   * @return ShopifyProduct[]
-   *   Products.
    */
   public static function loadByProperties(array $props = []) {
     return \Drupal::entityTypeManager()

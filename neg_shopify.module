@@ -134,14 +134,14 @@ function neg_shopify_entity_bundle_info_alter(&$bundles) {
  * Set the route for tag terms.
  */
 function neg_shopify_taxonomy_tag_term_uri(Term $term) {
-  return Url::fromUri('internal:/' . Settings::storUrl('page_tag', $term->id()));
+  return Url::fromUri('internal:/' . Settings::storeUrl('page_tag', $term->id()));
 }
 
 /**
  * Set the route for collection terms.
  */
 function neg_shopify_taxonomy_collection_term_uri(Term $term) {
-  return Url::fromUri('internal:/' . Settings::storUrl('page_collection', $term->id()));
+  return Url::fromUri('internal:/' . Settings::storeUrl('page_collection', $term->id()));
 }
 
 /**
@@ -265,6 +265,7 @@ function neg_shopify_toolbar() {
 function neg_shopify_renderable_links() {
 
   $user = \Drupal::currentUser();
+  $links = [];
 
   if ($user->hasPermission('administer shopify api')) {
     $links[] = [
@@ -489,7 +490,7 @@ function neg_shopify_cron() {
   $last_sync = \Drupal::state()->get('neg_shopify.last_product_sync', 0);
 
   // Check if we need to sync.
-  if ($cache_lifetime > 0 && (($last_sync + $cache_lifetime) < $runtime)) {
+  if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
     Sync::syncAllProducts();
   }
 
@@ -500,7 +501,7 @@ function neg_shopify_cron() {
   $last_sync = \Drupal::state()->get('neg_shopify.last_collection_sync', 0);
 
   // Check if we need to sync.
-  if ($cache_lifetime > 0 && (($last_sync + $cache_lifetime) < $runtime)) {
+  if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
     Sync::syncAllCollections();
   }
 }

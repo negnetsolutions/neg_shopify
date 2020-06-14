@@ -50,8 +50,8 @@ class CartController extends ControllerBase {
     $total = 0;
     foreach ($cart['items'] as $item) {
       $variant = ShopifyProductVariant::loadByVariantId($item['variantId']);
-      $price = $variant->price->value * 100;
-      $total += $price * $item['quantity'];
+      $price = (float) $variant->price->value * 100;
+      $total += $price * (int) $item['quantity'];
     }
     $cart['total'] = $total;
 
