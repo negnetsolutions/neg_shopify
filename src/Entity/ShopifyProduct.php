@@ -151,10 +151,12 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
           // This image is not attached to a variant, it should be applied to
           // to the extra images field.
           $image_file_interface = self::setupProductImage($variant_image['src']);
-          $values['extra_images'][] = [
-            'target_id' => $image_file_interface->id(),
-            'alt' => $variant_image['alt'],
-          ];
+          if ($image_file_interface instanceof FileInterface) {
+            $values['extra_images'][] = [
+              'target_id' => $image_file_interface->id(),
+              'alt' => $variant_image['alt'],
+            ];
+          }
         }
       }
     }
