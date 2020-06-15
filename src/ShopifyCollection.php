@@ -133,7 +133,7 @@ class ShopifyCollection {
     $variables['attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
-    $variables['#attributes']['data-type'] = 'collection';
+    $variables['attributes']['data-type'] = 'collection';
 
     $params = [
       'sort' => Settings::defaultSortOrder(),
