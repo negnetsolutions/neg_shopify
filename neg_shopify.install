@@ -62,3 +62,28 @@ function neg_shopify_update_8703(&$sandbox) {
 
   return t('Added shopify_product.low_price');
 }
+
+/**
+ * Adds "shopify_product.is_preorder"
+ */
+function neg_shopify_update_8711(&$sandbox) {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('shopify_product');
+  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_product');
+
+  $field_storage_definitions['is_preorder'] = BaseFieldDefinition::create('boolean')
+    ->setName('is_preorder')
+    ->setLabel(t('Available for Preorder'))
+    ->setDefaultValue(FALSE)
+    ->setTargetEntityTypeId('shopify_product')
+    ->setTargetBundle(NULL)
+    ->setReadOnly(TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  return t('Added shopify_product.is_preorder');
+}

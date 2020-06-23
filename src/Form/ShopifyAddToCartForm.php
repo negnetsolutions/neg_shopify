@@ -95,6 +95,15 @@ class ShopifyAddToCartForm extends FormBase {
           ],
         ];
       }
+      elseif ($product->get('is_preorder')->value == 1) {
+        // This variant is out of stock.
+        $form['submit'] = [
+          '#type' => 'submit',
+          '#disabled' => TRUE,
+          '#value' => t('Available for Preorder'),
+          '#name' => 'add_to_cart',
+        ];
+      }
       else {
         // This variant is out of stock.
         $form['submit'] = [

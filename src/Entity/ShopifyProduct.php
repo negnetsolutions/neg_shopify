@@ -171,7 +171,14 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       $values['extra_images'] = [];
     }
 
+    $values['is_preorder'] = FALSE;
     if (isset($values['tags']) && !is_array($values['tags']) && !empty($values['tags'])) {
+
+      // Set preorder available.
+      if (stristr($values['tags'], 'preorder')) {
+        $values['is_preorder'] = TRUE;
+      }
+
       $values['tags'] = explode(', ', $values['tags']);
       $values['tags'] = self::setupTags($values['tags']);
     }
@@ -403,7 +410,7 @@ FROM
 WHERE
 	tags.entity_id = product.id
 	AND tags.tags_target_id = t.tid
-	AND product.is_available = 1
+	AND (product.is_available = 1 or product.is_preorder = 1)
 	AND product.image__target_id is not null
   AND product.id != :id
   AND t.tid IN (:tags[])
@@ -655,6 +662,12 @@ EOL;
         ],
       ])
       ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+
+    $fields['is_preorder'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Available for Preorder'))
+      ->setDefaultValue(FALSE)
+      ->setReadOnly(TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
     $fields['is_available'] = BaseFieldDefinition::create('boolean')

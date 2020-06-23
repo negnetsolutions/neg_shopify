@@ -51,8 +51,15 @@ class ShopifyProductSearch {
     // Require images for found products.
     $query->condition('image__target_id', NULL, 'IS NOT NULL');
 
+    // Add an or query for available or preorders.
+    $group = $query->orConditionGroup();
+
     // Make sure is available.
-    $query->condition('is_available', TRUE);
+    $group->condition('is_available', TRUE);
+    // Or is a preorder.
+    $group->condition('is_preorder', TRUE);
+
+    $query->condition($group);
 
     if (isset($params['vendor_slug'])) {
       $query->condition('vendor_slug', $params['vendor_slug']);
