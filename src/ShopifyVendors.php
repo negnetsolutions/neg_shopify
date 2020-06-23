@@ -114,7 +114,8 @@ SELECT
 FROM
   shopify_product product
 WHERE
-  product.is_available = 1
+  product.is_available = 1 or
+  product.is_preorder = 1
 GROUP BY
   product.vendor_slug, product.vendor
 ORDER BY
