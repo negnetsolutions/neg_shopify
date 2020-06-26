@@ -29,8 +29,58 @@ trait ShopifyEntityTrait {
       // If our directory doesn't exist and can't be created, use the default.
       $directory = NULL;
     }
-    $file = system_retrieve_file($image_url, $directory, TRUE, FileSystemInterface::EXISTS_REPLACE);
+
+    $file = self::retrieveFile($image_url, $directory);
     return $file;
+  }
+
+  /**
+   * Retrieves a shopify image file.
+   */
+  protected static function retrieveFile($url, $destination) {
+
+    $parsed_url = parse_url($url);
+    if (is_dir(drupal_realpath($destination))) {
+
+      // Inject shopify version into filename.
+      $basename = drupal_basename($parsed_url['path']);
+      $filename_parts = pathinfo($basename);
+      $version = (isset($parsed_url['query'])) ? hash('crc32', $parsed_url['query']) : '00000000';
+      $filename = $filename_parts['filename'] . '_' . $version . '.' . $filename_parts['extension'];
+
+      // Prevent URIs with triple slashes when glueing parts together.
+      $path = str_replace('///', '//', "{$destination}/") . $filename;
+    }
+    else {
+      $path = $destination;
+    }
+
+    // Check to see if file is already downloaded.
+    $existing_files = entity_load_multiple_by_properties('file', [
+      'uri' => $path,
+    ]);
+
+    // If it exists, return that file.
+    if (count($existing_files) > 0) {
+      $existing = reset($existing_files);
+      return $existing;
+    }
+
+    try {
+      $data = (string) \Drupal::httpClient()
+        ->get($url)
+        ->getBody();
+      $local = file_save_data($data, $path, FileSystemInterface::EXISTS_REPLACE);
+    }
+    catch (RequestException $exception) {
+      \Drupal::logger('neg_shopify')->error(t('Failed to fetch file due to error "%error"', [
+        '%error' => $exception
+          ->getMessage(),
+      ]));
+      return FALSE;
+    }
+
+    return $local;
   }
 
 }
