@@ -3,10 +3,13 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.taxonomy_term.shopify_collections.field_disjunctive
     - field.field.taxonomy_term.shopify_collections.field_handle
+    - field.field.taxonomy_term.shopify_collections.field_rules
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_id
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_image
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_pub
+    - field.field.taxonomy_term.shopify_collections.field_type
     - taxonomy.vocabulary.shopify_collections
   module:
     - path
@@ -17,6 +20,13 @@ targetEntityType: taxonomy_term
 bundle: shopify_collections
 mode: default
 content:
+  field_disjunctive:
+    weight: 103
+    settings:
+      display_label: true
+    third_party_settings: {  }
+    type: boolean_checkbox
+    region: content
   field_handle:
     weight: 101
     settings:
@@ -24,6 +34,20 @@ content:
       placeholder: ''
     third_party_settings: {  }
     type: string_textfield
+    region: content
+  field_rules:
+    weight: 104
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+    type: string_textarea
+    region: content
+  field_type:
+    weight: 102
+    settings: {  }
+    third_party_settings: {  }
+    type: options_select
     region: content
   path:
     type: path

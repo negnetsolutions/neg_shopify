@@ -65,6 +65,95 @@ class ShopifyProductSearch {
       $query->condition('vendor_slug', $params['vendor_slug']);
     }
 
+    // Smart Collection.
+    if (isset($params['collection_rules'])) {
+      // Set group type.
+      $rules_group = $query->andConditionGroup();
+      if ($params['collection_disjunctive']) {
+        $rules_group = $query->orConditionGroup();
+      }
+
+      foreach ($params['collection_rules'] as $rule) {
+        $field = FALSE;
+        $relation = '=';
+
+        switch ($rule['column']) {
+          case 'title':
+            $field = $rule['column'];
+            break;
+
+          case 'vendor':
+            $field = $rule['column'];
+            break;
+
+          case 'type':
+            $field = 'product_type';
+            break;
+
+          case 'tag':
+            $field = 'tags.entity:taxonomy_term.name';
+            break;
+
+          case 'variant_title':
+            $field = 'variants.entity:shopify_product_variant.title';
+            break;
+
+          case 'variant_compare_at_price':
+            $field = 'variants.entity:shopify_product_variant.compare_at_price';
+            break;
+
+          case 'variant_weight':
+            $field = 'variants.entity:shopify_product_variant.weight';
+            break;
+
+          case 'variant_inventory':
+            $field = 'variants.entity:shopify_product_variant.inventory_quantity';
+            break;
+
+          case 'variant_price':
+            $field = 'variants.entity:shopify_product_variant.price';
+            break;
+        }
+
+        switch ($rule['relation']) {
+          case 'equals':
+            $relation = '=';
+            break;
+
+          case 'not_equals':
+            $relation = '<>';
+            break;
+
+          case 'greater_than':
+            $relation = '>';
+            break;
+
+          case 'less_than':
+            $relation = '<';
+            break;
+
+          case 'starts_with':
+            $relation = 'STARTS_WITH';
+            break;
+
+          case 'ends_with':
+            $relation = 'ENDS_WITH';
+            break;
+
+          case 'contains':
+            $relation = 'CONTAINS';
+            break;
+        }
+
+        if ($field) {
+          $rules_group->condition($field, $rule['condition'], $relation);
+        }
+      }
+
+      $query->condition($rules_group);
+    }
+
+    // Custom Collection.
     if (isset($params['collection_id'])) {
       $query->condition('collections', $params['collection_id']);
     }

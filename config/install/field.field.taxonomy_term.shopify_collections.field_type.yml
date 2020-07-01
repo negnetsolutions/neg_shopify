@@ -1,0 +1,23 @@
+uuid: 4dd5b00a-cbf4-4320-a286-8400c2cb0107
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_type
+    - taxonomy.vocabulary.shopify_collections
+  module:
+    - options
+id: taxonomy_term.shopify_collections.field_type
+field_name: field_type
+entity_type: taxonomy_term
+bundle: shopify_collections
+label: Type
+description: ''
+required: true
+translatable: false
+default_value:
+  -
+    value: CustomCollection
+default_value_callback: ''
+settings: {  }
+field_type: list_string

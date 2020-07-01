@@ -1,0 +1,18 @@
+uuid: 1254b65b-85dc-40fe-8adb-622a12d6131f
+langcode: en
+status: true
+dependencies:
+  module:
+    - taxonomy
+id: taxonomy_term.field_disjunctive
+field_name: field_disjunctive
+entity_type: taxonomy_term
+type: boolean
+settings: {  }
+module: core
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

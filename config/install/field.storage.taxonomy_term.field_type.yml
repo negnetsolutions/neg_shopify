@@ -1,0 +1,27 @@
+uuid: e54021a0-53a1-4227-88ee-93ec6e488549
+langcode: en
+status: true
+dependencies:
+  module:
+    - options
+    - taxonomy
+id: taxonomy_term.field_type
+field_name: field_type
+entity_type: taxonomy_term
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: CustomCollection
+      label: CustomCollection
+    -
+      value: SmartCollection
+      label: SmartCollection
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

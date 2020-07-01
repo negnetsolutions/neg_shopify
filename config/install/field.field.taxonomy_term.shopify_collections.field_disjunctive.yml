@@ -1,0 +1,23 @@
+uuid: 154334bc-6967-4174-8f75-03010efa439f
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_disjunctive
+    - taxonomy.vocabulary.shopify_collections
+id: taxonomy_term.shopify_collections.field_disjunctive
+field_name: field_disjunctive
+entity_type: taxonomy_term
+bundle: shopify_collections
+label: Disjunctive
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 1
+default_value_callback: ''
+settings:
+  on_label: 'Yes'
+  off_label: 'No'
+field_type: boolean

@@ -31,8 +31,22 @@ class ShopifyCollection {
     ];
 
     if ($collection_id != 'all') {
-      $params['collection_id'] = $collection_id;
-      $tags = self::cacheTags($collection_id);
+      $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($collection_id);
+
+      switch ($term->get('field_type')->value) {
+        case 'SmartCollection':
+          $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
+          $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
+          $tags = self::cacheTags($term->id());
+          break;
+
+        default:
+          // CustomCollection.
+          $params['collection_id'] = $term->id();
+          $tags = self::cacheTags($term->id(), FALSE);
+          break;
+      }
+
     }
     else {
       $tags = self::cacheTags('all');
@@ -141,8 +155,20 @@ class ShopifyCollection {
 
     $term = $variables['term'];
     $variables['attributes']['data-id'] = $term->id();
-    $params['collection_id'] = $term->id();
-    $tags = self::cacheTags($term->id());
+
+    switch ($term->get('field_type')->value) {
+      case 'SmartCollection':
+        $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
+        $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
+        $tags = self::cacheTags($term->id());
+        break;
+
+      default:
+        // CustomCollection.
+        $params['collection_id'] = $term->id();
+        $tags = self::cacheTags($term->id(), FALSE);
+        break;
+    }
 
     $search = new ShopifyProductSearch($params);
 
@@ -165,11 +191,16 @@ class ShopifyCollection {
   /**
    * Get's cache tags.
    */
-  public static function cacheTags($collection_id) {
-    return [
-      'shopify_product',
+  public static function cacheTags($collection_id, $includeProducts = TRUE) {
+    $tags = [
       'taxonomy_term:' . $collection_id,
     ];
+
+    if ($includeProducts) {
+      $tags[] = 'shopify_product_list';
+    }
+
+    return $tags;
   }
 
   /**
@@ -230,6 +261,39 @@ class ShopifyCollection {
       $date = strtotime($collection['published_at']);
       $term->field_shopify_collection_pub = $date ? $date : 0;
       $term->field_handle = $collection['handle'];
+
+      // Check for type of collection.
+      if (isset($collection['rules'])) {
+        // Set for no product sync.
+        $sync_products = FALSE;
+
+        // Set type.
+        $term->field_type = [
+          'value' => 'SmartCollection',
+        ];
+
+        // Set disjunctive.
+        $term->field_disjunctive = [
+          'value' => (boolean) $collection['disjunctive'],
+        ];
+
+        // Set rules.
+        $term->field_rules = [
+          'value' => json_encode($collection['rules']),
+        ];
+      }
+      else {
+        // Set type.
+        $term->field_type = [
+          'value' => 'CustomCollection',
+        ];
+
+        // Set disjunctive false.
+        $term->field_disjunctive = [
+          'value' => FALSE,
+        ];
+      }
+
     }
     if ($term->save() && isset($collection['image']['src'])) {
       // Save the image for this term.
@@ -255,7 +319,8 @@ class ShopifyCollection {
    */
   public static function create($collection, $sync_products = FALSE) {
     $date = strtotime($collection['published_at']);
-    $term = Term::create([
+
+    $fields = [
       'vid' => ShopifyProduct::SHOPIFY_COLLECTIONS_VID,
       'name' => $collection['title'],
       'description' => [
@@ -265,7 +330,41 @@ class ShopifyCollection {
       'field_handle' => $collection['handle'],
       'field_shopify_collection_id' => $collection['id'],
       'field_shopify_collection_pub' => $date ? $date : 0,
-    ]);
+    ];
+
+    // Check for type of collection.
+    if (isset($collection['rules'])) {
+      // Set for no product sync.
+      $sync_products = FALSE;
+
+      // Set type.
+      $fields['field_type'] = [
+        'value' => 'SmartCollection',
+      ];
+
+      // Set disjunctive.
+      $fields['field_disjunctive'] = [
+        'value' => (boolean) $collection['disjunctive'],
+      ];
+
+      // Set rules.
+      $fields['field_rules'] = [
+        'value' => json_encode($collection['rules']),
+      ];
+    }
+    else {
+      // Set type.
+      $fields['field_type'] = [
+        'value' => 'CustomCollection',
+      ];
+
+      // Set disjunctive false.
+      $fields['field_disjunctive'] = [
+        'value' => FALSE,
+      ];
+    }
+
+    $term = Term::create($fields);
     if ($term->save() && isset($collection['image']['src'])) {
       // Save the image for this term.
       self::saveImage($term, $collection['image']['src']);

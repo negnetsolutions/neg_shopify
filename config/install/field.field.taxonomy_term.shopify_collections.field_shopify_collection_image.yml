@@ -7,6 +7,8 @@ dependencies:
     - taxonomy.vocabulary.shopify_collections
   module:
     - image
+_core:
+  default_config_hash: Z76Vd-dBAQ8nbqfq820uHYlmZZHwQMRraqMK3E5NtmA
 id: taxonomy_term.shopify_collections.field_shopify_collection_image
 field_name: field_shopify_collection_image
 entity_type: taxonomy_term

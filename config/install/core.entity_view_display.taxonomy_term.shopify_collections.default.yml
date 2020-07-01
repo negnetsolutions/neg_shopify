@@ -3,12 +3,16 @@ langcode: en
 status: true
 dependencies:
   config:
+    - field.field.taxonomy_term.shopify_collections.field_disjunctive
     - field.field.taxonomy_term.shopify_collections.field_handle
+    - field.field.taxonomy_term.shopify_collections.field_rules
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_id
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_image
     - field.field.taxonomy_term.shopify_collections.field_shopify_collection_pub
+    - field.field.taxonomy_term.shopify_collections.field_type
     - taxonomy.vocabulary.shopify_collections
   module:
+    - options
     - text
 id: taxonomy_term.shopify_collections.default
 targetEntityType: taxonomy_term
@@ -22,8 +26,33 @@ content:
     region: content
     settings: {  }
     third_party_settings: {  }
+  field_disjunctive:
+    weight: 2
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    type: boolean
+    region: content
+  field_rules:
+    weight: 3
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: basic_string
+    region: content
+  field_type:
+    weight: 1
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    type: list_default
+    region: content
 hidden:
   field_handle: true
   field_shopify_collection_id: true
   field_shopify_collection_image: true
   field_shopify_collection_pub: true
+  search_api_excerpt: true

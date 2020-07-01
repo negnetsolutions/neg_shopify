@@ -1,0 +1,19 @@
+uuid: 77455900-3610-4501-b1d0-bf935bb1e981
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.taxonomy_term.field_rules
+    - taxonomy.vocabulary.shopify_collections
+id: taxonomy_term.shopify_collections.field_rules
+field_name: field_rules
+entity_type: taxonomy_term
+bundle: shopify_collections
+label: Rules
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: string_long
