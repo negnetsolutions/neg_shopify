@@ -108,6 +108,11 @@ class SettingsForm extends ConfigFormBase {
           '#value' => t('Uninstall All Hooks'),
           '#submit' => ['::uninstallHooks'],
         ];
+        $form['webhooks']['remove_relevant_hooks'] = [
+          '#type' => 'submit',
+          '#value' => t('Uninstall Relevant Hooks'),
+          '#submit' => ['::uninstallRelevantHooks'],
+        ];
       }
 
       $form['webhooks']['install_hooks'] = [
@@ -230,6 +235,13 @@ class SettingsForm extends ConfigFormBase {
    */
   public function deleteAllTags(array &$form, FormStateInterface $form_state) {
     Sync::deleteAllTags();
+  }
+
+  /**
+   * Removes all hooks.
+   */
+  public function uninstallRelevantHooks(array &$form, FormStateInterface $form_state) {
+    Webhooks::uninstallRelevantWebhooks();
   }
 
   /**

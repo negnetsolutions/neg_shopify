@@ -71,6 +71,19 @@ class Webhooks {
   }
 
   /**
+   * Uninstall Relevant webhooks.
+   */
+  public static function uninstallRelevantWebhooks() {
+    $hooks = self::getWebhooks();
+
+    foreach ($hooks as $hook) {
+      if ($hook['address'] === Settings::webhookRouteUrl()) {
+        ShopifyService::instance()->deleteWebhook($hook['id']);
+      }
+    }
+  }
+
+  /**
    * Uninstalls webhooks.
    */
   public static function uninstallWebhooks() {
