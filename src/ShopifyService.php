@@ -212,6 +212,20 @@ class ShopifyService {
   }
 
   /**
+   * Checks if product is listed on sales channel.
+   */
+  public function productIsListedOnSalesChannel($product_id) {
+    try {
+      $data = $this->client->ProductListing($product_id)->get();
+      return TRUE;
+    }
+    catch (\Exception $e) {
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Gets all products.
    */
   public function fetchAllPagedProducts(array $params = []) {
