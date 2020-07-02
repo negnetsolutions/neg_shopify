@@ -440,7 +440,11 @@ function _neg_shopify_process_paragraph_shopify_product(&$variables) {
 
   if (!$variables['paragraph']->field_product->isEmpty()) {
     $entity = $variables['paragraph']->field_product->entity;
-    if ($entity->get('is_available')->value == TRUE) {
+
+    $published_at = $entity->get('published_at')->value;
+    $published = ($published_at !== NULL && time() > $published_at);
+
+    if ($published && $entity->get('is_available')->value == TRUE) {
       $variables['product'] = $entity->getView('store_listing');
     }
   }

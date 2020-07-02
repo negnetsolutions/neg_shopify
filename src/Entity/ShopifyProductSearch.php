@@ -51,11 +51,15 @@ class ShopifyProductSearch {
     // Require images for found products.
     $query->condition('image__target_id', NULL, 'IS NOT NULL');
 
+    // Require published product.
+    $query->condition('published_at', time(), '<=');
+
     // Add an or query for available or preorders.
     $group = $query->orConditionGroup();
 
     // Make sure is available.
     $group->condition('is_available', TRUE);
+
     // Or is a preorder.
     $group->condition('is_preorder', TRUE);
 

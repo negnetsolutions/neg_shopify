@@ -62,57 +62,71 @@ class ShopifyAddToCartForm extends FormBase {
       '#value' => 'back',
     ];
 
-    // Send the quantity value.
-    if ($product->get('is_available')->value != FALSE) {
-      $form['quantity'] = [
-        '#type' => 'number',
-        '#title' => t('Quantity'),
-        '#default_value' => 1,
-        '#attributes' => ['min' => 0, 'max' => 999],
-      ];
-    }
+    $published_at = $product->get('published_at')->value;
+    $published = ($published_at !== NULL && time() > $published_at);
 
-    if (empty($variant_id)) {
-      // No variant matches these options.
-      $form['submit'] = [
-        '#type' => 'button',
-        '#disabled' => TRUE,
-        '#value' => t('Unavailable'),
-        '#name' => 'add_to_cart',
-      ];
-    }
-    else {
-      if ($variant->inventory_policy->value == 'continue' || $variant->inventory_quantity->value > 0 || empty($variant->inventory_management->value)) {
-        // User can add this variant to their cart.
-        $form['submit'] = [
-          '#type' => 'submit',
-          '#value' => t('Add to cart'),
-          '#name' => 'add_to_cart',
-          '#attributes' => [
-            'onclick' => [
-              'return shopping_cart.addToCart(this);',
-            ],
-          ],
+    if ($published) {
+      // Send the quantity value.
+      if ($product->get('is_available')->value != FALSE) {
+        $form['quantity'] = [
+          '#type' => 'number',
+          '#title' => t('Quantity'),
+          '#default_value' => 1,
+          '#attributes' => ['min' => 0, 'max' => 999],
         ];
       }
-      elseif ($product->get('is_preorder')->value == 1) {
-        // This variant is out of stock.
+
+      if (empty($variant_id)) {
+        // No variant matches these options.
         $form['submit'] = [
-          '#type' => 'submit',
+          '#type' => 'button',
           '#disabled' => TRUE,
-          '#value' => t('Available for Preorder'),
+          '#value' => t('Unavailable'),
           '#name' => 'add_to_cart',
         ];
       }
       else {
-        // This variant is out of stock.
-        $form['submit'] = [
-          '#type' => 'submit',
-          '#disabled' => TRUE,
-          '#value' => t('Out of stock'),
-          '#name' => 'add_to_cart',
-        ];
+        if ($variant->inventory_policy->value == 'continue' || $variant->inventory_quantity->value > 0 || empty($variant->inventory_management->value)) {
+          // User can add this variant to their cart.
+          $form['submit'] = [
+            '#type' => 'submit',
+            '#value' => t('Add to cart'),
+            '#name' => 'add_to_cart',
+            '#attributes' => [
+              'onclick' => [
+                'return shopping_cart.addToCart(this);',
+              ],
+            ],
+          ];
+        }
+        elseif ($product->get('is_preorder')->value == 1) {
+          // This variant is out of stock.
+          $form['submit'] = [
+            '#type' => 'submit',
+            '#disabled' => TRUE,
+            '#value' => t('Available for Preorder'),
+            '#name' => 'add_to_cart',
+          ];
+        }
+        else {
+          // This variant is out of stock.
+          $form['submit'] = [
+            '#type' => 'submit',
+            '#disabled' => TRUE,
+            '#value' => t('Out of stock'),
+            '#name' => 'add_to_cart',
+          ];
+        }
       }
+    }
+    else {
+      // This variant is out of stock.
+      $form['submit'] = [
+        '#type' => 'submit',
+        '#disabled' => TRUE,
+        '#value' => t('Unavailable'),
+        '#name' => 'add_to_cart',
+      ];
     }
 
     return $form;

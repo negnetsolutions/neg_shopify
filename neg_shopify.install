@@ -69,3 +69,10 @@ function neg_shopify_update_8703(&$sandbox) {
 function neg_shopify_update_8711(&$sandbox) {
   return t('Added shopify_product.is_preorder');
 }
+
+/**
+ * Adds "shopify_product blank"
+ */
+function neg_shopify_update_8712(&$sandbox) {
+  return t('shopify_product blank');
+}
