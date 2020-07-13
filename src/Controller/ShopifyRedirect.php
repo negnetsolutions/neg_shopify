@@ -8,7 +8,6 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Drupal\Core\Url;
 
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\ShopifyCollection;
@@ -54,7 +53,7 @@ class ShopifyRedirect extends ControllerBase {
       $messenger->addWarning(t("We're sorry, but that collection is unavailable at this time."));
     }
 
-    return new RedirectResponse('/' . Settings::storeUrl());
+    return new RedirectResponse('/');
   }
 
   /**
