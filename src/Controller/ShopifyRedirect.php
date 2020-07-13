@@ -8,6 +8,7 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Url;
 
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\ShopifyCollection;
@@ -30,7 +31,7 @@ class ShopifyRedirect extends ControllerBase {
       // We are redirecting to a specific variant page.
       $variant = ShopifyProductVariant::loadByVariantId($request->get('variant_id'));
       if ($variant instanceof ShopifyProductVariant) {
-        return new RedirectResponse($variant->toUrl());
+        return new RedirectResponse($variant->getProductUrl()->toString());
       }
       $messenger->addWarning(t("We're sorry, but that product is unavailable at this time."));
     }
@@ -39,7 +40,7 @@ class ShopifyRedirect extends ControllerBase {
       // We are redirecting to a product page (no variant selected).
       $product = ShopifyProduct::loadByProductId($request->get('product_id'));
       if ($product instanceof ShopifyProduct) {
-        return new RedirectResponse($product->toUrl());
+        return new RedirectResponse($product->toUrl()->toString());
       }
       $messenger->addWarning(t("We're sorry, but that product is unavailable at this time."));
     }
@@ -48,7 +49,7 @@ class ShopifyRedirect extends ControllerBase {
       // We are redirecting to a collection page.
       $collection = ShopifyCollection::load($request->get('collection_id'));
       if ($collection instanceof Term) {
-        return new RedirectResponse($collection->toUrl());
+        return new RedirectResponse($collection->toUrl()->toString());
       }
       $messenger->addWarning(t("We're sorry, but that collection is unavailable at this time."));
     }

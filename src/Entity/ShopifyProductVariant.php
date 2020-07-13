@@ -13,8 +13,6 @@ use Drupal\Core\Render\RenderContext;
 use Drupal\neg_shopify\ShopifyProductVariantInterface;
 use Drupal\neg_shopify\StoreFrontService;
 
-use Drupal\neg_shopify\ShopifyService;
-
 /**
  * Defines the Shopify product variant entity.
  *
@@ -211,6 +209,19 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     return \Drupal::entityTypeManager()
       ->getStorage('shopify_product_variant')
       ->loadByProperties($props);
+  }
+
+  /**
+   * Gets product url.
+   */
+  public function getProductUrl() {
+    $product = $this->getProduct();
+    $url = $product->toUrl();
+    $url->setOption('query', [
+      'variant_id' => $this->variant_id->value,
+    ]);
+
+    return $url;
   }
 
   /**

@@ -37,6 +37,13 @@ neg_shopify.cart.json:
   requirements:
     _permission: 'access content'
 
+neg_shopify_variant_redirect:
+  path: '/shopify/redirect'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\ShopifyRedirect::handleRedirect'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.products.json:
   path: '/shopify/products.json'
   defaults:
