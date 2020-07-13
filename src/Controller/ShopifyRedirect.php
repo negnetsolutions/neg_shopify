@@ -8,6 +8,8 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\taxonomy\Entity\Term;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Drupal\Core\Cache\CacheableRedirectResponse;
+use Drupal\Core\Cache\CacheableMetadata;
 
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\ShopifyCollection;
@@ -30,7 +32,15 @@ class ShopifyRedirect extends ControllerBase {
       // We are redirecting to a specific variant page.
       $variant = ShopifyProductVariant::loadByVariantId($request->get('variant_id'));
       if ($variant instanceof ShopifyProductVariant) {
-        return new RedirectResponse($variant->getProductUrl()->toString());
+        $response = CacheableRedirectResponse::create($variant->getProductUrl());
+        $cache = [
+          '#cache' => [
+            'contexts' => ['user.roles', 'url.query_args'],
+            'tags' => $variant->getCacheTags(),
+          ],
+        ];
+        $response->addCacheableDependency(CacheableMetadata::createFromRenderArray($cache));
+        return $response;
       }
       $messenger->addWarning(t("We're sorry, but that product is unavailable at this time."));
     }

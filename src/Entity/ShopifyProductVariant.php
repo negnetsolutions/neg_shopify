@@ -216,10 +216,15 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    */
   public function getProductUrl() {
     $product = $this->getProduct();
-    $url = $product->toUrl();
-    $url->setOption('query', [
-      'variant_id' => $this->variant_id->value,
-    ]);
+
+    $url = NULL;
+    \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$product, &$url) {
+      $url = $product->toUrl();
+      $url->setOption('query', [
+        'variant_id' => $this->variant_id->value,
+      ]);
+      $url = $url->toString();
+    });
 
     return $url;
   }
