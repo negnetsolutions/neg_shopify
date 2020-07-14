@@ -40,6 +40,14 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
       'template' => 'shopify-collection' ,
       'base hook' => 'taxonomy_term',
     ],
+    'shopify-xml-feed' => [
+      'template' => 'shopify-xml-feed' ,
+      'variables' => [
+        'products' => NULL,
+        'name' => NULL,
+        'link' => NULL,
+      ],
+    ],
     'shopify-collection-all' => [
       'template' => 'shopify-collection' ,
       'variables' => [
@@ -77,6 +85,10 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
     ],
     'shopify_product' => [
       'render element' => 'elements',
+    ],
+    'shopify_product__xml_listing' => [
+      'template' => 'shopify-product--xml-listing',
+      'base hook' => 'shopify_product',
     ],
     'shopify_product__store_listing' => [
       'template' => 'shopify-product--store-listing',

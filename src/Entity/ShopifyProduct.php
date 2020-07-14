@@ -527,6 +527,19 @@ EOL;
   }
 
   /**
+   * Gets first available variant.
+   */
+  public function getFirstAvailableVariant() {
+    foreach ($this->get('variants') as $variant) {
+      if ($variant->entity->isAvailable()) {
+        return $variant->entity;
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Loads a product that has a variant with the matching variant_id.
    *
    * @param string $variant_id
