@@ -381,6 +381,7 @@ function template_preprocess_shopify_product(&$variables) {
   if ($variables['shopify_product']->image->target_id) {
     $path = $variables['shopify_product']->image->entity->getFileUri();
     $variables['imagethumbnail'] = ImageStyle::load('rs_image_800w')->buildUrl($path);
+    $variables['imagethumbnail_large'] = ImageStyle::load('rs_image_2200w')->buildUrl($path);
   }
 
   $variables['vendor_url'] = Url::fromRoute('neg_shopify.vendors', [

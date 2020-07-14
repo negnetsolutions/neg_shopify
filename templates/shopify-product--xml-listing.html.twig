@@ -6,7 +6,7 @@
   <g:description><![CDATA[{{ shopify_product.body_html.0.value|striptags }}]]></g:description>
   <g:product_type>{{ shopify_product.product_type.0.value }}</g:product_type>
   <g:link><![CDATA[{{ url('entity.shopify_product.canonical', {'variant_id': variant.variant_id.0.value, 'shopify_product': shopify_product.id.0.value}) }}]]></g:link>
-  <g:image_link><![CDATA[{{ imagethumbnail }}]]></g:image_link>
+  <g:image_link><![CDATA[{{ imagethumbnail_large }}]]></g:image_link>
   <g:brand><![CDATA[{{ shopify_product.vendor.0.value }}]]></g:brand>
   <g:condition>new</g:condition>
   <g:availability>{% if variant.inventory_quantity.0.value > 0 %}in stock{% else %}out of stock{% endif %}</g:availability>
