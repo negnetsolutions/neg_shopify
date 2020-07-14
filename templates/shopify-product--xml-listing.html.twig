@@ -1,5 +1,5 @@
 {% set variant = shopify_product.firstAvailableVariant %}
-{% if variant %}
+{% if variant and shopify_product.body_html.0.value|striptags|render %}
 <item>
   <g:id>{{ variant.variant_id.0.value }}</g:id>
   <g:title><![CDATA[{{ shopify_product.title.0.value }}]]></g:title>
