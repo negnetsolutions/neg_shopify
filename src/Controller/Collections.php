@@ -47,7 +47,7 @@ class Collections extends ControllerBase {
     }
 
     $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, 100);
+    $products = $search->search(0, 700);
 
     $build = [
       '#theme' => 'shopify-xml-feed',
