@@ -76,6 +76,13 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['google_product_category'] = [
+      '#type' => 'textfield',
+      '#title' => t('Default Google Product Category'),
+      '#default_value' => $config->get('google_product_category'),
+      '#required' => TRUE,
+    ];
+
     $form['product_display'] = [
       '#type' => 'details',
       '#title' => t('Product Display'),
@@ -299,6 +306,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('products_frequency', $form_state->getValue('products_frequency'))
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
+      ->set('google_product_category', $form_state->getValue('google_product_category'))
       ->set('store_front_access_token', $form_state->getValue('store_front_access_token'))
       ->set('api_key', $form_state->getValue('api_key'))
       ->set('api_secret', $form_state->getValue('api_secret'))

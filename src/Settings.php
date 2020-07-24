@@ -46,6 +46,13 @@ class Settings {
   }
 
   /**
+   * Gets default google product category.
+   */
+  public static function defaultGoogleProductCategory() {
+    return self::config()->get('google_product_category');
+  }
+
+  /**
    * Gets shop info.
    */
   public static function shopInfo($key = '', $refresh = FALSE) {

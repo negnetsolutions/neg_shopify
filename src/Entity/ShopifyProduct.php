@@ -571,6 +571,13 @@ EOL;
   /**
    * {@inheritdoc}
    */
+  public function getGoogleProductCategory() {
+    return Settings::defaultGoogleProductCategory();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getOwner() {
     return $this->get('user_id')->entity;
   }
