@@ -531,7 +531,7 @@ EOL;
    */
   public function getFirstAvailableVariant() {
     foreach ($this->get('variants') as $variant) {
-      if ($variant->entity->isAvailable()) {
+      if ($variant->entity->isAvailable() || $this->get('is_preorder')->value == TRUE) {
         return $variant->entity;
       }
     }
