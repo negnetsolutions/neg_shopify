@@ -33,6 +33,11 @@ class Collections extends ControllerBase {
       'sort' => Settings::defaultSortOrder(),
     ];
 
+    $show = \Drupal::request()->query->get('show');
+    if ($show !== NULL) {
+      $params['show'] = $show;
+    }
+
     switch ($term->get('field_type')->value) {
       case 'SmartCollection':
         $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
@@ -48,7 +53,7 @@ class Collections extends ControllerBase {
     }
 
     $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, 700);
+    $products = $search->search(0, 1000);
 
     $build = [
       '#theme' => 'shopify-xml-feed',

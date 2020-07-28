@@ -1,5 +1,5 @@
 {% if shopify_product.body_html.0.value|striptags|render %}
-{% for variant in shopify_product.availableVariants %}
+{% for variant in shopify_product.variants %}
 <item>
   <g:id>{{ variant.variant_id.0.value }}</g:id>
   <g:title><![CDATA[{{ shopify_product.title.0.value }}]]></g:title>
@@ -9,7 +9,7 @@
   <g:image_link><![CDATA[{{ imagethumbnail_large }}]]></g:image_link>
   <g:brand><![CDATA[{{ shopify_product.vendor.0.value }}]]></g:brand>
   <g:condition>new</g:condition>
-  <g:availability>{% if shopify_product.is_preorder.value == 1 %}preorder{% elseif variant.inventory_quantity.0.value > 0 %}in stock{% else %}out of stock{% endif %}</g:availability>
+  <g:availability>{% if shopify_product.is_preorder.value == 1 %}preorder{% elseif variant.inventory_quantity.0.value > 0 %}in_stock{% else %}out_of_stock{% endif %}</g:availability>
   <g:inventory>{{ variant.inventory_quantity.0.value }}</g:inventory>
   <g:price> {{ variant.price.0.value }} USD </g:price>
   <g:mpn>{{ variant.sku.0.value }}</g:mpn>

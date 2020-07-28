@@ -54,16 +54,20 @@ class ShopifyProductSearch {
     // Require published product.
     $query->condition('published_at', time(), '<=');
 
-    // Add an or query for available or preorders.
-    $group = $query->orConditionGroup();
+    $show = isset($params['show']) ? $params['show'] : 'available';
 
-    // Make sure is available.
-    $group->condition('is_available', TRUE);
+    if ($show === 'available') {
+      // Add an or query for available or preorders.
+      $group = $query->orConditionGroup();
 
-    // Or is a preorder.
-    $group->condition('is_preorder', TRUE);
+      // Make sure is available.
+      $group->condition('is_available', TRUE);
 
-    $query->condition($group);
+      // Or is a preorder.
+      $group->condition('is_preorder', TRUE);
+
+      $query->condition($group);
+    }
 
     if (isset($params['vendor_slug'])) {
       $query->condition('vendor_slug', $params['vendor_slug']);
@@ -208,6 +212,8 @@ class ShopifyProductSearch {
           break;
       }
     }
+
+    $query->sort('is_available', 'ASC');
 
     foreach ($sort as $option) {
       $query->sort($option, $direction);
