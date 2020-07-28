@@ -1,5 +1,5 @@
-{% set variant = shopify_product.firstAvailableVariant %}
-{% if variant and shopify_product.body_html.0.value|striptags|render %}
+{% if shopify_product.body_html.0.value|striptags|render %}
+{% for variant in shopify_product.availableVariants %}
 <item>
   <g:id>{{ variant.variant_id.0.value }}</g:id>
   <g:title><![CDATA[{{ shopify_product.title.0.value }}]]></g:title>
@@ -15,6 +15,9 @@
   <g:mpn>{{ variant.sku.0.value }}</g:mpn>
   <g:shipping_weight>{{ variant.weight.0.value }} {{ variant.weight_unit.0.value }}</g:shipping_weight>
   <g:item_group_id>{{ shopify_product.product_id.0.value }}</g:item_group_id>
-  <g:google_product_category>{{ shopify_product.googleproductcategory }}</g:google_product_category>
+  {% for tag,value in shopify_product.googleproductcategorytags %}
+    <g:{{ tag }}>{% if value == null %}{{ variant.attribute(tag) }}{% else %}{{ value }}{% endif %}</g:{{ tag }}>
+  {% endfor %}
 </item>
+{% endfor %}
 {% endif %}

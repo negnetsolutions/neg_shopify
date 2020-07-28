@@ -292,6 +292,30 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Get's variant size.
+   */
+  public function getAttribute($name) {
+    $optionNames = array_map('strtolower', $this->getProduct()->getOptionNames());
+
+    $key = FALSE;
+    // Find the attribute.
+    foreach ($optionNames as $index => $optionName) {
+      if (strstr($optionName, $name) !== FALSE) {
+        $key = $index;
+        break;
+      }
+    }
+
+    if ($key !== FALSE) {
+      $optionVar = 'option' . ($key + 1);
+      $value = $this->$optionVar->value;
+      return $value;
+    }
+
+    return NULL;
+  }
+
+  /**
    * Get's selected options.
    */
   public function getSelectedOptions() {

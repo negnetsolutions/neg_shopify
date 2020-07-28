@@ -527,6 +527,20 @@ EOL;
   }
 
   /**
+   * Gets available variants.
+   */
+  public function getAvailableVariants() {
+    $variants = [];
+    foreach ($this->get('variants') as $variant) {
+      if ($variant->entity->isAvailable() || $this->get('is_preorder')->value == TRUE) {
+        $variants[] = $variant->entity;
+      }
+    }
+
+    return $variants;
+  }
+
+  /**
    * Gets first available variant.
    */
   public function getFirstAvailableVariant() {
@@ -571,8 +585,28 @@ EOL;
   /**
    * {@inheritdoc}
    */
-  public function getGoogleProductCategory() {
-    return Settings::defaultGoogleProductCategory();
+  public function getTagArray() {
+    $tags = [];
+    foreach ($this->get('tags')->getIterator() as $tag) {
+      $tags[] = strtolower($tag->entity->getName());
+    }
+
+    return $tags;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getGoogleProductCategoryTags() {
+    $variables = [
+      'shopify_product' => $this,
+      'google_product_category' => Settings::defaultGoogleProductCategory(),
+    ];
+
+    \Drupal::moduleHandler()->alter('neg_shopify_google_product_category', $variables);
+
+    unset($variables['shopify_product']);
+    return $variables;
   }
 
   /**
