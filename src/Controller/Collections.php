@@ -3,6 +3,7 @@
 namespace Drupal\neg_shopify\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
@@ -23,7 +24,7 @@ class Collections extends ControllerBase {
     $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['field_handle' => $handle]);
 
     if (count($term) === 0) {
-      throw new \NotFoundHttpException('Could not locate collection!');
+      throw new NotFoundHttpException('Could not locate collection!');
     }
 
     $term = reset($term);
