@@ -1,5 +1,5 @@
 {% if shopify_product.body_html.0.value|striptags|render %}
-{% for variant in shopify_product.variants %}
+{% for variant in shopify_product.getAvailableVariants %}
 <item>
   <g:id>{{ variant.variant_id.0.value }}</g:id>
   <g:title><![CDATA[{{ shopify_product.title.0.value }}]]></g:title>
