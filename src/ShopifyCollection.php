@@ -162,6 +162,8 @@ class ShopifyCollection {
     $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
     $variables['attributes']['data-type'] = 'collection';
 
+    $allowCustomSorting = TRUE;
+
     $params = [
       'sort' => Settings::defaultSortOrder(),
     ];
@@ -180,6 +182,11 @@ class ShopifyCollection {
         // CustomCollection.
         $params['collection_id'] = $term->id();
         $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
+
+        if (isset($params['collection_sort']['sort_order']) &&  $params['collection_sort']['sort_order'] === 'manual') {
+          $allowCustomSorting = FALSE;
+        }
+
         $tags = self::cacheTags($term->id(), FALSE);
         break;
     }
@@ -195,6 +202,7 @@ class ShopifyCollection {
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
       '#count' => $total,
       '#defaultSort' => Settings::defaultSortOrder(),
+      '#allowCustomSort' => $allowCustomSorting,
       '#cache' => [
         'contexts' => ['user.roles'],
         'tags' => $tags,

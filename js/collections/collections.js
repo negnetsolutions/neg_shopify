@@ -17,11 +17,13 @@ var Collections = function (el, opts) {
   this.firstPage = (_.itemsEl.children.length > 0) ? 1 : 0;
   this.sortEl = el.querySelector('#sort_order');
 
-  this.sortEl.addEventListener('change', function (e) {
-    const value = e.target.options[e.target.selectedIndex].value;
-    _.fetchOptions["sort"] = value;
-    _.fetch();
-  });
+  if (this.sortEl !== null) {
+    this.sortEl.addEventListener('change', function (e) {
+      const value = e.target.options[e.target.selectedIndex].value;
+      _.fetchOptions["sort"] = value;
+      _.fetch();
+    });
+  }
 
   this.fetch = function () {
     if (_.autopager !== false) {
