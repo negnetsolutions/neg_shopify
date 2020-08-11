@@ -33,9 +33,42 @@ class ShopifyCollection {
     if ($collection_id != 'all') {
       $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($collection_id);
 
+      $fieldRules = json_decode($term->get('field_rules')->value, TRUE);
+      $params['collection_sort'] = $fieldRules;
+
+      if (!isset($params['sort']) && isset($params['collection_sort']['sort_order'])) {
+        switch ($params['collection_sort']['sort_order']) {
+          case 'created-desc':
+            $params['sort'] = 'date-descending';
+            break;
+
+          case 'created':
+          case 'created-asc':
+            $params['sort'] = 'date-ascending';
+            break;
+
+          case 'price-desc':
+            $params['sort'] = 'price-descending';
+            break;
+
+          case 'price':
+          case 'price-asc':
+            $params['sort'] = 'price-ascending';
+            break;
+
+          case 'alpha-desc':
+            $params['sort'] = 'title-descending';
+            break;
+
+          case 'alpha':
+          case 'alpha-asc':
+            $params['sort'] = 'title-ascending';
+            break;
+        }
+      }
+
       switch ($term->get('field_type')->value) {
         case 'SmartCollection':
-          $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
           $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
           $tags = self::cacheTags($term->id());
           break;
@@ -43,7 +76,6 @@ class ShopifyCollection {
         default:
           // CustomCollection.
           $params['collection_id'] = $term->id();
-          $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
           $tags = self::cacheTags($term->id(), FALSE);
           break;
       }
@@ -110,13 +142,44 @@ class ShopifyCollection {
     $limit = (isset($variables['products_to_display'])) ? (int) $variables['products_to_display'] : 5;
     $term = $variables['term'];
 
-    $params = [
-      'sort' => Settings::defaultSortOrder(),
-    ];
+    $params = [];
+
+    $fieldRules = json_decode($term->get('field_rules')->value, TRUE);
+    $params['collection_sort'] = $fieldRules;
+
+    if (isset($params['collection_sort']['sort_order'])) {
+      switch ($params['collection_sort']['sort_order']) {
+        case 'created-desc':
+          $params['sort'] = 'date-descending';
+          break;
+
+        case 'created':
+        case 'created-asc':
+          $params['sort'] = 'date-ascending';
+          break;
+
+        case 'price-desc':
+          $params['sort'] = 'price-descending';
+          break;
+
+        case 'price':
+        case 'price-asc':
+          $params['sort'] = 'price-ascending';
+          break;
+
+        case 'alpha-desc':
+          $params['sort'] = 'title-descending';
+          break;
+
+        case 'alpha':
+        case 'alpha-asc':
+          $params['sort'] = 'title-ascending';
+          break;
+      }
+    }
 
     switch ($term->get('field_type')->value) {
       case 'SmartCollection':
-        $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
         $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
         $tags = self::cacheTags($term->id());
         break;
@@ -124,7 +187,6 @@ class ShopifyCollection {
       default:
         // CustomCollection.
         $params['collection_id'] = $term->id();
-        $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
         $tags = self::cacheTags($term->id(), FALSE);
         break;
     }
@@ -164,16 +226,55 @@ class ShopifyCollection {
 
     $allowCustomSorting = TRUE;
 
-    $params = [
-      'sort' => Settings::defaultSortOrder(),
-    ];
+    $params = [];
 
     $term = $variables['term'];
     $variables['attributes']['data-id'] = $term->id();
 
+    $fieldRules = json_decode($term->get('field_rules')->value, TRUE);
+    $params['collection_sort'] = $fieldRules;
+
+    if (isset($params['collection_sort']['sort_order'])) {
+      switch ($params['collection_sort']['sort_order']) {
+        case 'created-desc':
+          $params['sort'] = 'date-descending';
+          break;
+
+        case 'created':
+        case 'created-asc':
+          $params['sort'] = 'date-ascending';
+          break;
+
+        case 'price-desc':
+          $params['sort'] = 'price-descending';
+          break;
+
+        case 'price':
+        case 'price-asc':
+          $params['sort'] = 'price-ascending';
+          break;
+
+        case 'alpha-desc':
+          $params['sort'] = 'title-descending';
+          break;
+
+        case 'alpha':
+        case 'alpha-asc':
+          $params['sort'] = 'title-ascending';
+          break;
+      }
+    }
+
+    if (isset($params['sort'])) {
+      $variables['attributes']['data-sort'] = $params['sort'];
+    }
+
+    if (isset($params['collection_sort']['sort_order']) &&  $params['collection_sort']['sort_order'] === 'manual') {
+      $allowCustomSorting = FALSE;
+    }
+
     switch ($term->get('field_type')->value) {
       case 'SmartCollection':
-        $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
         $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
         $tags = self::cacheTags($term->id());
         break;
@@ -181,12 +282,6 @@ class ShopifyCollection {
       default:
         // CustomCollection.
         $params['collection_id'] = $term->id();
-        $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
-
-        if (isset($params['collection_sort']['sort_order']) &&  $params['collection_sort']['sort_order'] === 'manual') {
-          $allowCustomSorting = FALSE;
-        }
-
         $tags = self::cacheTags($term->id(), FALSE);
         break;
     }
@@ -201,7 +296,7 @@ class ShopifyCollection {
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
       '#count' => $total,
-      '#defaultSort' => Settings::defaultSortOrder(),
+      '#defaultSort' => $variables['attributes']['data-sort'],
       '#allowCustomSort' => $allowCustomSorting,
       '#cache' => [
         'contexts' => ['user.roles'],
@@ -274,6 +369,9 @@ class ShopifyCollection {
    */
   public static function update($collection, $sync_products = FALSE) {
     $term = self::load($collection['id']);
+
+    $saveTerms = TRUE;
+
     if ($term) {
       $term->name = $collection['title'];
       $term->description = [
@@ -284,10 +382,19 @@ class ShopifyCollection {
       $term->field_shopify_collection_pub = $date ? $date : 0;
       $term->field_handle = $collection['handle'];
 
+      $fieldRules = [
+        'sort_order' => $collection['sort_order'],
+      ];
+
       // Check for type of collection.
       if (isset($collection['rules'])) {
-        // Set for no product sync.
-        $sync_products = FALSE;
+
+        $saveTerms = FALSE;
+
+        // Set no product sync unless it's a manual sort.
+        if ($collection['sort_order'] !== 'manual') {
+          $sync_products = FALSE;
+        }
 
         // Set type.
         $term->field_type = [
@@ -300,9 +407,7 @@ class ShopifyCollection {
         ];
 
         // Set rules.
-        $term->field_rules = [
-          'value' => json_encode($collection['rules']),
-        ];
+        $fieldRules['rules'] = $collection['rules'];
       }
       else {
         // Set type.
@@ -316,23 +421,27 @@ class ShopifyCollection {
         ];
       }
 
+      // Set field_rules.
+      $term->field_rules = [
+        'value' => json_encode($fieldRules),
+      ];
     }
+
     if ($term->save() && isset($collection['image']['src'])) {
       // Save the image for this term.
       self::saveImage($term, $collection['image']['src']);
     }
+
     if ($sync_products) {
       // Sync product information for this collection.
-      $product_ids = self::syncProducts($collection);
+      $product_ids = self::syncProducts($collection, $saveTerms);
 
-      $sortParams = [
-        'sort_order' => $collection['sort_order'],
-        'items' => $product_ids,
-      ];
+      $fieldRules['items'] = $product_ids;
 
-      $term->set('field_rules', json_encode($sortParams));
+      $term->set('field_rules', json_encode($fieldRules));
       $term->save();
     }
+
     return $term;
   }
 
@@ -350,6 +459,8 @@ class ShopifyCollection {
   public static function create($collection, $sync_products = FALSE) {
     $date = strtotime($collection['published_at']);
 
+    $saveTerms = TRUE;
+
     $fields = [
       'vid' => ShopifyProduct::SHOPIFY_COLLECTIONS_VID,
       'name' => $collection['title'],
@@ -362,10 +473,19 @@ class ShopifyCollection {
       'field_shopify_collection_pub' => $date ? $date : 0,
     ];
 
+    $fieldRules = [
+      'sort_order' => $collection['sort_order'],
+    ];
+
     // Check for type of collection.
     if (isset($collection['rules'])) {
-      // Set for no product sync.
-      $sync_products = FALSE;
+
+      $saveTerms = FALSE;
+
+      // Set no product sync unless it's a manual sort.
+      if ($collection['sort_order'] !== 'manual') {
+        $sync_products = FALSE;
+      }
 
       // Set type.
       $fields['field_type'] = [
@@ -378,9 +498,7 @@ class ShopifyCollection {
       ];
 
       // Set rules.
-      $fields['field_rules'] = [
-        'value' => json_encode($collection['rules']),
-      ];
+      $fieldRules['rules'] = $collection['rules'];
     }
     else {
       // Set type.
@@ -394,14 +512,20 @@ class ShopifyCollection {
       ];
     }
 
+    // Set field_rules.
+    $fields['field_rules'] = [
+      'value' => json_encode($fieldRules),
+    ];
+
     $term = Term::create($fields);
     if ($term->save() && isset($collection['image']['src'])) {
       // Save the image for this term.
       self::saveImage($term, $collection['image']['src']);
     }
+
     if ($sync_products) {
       // Sync product information for this collection.
-      $product_ids = self::syncProducts($collection);
+      $product_ids = self::syncProducts($collection, $saveTerms);
 
       $sortParams = [
         'sort_order' => $collection['sort_order'],
@@ -411,6 +535,7 @@ class ShopifyCollection {
       $term->set('field_rules', json_encode($sortParams));
       $term->save();
     }
+
     return $term;
   }
 
@@ -439,7 +564,7 @@ class ShopifyCollection {
    * @param object $collection
    *   Shopify collection.
    */
-  protected static function syncProducts($collection) {
+  protected static function syncProducts($collection, $saveTerms = TRUE) {
     $term = self::load($collection['id']);
     $collects = ShopifyService::instance()->fetchCollectionProducts($collection['id']);
     $product_ids = [];
@@ -455,21 +580,25 @@ class ShopifyCollection {
       // Add item to product_ids.
       $product_ids[] = $c['id'];
 
-      foreach ($product->collections as $key => $item) {
-        if ($item->target_id && ($item->target_id == $term->id())) {
-          // Product already in collection.
-          // Check if this collection is active.
-          if ($term->field_shopify_collection_pub->value == 0) {
-            // Remove this collection from the product.
-            $product->collections->removeItem($key);
-            $product->save();
+      if ($saveTerms === TRUE) {
+        // Only save product term connections if $saveTerms is TRUE.
+        foreach ($product->collections as $key => $item) {
+          if ($item->target_id && ($item->target_id == $term->id())) {
+            // Product already in collection.
+            // Check if this collection is active.
+            if ($term->field_shopify_collection_pub->value == 0) {
+              // Remove this collection from the product.
+              $product->collections->removeItem($key);
+              $product->save();
+            }
+            continue 2;
           }
-          continue 2;
         }
-      }
-      if ($term->field_shopify_collection_pub->value != 0) {
-        $product->collections[] = $term;
-        $product->save();
+
+        if ($term->field_shopify_collection_pub->value != 0) {
+          $product->collections[] = $term;
+          $product->save();
+        }
       }
     }
 

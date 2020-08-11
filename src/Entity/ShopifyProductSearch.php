@@ -45,7 +45,7 @@ class ShopifyProductSearch {
     $nodes = ShopifyProduct::loadMultiple($ids);
 
     // See if there is a preset sort_order.
-    if (isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual') {
+    if (isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
       $this->sortByProductId($nodes, $this->params['collection_sort']['items']);
     }
 
@@ -93,14 +93,14 @@ class ShopifyProductSearch {
     }
 
     // Smart Collection.
-    if (isset($params['collection_rules'])) {
+    if (isset($params['collection_sort']) && isset($params['collection_sort']['rules'])) {
       // Set group type.
       $rules_group = $query->andConditionGroup();
       if ($params['collection_disjunctive']) {
         $rules_group = $query->orConditionGroup();
       }
 
-      foreach ($params['collection_rules'] as $rule) {
+      foreach ($params['collection_sort']['rules'] as $rule) {
         $field = FALSE;
         $relation = '=';
 
