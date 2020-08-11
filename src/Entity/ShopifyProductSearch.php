@@ -3,12 +3,16 @@
 namespace Drupal\neg_shopify\Entity;
 
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\SortArrayByProductId;
 
 /**
  * Class ShopifyProductSearch.
  */
 class ShopifyProductSearch {
 
+  /**
+   * {@inheritdoc}
+   */
   protected $params;
 
   /**
@@ -37,7 +41,22 @@ class ShopifyProductSearch {
     }
 
     $ids = $query->execute();
-    return ShopifyProduct::loadMultiple($ids);
+
+    $nodes = ShopifyProduct::loadMultiple($ids);
+
+    // See if there is a preset sort_order.
+    if (isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual') {
+      $this->sortByProductId($nodes, $this->params['collection_sort']['items']);
+    }
+
+    return $nodes;
+  }
+
+  /**
+   * Sorts ids by their manual sort order.
+   */
+  protected function sortByProductId(array &$nodes, array $sortProductIds) {
+    usort($nodes, [new SortArrayByProductId($sortProductIds), 'call']);
   }
 
   /**

@@ -43,6 +43,7 @@ class ShopifyCollection {
         default:
           // CustomCollection.
           $params['collection_id'] = $term->id();
+          $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
           $tags = self::cacheTags($term->id(), FALSE);
           break;
       }
@@ -111,10 +112,22 @@ class ShopifyCollection {
 
     $params = [
       'sort' => Settings::defaultSortOrder(),
-      'collection_id' => $term->id(),
     ];
 
-    $tags = self::cacheTags($term->id());
+    switch ($term->get('field_type')->value) {
+      case 'SmartCollection':
+        $params['collection_rules'] = json_decode($term->get('field_rules')->value, TRUE);
+        $params['collection_disjunctive'] = (bool) $term->get('field_disjunctive')->value;
+        $tags = self::cacheTags($term->id());
+        break;
+
+      default:
+        // CustomCollection.
+        $params['collection_id'] = $term->id();
+        $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
+        $tags = self::cacheTags($term->id(), FALSE);
+        break;
+    }
 
     $search = new ShopifyProductSearch($params);
     $products = $search->search(0, $limit);
@@ -166,6 +179,7 @@ class ShopifyCollection {
       default:
         // CustomCollection.
         $params['collection_id'] = $term->id();
+        $params['collection_sort'] = json_decode($term->get('field_rules')->value, TRUE);
         $tags = self::cacheTags($term->id(), FALSE);
         break;
     }
@@ -301,7 +315,15 @@ class ShopifyCollection {
     }
     if ($sync_products) {
       // Sync product information for this collection.
-      self::syncProducts($collection);
+      $product_ids = self::syncProducts($collection);
+
+      $sortParams = [
+        'sort_order' => $collection['sort_order'],
+        'items' => $product_ids,
+      ];
+
+      $term->set('field_rules', json_encode($sortParams));
+      $term->save();
     }
     return $term;
   }
@@ -371,7 +393,15 @@ class ShopifyCollection {
     }
     if ($sync_products) {
       // Sync product information for this collection.
-      self::syncProducts($collection);
+      $product_ids = self::syncProducts($collection);
+
+      $sortParams = [
+        'sort_order' => $collection['sort_order'],
+        'items' => $products_ids,
+      ];
+
+      $term->set('field_rules', json_encode($sortParams));
+      $term->save();
     }
     return $term;
   }
@@ -404,6 +434,8 @@ class ShopifyCollection {
   protected static function syncProducts($collection) {
     $term = self::load($collection['id']);
     $collects = ShopifyService::instance()->fetchCollectionProducts($collection['id']);
+    $product_ids = [];
+
     foreach ($collects as $c) {
 
       // Update this product information.
@@ -411,6 +443,10 @@ class ShopifyCollection {
       if (!$product) {
         continue;
       }
+
+      // Add item to product_ids.
+      $product_ids[] = $c['id'];
+
       foreach ($product->collections as $key => $item) {
         if ($item->target_id && ($item->target_id == $term->id())) {
           // Product already in collection.
@@ -428,6 +464,8 @@ class ShopifyCollection {
         $product->save();
       }
     }
+
+    return $product_ids;
   }
 
   /**
