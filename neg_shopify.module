@@ -77,7 +77,7 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'products' => NULL,
         'count' => NULL,
         'defaultSort' => NULL,
-        'allowCustomSort' => TRUE,
+        'allowManualSort' => FALSE,
       ],
     ],
     'neg_shopify_cart' => [

@@ -45,7 +45,7 @@ class ShopifyProductSearch {
     $nodes = ShopifyProduct::loadMultiple($ids);
 
     // See if there is a preset sort_order.
-    if (isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
+    if ($this->params['sort'] === 'manual-ascending' && isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
       $this->sortByProductId($nodes, $this->params['collection_sort']['items']);
     }
 

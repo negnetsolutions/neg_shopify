@@ -38,6 +38,10 @@ class ShopifyCollection {
 
       if (!isset($params['sort']) && isset($params['collection_sort']['sort_order'])) {
         switch ($params['collection_sort']['sort_order']) {
+          case 'manual':
+            $params['sort'] = 'manual-ascending';
+            break;
+
           case 'created-desc':
             $params['sort'] = 'date-descending';
             break;
@@ -149,6 +153,10 @@ class ShopifyCollection {
 
     if (isset($params['collection_sort']['sort_order'])) {
       switch ($params['collection_sort']['sort_order']) {
+        case 'manual':
+          $params['sort'] = 'manual-ascending';
+          break;
+
         case 'created-desc':
           $params['sort'] = 'date-descending';
           break;
@@ -224,7 +232,7 @@ class ShopifyCollection {
     $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
     $variables['attributes']['data-type'] = 'collection';
 
-    $allowCustomSorting = TRUE;
+    $allowManualSorting = FALSE;
 
     $params = [];
 
@@ -236,6 +244,10 @@ class ShopifyCollection {
 
     if (isset($params['collection_sort']['sort_order'])) {
       switch ($params['collection_sort']['sort_order']) {
+        case 'manual':
+          $params['sort'] = 'manual-ascending';
+          break;
+
         case 'created-desc':
           $params['sort'] = 'date-descending';
           break;
@@ -270,7 +282,7 @@ class ShopifyCollection {
     }
 
     if (isset($params['collection_sort']['sort_order']) &&  $params['collection_sort']['sort_order'] === 'manual') {
-      $allowCustomSorting = FALSE;
+      $allowManualSorting = TRUE;
     }
 
     switch ($term->get('field_type')->value) {
@@ -297,7 +309,7 @@ class ShopifyCollection {
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
       '#count' => $total,
       '#defaultSort' => $variables['attributes']['data-sort'],
-      '#allowCustomSort' => $allowCustomSorting,
+      '#allowManualSort' => $allowManualSorting,
       '#cache' => [
         'contexts' => ['user.roles'],
         'tags' => $tags,
