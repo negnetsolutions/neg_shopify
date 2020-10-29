@@ -40,10 +40,12 @@ trait ShopifyEntityTrait {
   protected static function retrieveFile($url, $destination) {
 
     $parsed_url = parse_url($url);
-    if (is_dir(drupal_realpath($destination))) {
+    $fs = \Drupal::service('file_system');
+
+    if (is_dir($fs->realpath($destination))) {
 
       // Inject shopify version into filename.
-      $basename = drupal_basename($parsed_url['path']);
+      $basename = $fs->basename($parsed_url['path']);
       $filename_parts = pathinfo($basename);
       $version = (isset($parsed_url['query'])) ? hash('crc32', $parsed_url['query']) : '00000000';
       $filename = $filename_parts['filename'] . '_' . $version . '.' . $filename_parts['extension'];
@@ -56,7 +58,7 @@ trait ShopifyEntityTrait {
     }
 
     // Check to see if file is already downloaded.
-    $existing_files = entity_load_multiple_by_properties('file', [
+    $existing_files = \Drupal::entityTypeManager()->getStorage('file')->loadByProperties([
       'uri' => $path,
     ]);
 
