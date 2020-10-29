@@ -2,7 +2,7 @@
   <div class="count">{{ count }} products</div>
   <div class="sort_order">
     <label for="SortBy" class="label--hidden">Sort By</label>
-    <select name="sort_order" id="sort_order" class="">
+    <select aria-label="Change Sort Order" name="sort_order" id="sort_order" class="">
       {% if allowManualSort %}
       <option value="manual-ascending"{% if defaultSort == 'manual-ascending' %} selected{% endif %}>Custom</option>
       {% endif %}

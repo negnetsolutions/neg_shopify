@@ -125,7 +125,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       if ($file && $file instanceof FileInterface) {
         $values['image'] = [
           'target_id' => $file->id(),
-          'alt' => $values['image']['alt'],
+          'alt' => (strlen($values['image']['alt']) > 0) ? $values['image']['alt'] : $values['title'],
         ];
       }
     }
@@ -154,7 +154,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
           if ($image_file_interface && $image_file_interface instanceof FileInterface) {
             $values['extra_images'][] = [
               'target_id' => $image_file_interface->id(),
-              'alt' => $variant_image['alt'],
+              'alt' => (strlen($variant_image['alt']) > 0) ? $variant_image['alt'] : $values['title'],
             ];
           }
         }
