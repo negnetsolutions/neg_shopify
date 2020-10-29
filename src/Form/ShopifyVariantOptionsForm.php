@@ -88,7 +88,7 @@ class ShopifyVariantOptionsForm extends FormBase {
         '#options' => $options,
         '#options_attributes' => $optionsAttributes,
         '#default_value' => ($variant_id) ? $variant_id : array_keys($options)[0],
-        '#attributes' => ['onchange' => 'javascript:this.form.update_variant.click();'],
+        '#attributes' => ['aria-label' => 'Select style', 'onchange' => 'javascript:this.form.update_variant.click();'],
       ];
 
       $form['update_variant'] = [
