@@ -175,7 +175,8 @@ const shopping_cart = new function (){
         variantId: variant_id,
         qty: qty,
       }, function (data) {
-        btn.value = 'Added to Cart!';
+        btn.value = 'Add to Cart';
+        btn.disabled = false;
       }
     );
 
