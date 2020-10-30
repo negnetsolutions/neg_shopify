@@ -57,7 +57,7 @@ const shopping_cart = new function (){
       if (_.xobj.readyState === 4 && _.xobj.status === 200) {
         var data = JSON.parse(_.xobj.responseText);
         // Process data.
-        _.handleData(data);
+        _.handleData(data, callback);
 
         if (typeof data.cart !== 'undefined') {
           // Clear any redirects from the cache.
@@ -72,8 +72,12 @@ const shopping_cart = new function (){
     _.xobj.send(null);
   };
 
-  this.handleData = function handleData(data) {
+  this.handleData = function handleData(data, callback) {
     _.cart = data.cart;
+
+    if (typeof callback !== 'undefined') {
+      callback.call(_, data);
+    }
 
     if (typeof data.redirectToCart !== 'undefined') {
       window.location = drupalSettings.cart.cartPage;
@@ -96,10 +100,6 @@ const shopping_cart = new function (){
         _.resetCart();
         return false;
       }
-    }
-
-    if (typeof callback !== 'undefined') {
-      callback.call(_, data);
     }
 
     if (typeof data.cart.items !== 'undefined') {
@@ -175,6 +175,7 @@ const shopping_cart = new function (){
         variantId: variant_id,
         qty: qty,
       }, function (data) {
+        console.debug("here");
         btn.value = 'Add to Cart';
         btn.disabled = false;
       }
