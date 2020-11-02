@@ -84,6 +84,10 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
       'template' => 'cart',
       'variables' => [],
     ],
+    'neg_shopify_minicart' => [
+      'template' => 'mini-cart',
+      'variables' => [],
+    ],
     'shopify_product' => [
       'render element' => 'elements',
     ],

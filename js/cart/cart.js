@@ -79,8 +79,21 @@ const shopping_cart = new function (){
       callback.call(_, data);
     }
 
+    if (typeof data.cart !== 'undefined' && typeof data.cart.items !== 'undefined') {
+      // Notify observers.
+      for (let i = 0; i < _.cartObservers.length; i++) {
+        _.cartObservers[i](data.cart);
+      }
+    }
+
+
     if (typeof data.redirectToCart !== 'undefined') {
-      window.location = drupalSettings.cart.cartPage;
+      if (typeof cartBlock !== 'undefined') {
+        cartBlock.open();
+      }
+      else {
+        window.location = drupalSettings.cart.cartPage;
+      }
       return false;
     }
 
@@ -102,20 +115,28 @@ const shopping_cart = new function (){
       }
     }
 
-    if (typeof data.cart.items !== 'undefined') {
-      // Notify observers.
-      for (let i = 0; i < _.cartObservers.length; i++) {
-        _.cartObservers[i](data.cart);
+    return true;
+  };
+
+  this.checkDataConsitency = function checkDataConsitency(d) {
+    try {
+      const data = JSON.parse(d);
+      if (typeof data.status === 'undefined' || data.status != 'OK') {
+        return false;
       }
     }
-
+    catch (e) {
+      console.debug("json parse error");
+      return false;
+    }
     return true;
+
   };
 
   this.loadCart = function loadCart() {
     const data = _.getCache('cart');
 
-    if (data !== null) {
+    if (data !== null && _.checkDataConsitency(data)) {
       setTimeout(function() {
         _.log('Using Cached Cart Data');
         _.handleData(JSON.parse(data));
@@ -175,7 +196,6 @@ const shopping_cart = new function (){
         variantId: variant_id,
         qty: qty,
       }, function (data) {
-        console.debug("here");
         btn.value = 'Add to Cart';
         btn.disabled = false;
       }

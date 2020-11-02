@@ -1,11 +1,20 @@
-cart_page:
+cart_controller:
   version: 0.01
   js:
-    js/cart/cart_page.js: {}
+    js/cart/cart_controller.js: {}
   dependencies:
     - neg_shopify/shopify.js
     - negnet_utility/closest
     - negnet_utility/createElementFromHTML
+cart_block:
+  version: 0.01
+  css:
+    theme:
+      css/shopify.cart.block.css: {}
+  js:
+    js/cart/cart_block.js: {}
+  dependencies:
+    - neg_shopify/cart_controller
 shopify.js:
   version: 1.x
   js:

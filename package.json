@@ -1,0 +1,26 @@
+{
+  "name": "pohlenz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "*",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-clean-css": "*",
+    "gulp-sass": "*",
+    "gulp-shell": "*",
+    "gulp-util": "*"
+  },
+  "dependencies": {},
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "maintained node versions",
+    "not dead"
+  ]
+}

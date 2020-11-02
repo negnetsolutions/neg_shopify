@@ -1,6 +1,6 @@
-const cartPage = new function () {
+const cartController = function (el) {
   var _ = this;
-  this.el = document.querySelector('#cart');
+  this.el = el;
 
   if (this.el === null) {
     return;
@@ -47,17 +47,39 @@ const cartPage = new function () {
   };
 
   this.renderCart = function renderCart(cart) {
-
     if (cart.length === 0) {
       return;
     }
 
+    let fragment = document.createDocumentFragment();
+    const itemsWrapper = _.cartWrapper.querySelector('.items');
+    const subtotalWrapper = _.cartWrapper.querySelector('.subtotal');
+    const checkoutWrapper = _.cartWrapper.querySelector('.checkout-form');
+    const formWrapper = _.cartWrapper.querySelector('form');
+    const emptyWrapper = formWrapper.querySelector('.cart-item-list.text');
+
     if (cart.items.length === 0) {
-      _.cartWrapper.innerHTML = "<div class='cart-item-list text'><h2>Your cart is currently empty!</h2><p>No worries though, plenty to choose from right over <a href='" + drupalSettings.cart.emptyRedirect + "'>here</a>.</p></div";
+
+      const el = createElementFromHTML("<div class='cart-item-list text'><h2>Your cart is currently empty!</h2><p>No worries though, plenty to choose from right over <a href='" + drupalSettings.cart.emptyRedirect + "'>here</a>.</p></div");
+      fragment.appendChild(el);
+
+      subtotalWrapper.style.display = 'none';
+      checkoutWrapper.style.display = 'none';
+      itemsWrapper.style.display = 'none';
+      if (!emptyWrapper) {
+        formWrapper.appendChild(fragment);
+      }
     }
     else {
       let subtotal = _.cartWrapper.querySelector('.subtotal > .value');
       let itemList = _.cartWrapper.querySelector('.item-list');
+
+      subtotalWrapper.removeAttribute("style");
+      checkoutWrapper.removeAttribute("style");
+      itemsWrapper.removeAttribute("style");
+      if (emptyWrapper) {
+        emptyWrapper.remove();
+      }
 
       _.checkoutBtn.addEventListener('click', _.checkout);
       itemList.addEventListener('change', _.updateItemCount);
@@ -72,7 +94,6 @@ const cartPage = new function () {
       const price = formatter.format(cart.total / 100);
 
       // Build the cart items view.
-      let fragment = document.createDocumentFragment();
       for (let i = 0; i < cart.items.length; i++) {
         let el = createElementFromHTML(cart.items[i].view);
         let number = el.querySelector('.item-qty input');
@@ -90,7 +111,19 @@ const cartPage = new function () {
 
   };
 
-  shopping_cart.registerObserver(this.renderCart);
-  this.renderCart(shopping_cart.cart);
+  this.registerForUpdates = function registerForUpdates() {
+    shopping_cart.registerObserver(this.renderCart);
+    this.renderCart(shopping_cart.cart);
+  };
 
-}();
+};
+
+(function processCarts() {
+  const carts = document.querySelectorAll('.shopify_cart');
+  for (let i = 0; i < carts.length; i++) {
+    carts[i].cartController = new cartController(carts[i]);
+    if (carts[i].classList.contains('cart-page')) {
+      carts[i].cartController.registerForUpdates();
+    }
+  }
+}());
