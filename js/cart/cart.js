@@ -28,6 +28,10 @@ const shopping_cart = new function (){
 
   this.registerObserver = function registerObserver(callback) {
     _.cartObservers.push(callback);
+
+    if (typeof _.cart !== 'undefined' && typeof _.cart.items !== 'undefined') {
+      callback(_.cart);
+    }
   }
 
   this.log = function log(message) {
