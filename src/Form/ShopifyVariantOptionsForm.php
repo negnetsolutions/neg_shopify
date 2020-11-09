@@ -42,6 +42,11 @@ class ShopifyVariantOptionsForm extends FormBase {
     $optionsAttributes = [];
     $variants = $product->get('variants');
 
+    if ($variant_id === FALSE) {
+      $variant_id = $this->getFirstVariantId($variants);
+      $_GET['variant_id'] = $variant_id;
+    }
+
     foreach ($variants as $i => $variant) {
 
       $attributes = [];
@@ -114,6 +119,37 @@ class ShopifyVariantOptionsForm extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->goToVariant($form_state->getValue('options'), $form_state);
+  }
+
+  /**
+   * Gets first variant id.
+   */
+  private function getFirstVariantId(object $variants) {
+    $optionsAttributes = [];
+    foreach ($variants as $i => $variant) {
+      $attributes = [];
+
+      if (!$variant->entity->isAvailable()) {
+
+        $attributes['disabled'] = 'disabled';
+      }
+
+      $key = $variant->entity->get('variant_id')->value;
+      $optionsAttributes[$key] = $attributes;
+    }
+
+    $keys = array_keys($optionsAttributes);
+    if (isset($optionsAttributes[$keys[0]]['disabled'])) {
+      // The default attribute is disabled. We need to try to
+      // redirect to an available product.
+      foreach ($optionsAttributes as $key => $attributes) {
+        if (!isset($attributes['disabled'])) {
+          return $key;
+        }
+      }
+    }
+
+    return FALSE;
   }
 
   /**

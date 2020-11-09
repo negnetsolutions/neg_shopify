@@ -31,7 +31,8 @@ class ShopifyAddToCartForm extends FormBase {
 
     $form_state->set('product', $product);
 
-    $variant_id = \Drupal::request()->get('variant_id', FALSE);
+    $variant_id = (isset($_GET['variant_id']) && is_numeric($_GET['variant_id'])) ? $_GET['variant_id'] : FALSE;
+
     if ($variant_id === FALSE) {
       // No variant set yet, setup the default first variant.
       $entity_id = $product->variants->get(0)->getValue()['target_id'];
