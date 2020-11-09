@@ -114,6 +114,8 @@ class ShopifyCollection {
     $variables['#attributes']['data-id'] = 'all';
     $variables['#attributes']['data-type'] = 'collection';
 
+    self::attachMetatag($variables, 'description', 'Shop all products.');
+
     $params = [
       'sort' => Settings::defaultSortOrder(),
     ];
@@ -225,6 +227,7 @@ class ShopifyCollection {
   public static function render(&$variables) {
 
     $variables['#attached']['library'][] = 'neg_shopify/collections';
+
     $variables['attributes']['class'][] = 'shopify_collection';
     $variables['attributes']['class'][] = 'autopager';
     $variables['attributes']['data-perpage'] = Settings::productsPerPage();
@@ -237,6 +240,8 @@ class ShopifyCollection {
     $params = [];
 
     $term = $variables['term'];
+    self::attachMetatag($variables, 'description', 'Shop ' . $term->getName());
+
     $variables['attributes']['data-id'] = $term->id();
 
     $fieldRules = json_decode($term->get('field_rules')->value, TRUE);
@@ -315,6 +320,21 @@ class ShopifyCollection {
         'tags' => $tags,
       ],
     ];
+  }
+
+  /**
+   * Creates a metatag object.
+   */
+  protected static function attachMetatag(&$variables, $name, $content) {
+    $tag = [
+      '#type' => 'html_tag',
+      '#tag' => 'meta',
+      '#attributes' => [
+        'name' => $name,
+        'content' => $content,
+      ],
+    ];
+    $variables['#attached']['html_head'][] = [$tag, $name];
   }
 
   /**
