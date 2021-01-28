@@ -21,7 +21,7 @@ class CartController extends ControllerBase {
    * Gets the cart object.
    */
   protected function getCart() {
-    $store = \Drupal::service('user.private_tempstore')->get('neg_shopify');
+    $store = \Drupal::service('tempstore.private')->get('neg_shopify');
     $cart = $store->get('cart');
 
     if ($cart === NULL || !isset($cart['items']) || !is_array($cart['items'])) {
@@ -37,7 +37,7 @@ class CartController extends ControllerBase {
   protected function saveCart($cart) {
     sort($cart['items']);
     $cart = $this->calculateCartTotals($cart);
-    $store = \Drupal::service('user.private_tempstore')->get('neg_shopify');
+    $store = \Drupal::service('tempstore.private')->get('neg_shopify');
     $cart = $store->set('cart', $cart);
     Cache::invalidateTags(['shopping_cart']);
     return TRUE;
