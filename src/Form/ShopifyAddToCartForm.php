@@ -106,10 +106,8 @@ class ShopifyAddToCartForm extends FormBase {
 
           // This variant is out of stock.
           $form['submit'] = [
-            '#type' => 'submit',
-            '#disabled' => TRUE,
-            '#value' => t(($config->get('presale_text') !== NULL) ? $config->get('presale_text') : 'Available for preorder'),
-            '#name' => 'add_to_cart',
+            '#type' => 'markup',
+            '#markup' => t(($config->get('presale_text') !== NULL) ? $config->get('presale_text') : '<p>Available for preorder</p>'),
             '#cache' => [
               'tags' => ['config:neg_shopify.settings'],
             ]

@@ -97,8 +97,9 @@ class SettingsForm extends ConfigFormBase {
     $form['product_display']['presale_text'] = [
       '#type' => 'textfield',
       '#title' => t('Presale Text'),
-      '#default_value' => ($config->get('presale_text') !== NULL) ? $config->get('presale_text') : 'Available for preorder',
-      '#description' => t('Enter text to display for presale items.'),
+      '#default_value' => ($config->get('presale_text') !== NULL) ? $config->get('presale_text') : '<p>Available for preorder.</p>',
+      '#maxlength' => '255',
+      '#description' => t('Enter html to display for presale items.'),
       '#required' => TRUE,
     ];
 
