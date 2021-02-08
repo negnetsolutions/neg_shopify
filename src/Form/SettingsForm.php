@@ -94,6 +94,13 @@ class SettingsForm extends ConfigFormBase {
       '#description' => t('Enter the number of products to display on each page.'),
       '#required' => TRUE,
     ];
+    $form['product_display']['presale_text'] = [
+      '#type' => 'textfield',
+      '#title' => t('Presale Text'),
+      '#default_value' => ($config->get('presale_text') !== NULL) ? $config->get('presale_text') : 'Available for preorder',
+      '#description' => t('Enter text to display for presale items.'),
+      '#required' => TRUE,
+    ];
 
     if ($config->get('api_key') !== NULL) {
       $form['webhooks'] = [
@@ -306,6 +313,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('products_frequency', $form_state->getValue('products_frequency'))
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
+      ->set('presale_text', $form_state->getValue('presale_text'))
       ->set('google_product_category', $form_state->getValue('google_product_category'))
       ->set('store_front_access_token', $form_state->getValue('store_front_access_token'))
       ->set('api_key', $form_state->getValue('api_key'))

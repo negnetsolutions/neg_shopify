@@ -101,12 +101,18 @@ class ShopifyAddToCartForm extends FormBase {
           ];
         }
         elseif ($product->get('is_preorder')->value == 1) {
+
+          $config = Settings::config();
+
           // This variant is out of stock.
           $form['submit'] = [
             '#type' => 'submit',
             '#disabled' => TRUE,
-            '#value' => t('Available for Preorder'),
+            '#value' => t(($config->get('presale_text') !== NULL) ? $config->get('presale_text') : 'Available for preorder'),
             '#name' => 'add_to_cart',
+            '#cache' => [
+              'tags' => ['config:neg_shopify.settings'],
+            ]
           ];
         }
         else {
