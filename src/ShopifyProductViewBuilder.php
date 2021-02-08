@@ -25,7 +25,9 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
     }
     else {
-      $active_variant = ShopifyProductVariant::load($entity->variants->get(0)->target_id);
+      $variants = $entity->variants;
+      $variant_id = $this->getFirstVariantId($variants);
+      $active_variant = ShopifyProductVariant::load($variant_id);
     }
 
     if ($display->getComponent('related_items')) {
@@ -90,4 +92,34 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
     }
   }
 
+  /**
+   * Gets first variant id.
+   */
+  private function getFirstVariantId(object $variants) {
+    $optionsAttributes = [];
+    foreach ($variants as $i => $variant) {
+      $attributes = [];
+
+      if (!$variant->entity->isAvailable()) {
+
+        $attributes['disabled'] = 'disabled';
+      }
+
+      $key = $variant->entity->id();
+      $optionsAttributes[$key] = $attributes;
+    }
+
+    $keys = array_keys($optionsAttributes);
+    if (isset($optionsAttributes[$keys[0]]['disabled'])) {
+      // The default attribute is disabled. We need to try to
+      // redirect to an available product.
+      foreach ($optionsAttributes as $key => $attributes) {
+        if (!isset($attributes['disabled'])) {
+          return $key;
+        }
+      }
+    }
+
+    return FALSE;
+  }
 }
