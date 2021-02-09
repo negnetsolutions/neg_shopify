@@ -109,7 +109,7 @@ class ShopifyAddToCartForm extends FormBase {
             '#type' => 'markup',
             '#markup' => t(($config->get('presale_text') !== NULL) ? $config->get('presale_text') : '<p>Available for preorder</p>'),
             '#cache' => [
-              'tags' => ['config:neg_shopify.settings'],
+              'tags' => ['config:neg_shopify.settings', 'shopify_product:' . $product->id()],
             ]
           ];
         }
