@@ -9,11 +9,13 @@ use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\neg_shopify\UserManagement;
 
 /**
  * Implements hook_theme().
@@ -107,6 +109,32 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
       'base hook' => 'shopify_product_variant',
     ],
   ];
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  switch ($form_id) {
+    case 'user_login_form' :
+      $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+      if ($allowShopifyLogins === TRUE) {
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyLoginForm');
+      }
+
+      $form['#cache']['tags'][] = 'config:neg_shopify.settings';
+    break;
+
+    case 'user_register_form' :
+      $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+      if ($allowShopifyLogins === TRUE) {
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyRegisterForm');
+      }
+      $form['#cache']['tags'][] = 'config:neg_shopify.settings';
+    break;
+  }
 }
 
 /**
@@ -528,5 +556,14 @@ function neg_shopify_cron() {
   // Check if we need to sync.
   if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
     Sync::syncAllCollections();
+  }
+}
+
+/**
+ * Watches for user deletions and cleans up state.
+ */
+function neg_shopify_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'user') {
+    UserManagement::clearShopifyUserState($entity);
   }
 }

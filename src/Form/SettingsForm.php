@@ -83,6 +83,17 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['user_management'] = [
+      '#type' => 'details',
+      '#title' => t('User Management'),
+    ];
+
+    $form['user_management']['allow_shopify_users'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Allow users to login with their Shopify Accounts.'),
+      '#default_value' => $config->get('allow_shopify_users'),
+    ];
+
     $form['product_display'] = [
       '#type' => 'details',
       '#title' => t('Product Display'),
@@ -314,6 +325,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('products_frequency', $form_state->getValue('products_frequency'))
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
+      ->set('allow_shopify_users', $form_state->getValue('allow_shopify_users'))
       ->set('presale_text', $form_state->getValue('presale_text'))
       ->set('google_product_category', $form_state->getValue('google_product_category'))
       ->set('store_front_access_token', $form_state->getValue('store_front_access_token'))

@@ -1,0 +1,9 @@
+uuid: f413226d-6c8c-4e4e-b2d5-3284b182638d
+langcode: en
+status: true
+dependencies: {  }
+id: shopify_customer
+label: 'Shopify Customer'
+weight: 2
+is_admin: null
+permissions: {  }
