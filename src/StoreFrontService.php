@@ -7,8 +7,6 @@ namespace Drupal\neg_shopify;
  */
 class StoreFrontService {
 
-  const API_VERSION = '2020-04';
-
   /**
    * Requests data from storefront.
    */
@@ -23,7 +21,7 @@ class StoreFrontService {
 
     $config = Settings::config();
 
-    $path = 'https://' . $config->get('shop_url') . '.myshopify.com/api/' . self::API_VERSION . '/graphql.json';
+    $path = 'https://' . $config->get('shop_url') . '.myshopify.com/api/' . Settings::API_VERSION . '/graphql.json';
 
     $request = $client->post($path, ['headers' => $headers, 'body' => $graphQL]);
 

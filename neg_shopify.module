@@ -16,6 +16,7 @@ use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyCustomer;
 
 /**
  * Implements hook_theme().
@@ -50,6 +51,31 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'link' => NULL,
       ],
     ],
+    'shopify-vendor' => [
+      'template' => 'shopify-vendor' ,
+      'variables' => [
+        'attributes' => NULL,
+        'name' => NULL,
+        'image' => NULL,
+        'slug' => NULL,
+      ],
+    ],
+    'shopify_vendors_page' => [
+      'template' => 'shopify-vendors-page' ,
+      'variables' => [
+        'attributes' => NULL,
+        'name' => 'Vendors',
+        'vendors' => NULL,
+      ],
+    ],
+    'shopify-vendor-page' => [
+      'template' => 'shopify-vendor-page' ,
+      'variables' => [
+        'attributes' => NULL,
+        'name' => NULL,
+        'products' => NULL,
+      ],
+    ],
     'shopify-collection-all' => [
       'template' => 'shopify-collection' ,
       'variables' => [
@@ -80,6 +106,7 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'count' => NULL,
         'defaultSort' => NULL,
         'allowManualSort' => FALSE,
+        'controls' => TRUE,
       ],
     ],
     'neg_shopify_cart' => [
@@ -89,6 +116,19 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
     'neg_shopify_minicart' => [
       'template' => 'mini-cart',
       'variables' => [],
+    ],
+    'neg_shopify_order_receipt' => [
+      'template' => 'order-receipt',
+      'variables' => [
+        'order' => NULL,
+      ],
+    ],
+    'neg_shopify_user_order_history' => [
+      'template' => 'user-order-history',
+      'variables' => [
+        'email' => NULL,
+        'perPage' => 5,
+      ],
     ],
     'shopify_product' => [
       'render element' => 'elements',
@@ -557,6 +597,17 @@ function neg_shopify_cron() {
   if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
     Sync::syncAllCollections();
   }
+
+  // Users.
+  $cache_lifetime = $config->get('users_frequency');
+  $cache_lifetime = ($cache_lifetime === NULL) ? 0 : $cache_lifetime;
+
+  $last_sync = \Drupal::state()->get('neg_shopify.last_users_sync', 0);
+
+  // Check if we need to sync.
+  if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
+    Sync::syncAllUsers();
+  }
 }
 
 /**
@@ -565,5 +616,18 @@ function neg_shopify_cron() {
 function neg_shopify_entity_delete(EntityInterface $entity) {
   if ($entity->getEntityTypeId() === 'user') {
     UserManagement::clearShopifyUserState($entity);
+  }
+}
+
+function neg_shopify_preprocess_user(&$vars) {
+  $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+
+  if ($allowShopifyLogins) {
+    $user = $vars['user'];
+    $customer = new ShopifyCustomer([
+      'user' => $user,
+    ]);
+
+    $vars['content']['order_history'] = $customer->renderOrderHistoryBlock(10);
   }
 }

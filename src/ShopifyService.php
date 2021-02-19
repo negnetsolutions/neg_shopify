@@ -14,6 +14,7 @@ class ShopifyService {
   protected $productService = FALSE;
   protected $metafieldService = FALSE;
   protected $smartCollectionService = FALSE;
+  protected $customerService = FALSE;
   protected $customCollectionService = FALSE;
   protected $webhookService = FALSE;
   protected $collectionProductsServices = [];
@@ -53,6 +54,7 @@ class ShopifyService {
     $this->productService = $this->client->Product;
     $this->metafieldService = $this->client->Metafield;
     $this->smartCollectionService = $this->client->SmartCollection;
+    $this->customerService = $this->client->Customer;
     $this->customCollectionService = $this->client->CustomCollection;
     $this->webhookService = $this->client->Webhook;
   }
@@ -85,10 +87,57 @@ class ShopifyService {
   }
 
   /**
+   * Gets the last updated date.
+   */
+  public static function getLastUsersUpdatedDate() {
+    $ts = \Drupal::state()->get('neg_shopify.last_users_sync', 0);
+    return self::formatTimestamp($ts);
+  }
+
+  /**
    * Formats timestamp to Shopify date format.
    */
   public static function formatTimestamp(int $timestamp) {
     return date('c', $timestamp);
+  }
+
+  /**
+   * Runs GraphQL Query.
+   */
+  public function graphQL(string $graphQL, $variables = []) {
+    $client = \Drupal::httpClient();
+
+    $headers = [
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/json',
+    ];
+
+    $request = [
+      'query' => str_replace("\n", " ", $graphQL),
+      // 'variables' => $variables,
+    ];
+    $json = json_encode($request);
+
+    $config = Settings::config();
+
+    $path = 'https://' . $config->get('shop_url') . '.myshopify.com/admin/api/' . Settings::API_VERSION . '/graphql.json';
+
+    $request = $client->post($path, [
+      'headers' => $headers,
+      'body' => $json,
+      'auth' => [
+        $config->get('api_key'),
+        $config->get('api_password'),
+      ],
+    ]);
+
+    $response = json_decode($request->getBody(), TRUE);
+
+    if (isset($response['errors'])) {
+      throw new \Exception('GraphQL Error: ' . print_r($response['errors'], TRUE) . "\nGRAPHQL: $graphQL");
+    }
+
+    return $response;
   }
 
   /**
@@ -169,6 +218,42 @@ class ShopifyService {
     }
 
     return $hooks;
+  }
+
+  /**
+   * Get's Users.
+   */
+  public function fetchAllUsers(array $params = []) {
+
+    $users = [];
+    $pages = $this->fetchAllPagedUsers($params);
+    foreach ($pages as $page) {
+      foreach ($page as $user) {
+        $users[] = $user;
+      }
+    }
+
+    return $users;
+  }
+
+  /**
+   * Gets all users.
+   */
+  public function fetchAllPagedUsers(array $params = []) {
+
+    $pages = [];
+
+    // Fetch this page.
+    $users = $this->customerService->get($params);
+    $pages[] = $users;
+
+    // Get Next Page.
+    $next = $this->customerService->getNextLink();
+    if ($next !== NULL) {
+      $pages = array_merge($pages, $this->fetchAllPagedUsers($this->processPageCursor($next)));
+    }
+
+    return $pages;
   }
 
   /**

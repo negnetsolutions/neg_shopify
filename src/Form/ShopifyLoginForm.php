@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\user\Form\UserLoginForm;
 use Drupal\neg_shopify\StoreFrontService;
 use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyCustomer;
 
 use Drupal\user\UserStorageInterface;
 use Drupal\user\UserFloodControlInterface;
@@ -184,9 +185,16 @@ class ShopifyLoginForm extends UserLoginForm {
       return;
     }
 
+    // Query for customer information.
     if (!$this->drupalUser) {
       // Create a new user.
       $this->drupalUser = UserManagement::provisionDrupalUser($this->userName);
+
+      $customer = new ShopifyCustomer([
+        'accessToken' => $this->accessToken['accessToken'],
+      ]);
+
+      $customer->updateDrupalUser($this->drupalUser);
     }
 
     // All passed, log the user in by handing over the UID.

@@ -104,6 +104,9 @@ class Webhooks {
     ShopifyService::instance()->createWebhook('collections/create');
     ShopifyService::instance()->createWebhook('collections/update');
     ShopifyService::instance()->createWebhook('collections/delete');
+    ShopifyService::instance()->createWebhook('customers/create');
+    ShopifyService::instance()->createWebhook('customers/update');
+    ShopifyService::instance()->createWebhook('customers/delete');
   }
 
 }

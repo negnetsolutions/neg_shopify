@@ -84,6 +84,56 @@ class Sync {
   }
 
   /**
+   * Syncs all users.
+   */
+  public static function syncAllUsers() {
+
+    // Only sync if allowing shopify logins.
+    $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+    if (!$allowShopifyLogins) {
+      return;
+    }
+
+    $service = ShopifyService::instance();
+    $queue = Settings::usersQueue();
+
+    if ($queue->numberOfItems() > 0) {
+      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear', TRUE);
+      return FALSE;
+    }
+
+    $users = ShopifyService::instance()->fetchAllUsers([
+      'updated_at_min' => ShopifyService::getLastUsersUpdatedDate(),
+    ]);
+
+    // Open the batch.
+    $queue->createItem([
+      'op' => 'openUsersBatch',
+      'users_count' => count($users),
+    ]);
+
+    // Sync each user.
+    foreach ($users as $user) {
+      $queue->createItem([
+        'op' => 'syncUser',
+        'user' => $user,
+      ]);
+    }
+
+    // Delete Orphaned Collections.
+    $queue->createItem([
+      'op' => 'deleteOrphanedUsers',
+    ]);
+
+    // Close batch.
+    $queue->createItem([
+      'op' => 'closeUsersBatch',
+    ]);
+
+    \Drupal::messenger()->addStatus('Queued Full Users Sync for next cron run!', TRUE);
+  }
+
+  /**
    * Full Collections Sync.
    */
   public static function syncAllCollections() {

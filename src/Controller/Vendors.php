@@ -23,10 +23,29 @@ class Vendors extends ControllerBase {
   public function render($vendor) {
 
     $build = [
-      '#theme' => 'shopify-collection-all',
+      '#theme' => 'shopify-vendor-page',
       '#name' => $this->getTitle($vendor),
     ];
     ShopifyVendors::renderProductsByVendorSlug($vendor, $build);
+    return $build;
+  }
+
+  /**
+   * Renders /vendors title.
+   */
+  public function getVendorPageTitle() {
+    return 'Vendors';
+  }
+
+  /**
+   * Renders /vendors.
+   */
+  public function renderAll() {
+
+    $build = [
+      '#theme' => 'shopify_vendors_page',
+    ];
+    ShopifyVendors::renderVendorsPage($build);
     return $build;
   }
 

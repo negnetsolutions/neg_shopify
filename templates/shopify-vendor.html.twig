@@ -1,0 +1,8 @@
+<figure {{ attributes }}>
+  <a href="{{ url('neg_shopify.vendors', {'vendor': slug}) }}">
+    {% if image | render %}
+    <div class="image">{{ image }}</div>
+    {% endif %}
+    <figcaption class="title">{{ name }}</figcaption>
+  </a>
+</figure>

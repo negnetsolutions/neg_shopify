@@ -1,4 +1,5 @@
-<header class="controls">
+{% if controls %}
+  <header class="controls">
   <div class="count">{{ count }} products</div>
   <div class="sort_order">
     <label for="SortBy" class="label--hidden">Sort By</label>
@@ -15,6 +16,7 @@
     </select>
   </div>
 </header>
+{% endif %}
 <section class="items products">
   {{ products }}
 </section>

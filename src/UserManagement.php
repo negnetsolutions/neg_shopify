@@ -3,11 +3,29 @@
 namespace Drupal\neg_shopify;
 
 use Drupal\user\UserInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Provides user management for Shopify Users.
  */
 class UserManagement {
+
+  /**
+   * Tries to load load a drupal user by shopify id.
+   */
+  public static function loadUserByShopifyId($id) {
+
+    if (!str_starts_with($id, 'gid://shopify/Customer/')) {
+      $id = "gid://shopify/Customer/$id";
+    }
+
+    $query = \Drupal::entityQuery('user');
+    $query->condition('field_shopify_id', $id, '=');
+    $ids = $query->execute();
+    $users = User::loadMultiple($ids);
+
+    return (count($users) > 0) ? reset($users) : NULL;
+  }
 
   /**
    * Tries to load load a drupal user by email.
@@ -20,6 +38,17 @@ class UserManagement {
   }
 
   /**
+   * Get's admin roles.
+   */
+  public static function getAdminRoles() {
+    return \Drupal::entityTypeManager()
+                        ->getStorage('user_role')
+                        ->getQuery()
+                        ->condition('is_admin', TRUE)
+                        ->execute();
+  }
+
+  /**
    * Verifies whether the user is available or can be created.
    *
    * @return bool
@@ -29,11 +58,7 @@ class UserManagement {
    */
   public static function verifyUserAllowed($user): bool {
     // Dissalow Administrators.
-    $admin_roles = \Drupal::entityTypeManager()
-                        ->getStorage('user_role')
-                        ->getQuery()
-                        ->condition('is_admin', TRUE)
-                        ->execute();
+    $admin_roles = self::getAdminRoles();
     if (!empty(array_intersect($user->getRoles(), $admin_roles))) {
       return FALSE;
     }
@@ -82,10 +107,18 @@ class UserManagement {
     $account->save();
 
     return $account;
+  }
 
-    $this->drupalUser = $account;
+  /**
+   * Get's shopifyUserAccessToken.
+   */
+  public static function getAccessToken($uid = FALSE) {
+    if ($uid === FALSE) {
+      $current_user = \Drupal::currentUser();
+      $uid = $current_user->id();
+    }
 
-    return TRUE;
+    return \Drupal::state()->get("shopify_user_access_token_$uid");
   }
 
   /**

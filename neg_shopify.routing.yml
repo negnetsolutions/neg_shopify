@@ -6,6 +6,14 @@ neg_shopify.settings:
   requirements:
     _permission: 'Administer Shopify API'
 
+neg_shopify.vendors_page:
+  path: '/vendors'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\Vendors::renderAll'
+    _title_callback: '\Drupal\neg_shopify\Controller\Vendors::getVendorPageTitle'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.vendors:
   path: '/vendors/{vendor}'
   defaults:
@@ -64,6 +72,21 @@ neg_shopify.webhook:
     _controller: '\Drupal\neg_shopify\Controller\WebhookController::handleIncomingWebhook'
   requirements:
     _permission: 'access content'
+
+neg_shopify.customer.order.json:
+  path: '/account/order.json'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrder'
+    _title: 'Receipt'
+  requirements:
+    _permission: 'view all shopify customer data+view own shopify customer data'
+
+neg_shopify.customer.orders.json:
+  path: '/account/orders.json'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrders'
+  requirements:
+    _permission: 'view all shopify customer data+view own shopify customer data'
 
 shopify_product_variant.settings:
   path: '/admin/structure/shopify_product_variant'

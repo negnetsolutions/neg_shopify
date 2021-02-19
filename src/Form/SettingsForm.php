@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify\Form;
 use Drupal\neg_shopify\Settings;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\Role;
 
 use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\neg_shopify\Plugin\Webhooks;
@@ -216,6 +217,39 @@ class SettingsForm extends ConfigFormBase {
         '#submit' => ['::forceCollectionsSync'],
       ];
 
+      $form['users'] = [
+        '#type' => 'details',
+        '#title' => t('Sync Users'),
+        '#description' => t('Last sync time: @time', [
+          '@time' => $collections_last_sync_time_formatted,
+        ]),
+      ];
+
+      $form['users']['users_frequency'] = [
+        '#type' => 'select',
+        '#title' => t('Full Sync Frequency'),
+        '#default_value' => $config->get('users_frequency'),
+        '#options' => [
+          '0' => 'Never',
+          '21600' => 'Every 6 Hours',
+          '43200' => 'Every 12 Hours',
+          '86400' => 'Every 24 Hours',
+        ],
+        '#required' => TRUE,
+      ];
+
+      $form['users']['reset_users'] = [
+        '#type' => 'submit',
+        '#value' => t('Reset Users Last Sync Time and Queue Sync'),
+        '#submit' => ['::resetUsersSync'],
+      ];
+
+      $form['users']['sync_users'] = [
+        '#type' => 'submit',
+        '#value' => t('Queue users Sync Now'),
+        '#submit' => ['::forceUsersSync'],
+      ];
+
       $form['delete'] = [
         '#type' => 'details',
         '#title' => t('Data Reset'),
@@ -287,6 +321,21 @@ class SettingsForm extends ConfigFormBase {
   /**
    * Forces a collections resync.
    */
+  public function resetUsersSync(array &$form, FormStateInterface $form_state) {
+    \Drupal::state()->set('neg_shopify.last_users_sync', 0);
+    Sync::syncAllUsers();
+  }
+
+  /**
+   * Forces a collections resync.
+   */
+  public function forceUsersSync(array &$form, FormStateInterface $form_state) {
+    Sync::syncAllUsers();
+  }
+
+  /**
+   * Forces a collections resync.
+   */
   public function resetCollectionSync(array &$form, FormStateInterface $form_state) {
     \Drupal::state()->set('neg_shopify.last_collection_sync', 0);
     Sync::syncAllCollections();
@@ -315,15 +364,33 @@ class SettingsForm extends ConfigFormBase {
   }
 
   /**
+   * Checks that user roles are in place.
+   */
+  protected function checkUserRoles() {
+    $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple();
+    $keys = array_keys($roles);
+    if (!in_array('shopify_customer', $keys)) {
+      $role = Role::create(array('id' => 'shopify_customer', 'label' => 'Shopify Customer'));
+      $role->save();
+      $role->grantPermission('view own shopify customer data');
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Retrieve the configuration.
     $config = Settings::editableConfig();
 
+    if ($form_state->getValue('allow_shopify_users') == TRUE) {
+      $this->checkUserRoles();
+    }
+
     $config->set('shop_url', $form_state->getValue('shop_url'))
       ->set('products_frequency', $form_state->getValue('products_frequency'))
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
+      ->set('users_frequency', $form_state->getValue('users_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
       ->set('allow_shopify_users', $form_state->getValue('allow_shopify_users'))
       ->set('presale_text', $form_state->getValue('presale_text'))

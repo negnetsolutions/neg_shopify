@@ -15,7 +15,9 @@ class Settings {
   const WEBHOOKQUEUE = 'neg_shopify_webhook';
   const CRONQUEUE = 'neg_shopify';
   const COLLECTIONSQUEUE = 'neg_shopify_collections';
+  const USERSQUEUE = 'neg_shopify_users';
   const DEFAULT_SORT = 'date-descending';
+  const API_VERSION = '2021-01';
 
   /**
    * Invalidates review cache.
@@ -28,6 +30,8 @@ class Settings {
    * Gets the webhook route urls.
    */
   public static function webhookRouteUrl() {
+    // TODO.
+    return 'https://8ad438214326.ngrok.io/shopify/webhook';
     return Url::fromRoute('neg_shopify.webhook')->setAbsolute()->toString();
   }
 
@@ -113,6 +117,15 @@ class Settings {
   public static function collectionsQueue() {
     $queue_factory = \Drupal::service('queue');
     $queue = $queue_factory->get(self::COLLECTIONSQUEUE);
+    return $queue;
+  }
+
+  /**
+   * Get Users Queue.
+   */
+  public static function usersQueue() {
+    $queue_factory = \Drupal::service('queue');
+    $queue = $queue_factory->get(self::USERSQUEUE);
     return $queue;
   }
 

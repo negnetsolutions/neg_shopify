@@ -111,6 +111,26 @@ class SyncShopify extends QueueWorkerBase {
         Settings::log('Closing Collection Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
         break;
 
+        case 'openUsersBatch':
+          Settings::log('Starting Users Sync Batch. (Syncing %count Users)', ['%count' => $data['users_count']], 'info');
+          break;
+
+        case 'syncUser':
+          $user = $data['user'];
+          break;
+
+        case 'deleteOrphanedUsers':
+
+          break;
+
+        case 'closeUsersBatch':
+          $config = Settings::editableConfig();
+          $last_updated = time();
+          $datetime = new \DateTime();
+          $last_updated_human = $datetime->format('Y-m-d H:i');
+          \Drupal::state()->set('neg_shopify.last_users_sync', $last_updated);
+          Settings::log('Closing Users Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
+          break;
     }
   }
 
