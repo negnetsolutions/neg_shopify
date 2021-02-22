@@ -36,7 +36,7 @@
       <section class="line">
         <div class="image">
           {% if line.node.image.transformedSrc %}
-          <img width="{{ line.node.image.width }}" height="{{ line.node.image.height }}" alt="{{ line.node.image.altText }}" src="{{ line.node.image.transformedSrc }}" />
+          <img decoding="async" loading="lazy" width="{{ line.node.image.width }}" height="{{ line.node.image.height }}" alt="{{ line.node.image.altText }}" src="{{ line.node.image.transformedSrc }}" />
           {% endif %}
         </div>
         <div class="description">

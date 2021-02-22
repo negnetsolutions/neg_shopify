@@ -20,7 +20,7 @@ class Settings {
   const API_VERSION = '2021-01';
 
   /**
-   * Invalidates review cache.
+   * Invalidates product cache.
    */
   public static function invalidateCache() {
     Cache::invalidateTags(['shopify_product']);
