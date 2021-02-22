@@ -4,11 +4,88 @@ namespace Drupal\neg_shopify;
 
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Provides user management for Shopify Users.
  */
 class UserManagement {
+
+  /**
+   * Deletes orphaned users.
+   */
+  public static function deleteOrphanedUsers(array $options = []) {
+
+    $users_ids = [];
+    $users = ShopifyService::instance()->fetchAllUsers($options);
+
+    foreach ($users as $user) {
+      $gid = 'gid://shopify/Customer/' . $user['id'];
+      $users_ids[] = $gid;
+    }
+
+    $deleted_users = [];
+
+    $query = \Drupal::entityQuery('user');
+    $query->condition('field_shopify_id', $users_ids, 'NOT IN');
+    $ids = $query->execute();
+    $users = User::loadMultiple($ids);
+
+    foreach ($users as $user) {
+      // Check if user can be deleted.
+      if (self::verifyUserAllowed($user)) {
+        $deleted_users[] = $user;
+        $user->delete();
+      }
+    }
+
+    return $deleted_users;
+
+  }
+
+  /**
+   * Syncs user with shopify.
+   */
+  public static function syncUserWithShopify($shopifyUser) {
+    $mail = $shopifyUser['email'];
+
+    if (strlen(trim($mail)) == 0) {
+      return FALSE;
+    }
+
+    $firstName = $shopifyUser['first_name'];
+    $lastName = $shopifyUser['last_name'];
+    $gid = 'gid://shopify/Customer/' . $shopifyUser['id'];
+
+    // Try to find the user.
+    $user = self::loadUserByShopifyId($shopifyUser['id']);
+
+    // Check for email address change.
+    if ($user && $user->getEmail() != $mail) {
+      Settings::log('User email change from %email1 to %email2. Deleting Original User.', ['%email1' => $user->getEmail(), '%email2' => $mail]);
+      // Let's delete this user and add a new one.
+      self::clearShopifyUserState($user);
+      $user->delete();
+      $user = NULL;
+    }
+
+    if (!$user) {
+      Settings::log('Creating User: %email', ['%email' => $mail]);
+      $user = self::provisionDrupalUser($mail);
+    }
+
+    if ($user) {
+      Settings::log('Updating User: %email', ['%email' => $mail]);
+      $user->field_first_name->setValue(['value' => $firstName]);
+      $user->field_last_name->setValue(['value' => $lastName]);
+      $user->field_shopify_id->setValue(['value' => $gid]);
+      $user->save();
+
+      return TRUE;
+    }
+
+    return FALSE;
+  }
 
   /**
    * Tries to load load a drupal user by shopify id.
@@ -60,6 +137,11 @@ class UserManagement {
     // Dissalow Administrators.
     $admin_roles = self::getAdminRoles();
     if (!empty(array_intersect($user->getRoles(), $admin_roles))) {
+      return FALSE;
+    }
+
+    // Make sure user is a shopify customer.
+    if (!$user->hasRole('shopify_customer')) {
       return FALSE;
     }
 

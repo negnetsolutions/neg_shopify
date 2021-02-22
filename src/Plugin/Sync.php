@@ -104,6 +104,8 @@ class Sync {
 
     $users = ShopifyService::instance()->fetchAllUsers([
       'updated_at_min' => ShopifyService::getLastUsersUpdatedDate(),
+      'limit' => '250',
+      'fields' => 'id,email,first_name,last_name',
     ]);
 
     // Open the batch.

@@ -7,6 +7,7 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\ShopifyCollection;
+use Drupal\neg_shopify\UserManagement;
 
 /**
  * Class SyncShopify.
@@ -117,9 +118,22 @@ class SyncShopify extends QueueWorkerBase {
 
         case 'syncUser':
           $user = $data['user'];
+          UserManagement::syncUserWithShopify($user);
+
           break;
 
         case 'deleteOrphanedUsers':
+
+          $users = UserManagement::deleteOrphanedUsers([
+            'limit' => 250,
+            'fields' => 'id',
+          ]);
+
+          $deleted = count($users);
+
+          if ($deleted > 0) {
+            Settings::log('Deleted %count orphaned users', ['%count' => $deleted], 'debug');
+          }
 
           break;
 
