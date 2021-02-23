@@ -224,6 +224,11 @@ class Sync {
       'op' => 'deleteProducts',
     ]);
 
+    // Syncs vendors.
+    $queue->createItem([
+      'op' => 'syncVendors',
+    ]);
+
     // Close batch.
     $queue->createItem([
       'op' => 'closeProductBatch',

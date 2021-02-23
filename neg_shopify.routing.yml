@@ -14,14 +14,6 @@ neg_shopify.vendors_page:
   requirements:
     _permission: 'access content'
 
-neg_shopify.vendors:
-  path: '/vendors/{vendor}'
-  defaults:
-    _controller: '\Drupal\neg_shopify\Controller\Vendors::render'
-    _title_callback: '\Drupal\neg_shopify\Controller\Vendors::getTitle'
-  requirements:
-    _permission: 'access content'
-
 neg_shopify.all:
   path: '/collections/all'
   defaults:
@@ -98,6 +90,14 @@ shopify_product_variant.settings:
   options:
     _admin_route: TRUE
 
+entity.shopify_vendor.canonical:
+  path: '/store/vendor/{shopify_vendor}'
+  defaults:
+    _entity_view: 'shopify_vendor'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _entity_access: 'shopify_vendor.view'
+
 entity.shopify_product.canonical:
   path: '/store/product/{shopify_product}'
   defaults:
@@ -155,6 +155,15 @@ shopify_product.settings:
   options:
     _admin_route: TRUE
 
+shopify_vendor.settings:
+  path: '/admin/structure/shopify_vendor'
+  defaults:
+   _form: '\Drupal\neg_shopify\Entity\Form\ShopifyVendorSettingsForm'
+   _title: 'Shopify vendor settings'
+  requirements:
+    _permission: 'administer shopify product entities'
+  options:
+    _admin_route: TRUE
 
 # ShopifyProductVariant routing definition
 entity.shopify_product_variant.canonical:

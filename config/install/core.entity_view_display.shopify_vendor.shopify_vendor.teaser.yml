@@ -1,0 +1,24 @@
+uuid: 9171272d-6a31-4254-861f-a266c640be63
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.shopify_vendor.teaser
+  module:
+    - neg_shopify
+id: shopify_vendor.shopify_vendor.teaser
+targetEntityType: shopify_vendor
+bundle: shopify_vendor
+mode: teaser
+content:
+  thumbnail:
+    weight: 0
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  products: true
+  search_api_excerpt: true
+  tags: true
+  title: true
+  user_id: true

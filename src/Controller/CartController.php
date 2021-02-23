@@ -280,9 +280,13 @@ EOF;
    * Gets a new checkout.
    */
   protected function createCheckout($lineItems) {
+    $current_user = \Drupal::currentUser();
+    $email = 'email: "' . $current_user->getEmail() . '", ';
+
     $query = <<<EOF
 mutation {
   checkoutCreate(input: {
+    {$email}
     lineItems: {$lineItems}
   }) {
     checkout {
@@ -293,8 +297,10 @@ mutation {
   }
 }
 EOF;
+
     try {
       $results = StoreFrontService::request($query);
+
       if (!isset($results['data']) || !isset($results['data']['checkoutCreate']) || !isset($results['data']['checkoutCreate']['checkout']) || !isset($results['data']['checkoutCreate']['checkout']['id'])) {
         return FALSE;
       }

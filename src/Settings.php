@@ -62,6 +62,7 @@ class Settings {
   public static function shopInfo($key = '', $refresh = FALSE) {
     if ($refresh) {
       $info = ShopifyService::instance()->shopInfo();
+
       // Convert to object.
       $info = json_decode(json_encode($info), FALSE);
       \Drupal::state()->set('shopify.shop_info', $info);

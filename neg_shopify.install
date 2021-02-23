@@ -76,3 +76,13 @@ function neg_shopify_update_8711(&$sandbox) {
 function neg_shopify_update_8712(&$sandbox) {
   return t('shopify_product blank');
 }
+
+/**
+ * Adds "shopify_vendors table"
+ */
+function neg_shopify_update_8713(&$sandbox) {
+    \Drupal::entityTypeManager()->clearCachedDefinitions();
+    \Drupal::entityDefinitionUpdateManager()
+      ->installEntityType(\Drupal::entityTypeManager()->getDefinition('shopify_vendor'));
+  return t('shopify vendor entity created');
+}

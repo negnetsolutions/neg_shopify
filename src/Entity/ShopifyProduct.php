@@ -63,7 +63,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   use ShopifyEntityTrait;
 
   const SHOPIFY_COLLECTIONS_VID = 'shopify_collections';
-  const SHOPIFY_TAGS_VID = 'shopify_tags';
+  public const SHOPIFY_TAGS_VID = 'shopify_tags';
   const SHOPIFY_VENDORS_VID = 'shopify_vendors';
 
   /**
@@ -526,6 +526,14 @@ EOL;
     return FALSE;
   }
 
+
+  /**
+   * Get's shopiy vendor entity.
+   */
+  public function getShopifyVendor() {
+    return ShopifyVendor::loadBySlug($this->get('vendor_slug')->value);
+  }
+
   /**
    * Gets available variants.
    */
@@ -705,14 +713,9 @@ EOL;
       ->setSetting('handler', 'default')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('form', [
-        // @todo: Would prefer to use inline entity form, but it's buggy, not working...
-        // 'type' => 'inline_entity_form_complex'.
         'type' => 'entity_reference_autocomplete_tags',
         'weight' => -25,
         'settings' => [
-        // 'match_operator' => 'CONTAINS',
-        // 'autocomplete_type' => 'tags',
-        // 'placeholder' => ''.
         ],
       ])
       ->setDisplayConfigurable('form', TRUE)

@@ -8,6 +8,7 @@ use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
+use Drupal\neg_shopify\ShopifyVendors;
 
 /**
  * Class ShopifyWebhook.
@@ -55,6 +56,7 @@ class ShopifyWebhook extends QueueWorkerBase {
       case 'products/update':
         $product = ShopifyProduct::updateProduct($data['payload']);
         if ($product !== FALSE) {
+          ShopifyVendors::syncVendors();
           Settings::log('Synced Product id: %id', ['%id' => $data['payload']['id'], 'debug']);
         }
         else {
@@ -66,6 +68,7 @@ class ShopifyWebhook extends QueueWorkerBase {
         $product = ShopifyProduct::loadByProductId($data['payload']['id']);
         if ($product !== FALSE) {
           $product->delete();
+          ShopifyVendors::syncVendors();
           Settings::log('Deleted Product id: %id', ['%id' => $data['payload']['id'], 'debug']);
         }
         break;

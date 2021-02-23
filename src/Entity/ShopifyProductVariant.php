@@ -11,7 +11,7 @@ use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\neg_shopify\ShopifyProductVariantInterface;
-use Drupal\neg_shopify\StoreFrontService;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Defines the Shopify product variant entity.
@@ -345,41 +345,9 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    * Fetchs the shopify storefront api id for this variant.
    */
   public function getStoreFrontId() {
-
-    if ($this->get('storefront_id')->isEmpty()) {
-      $product = $this->getProduct();
-      $handle = $product->handle->value;
-      $options = $this->getSelectedOptions();
-
-      // Encode Options.
-      $options = preg_replace('/"([^"]+)"\s*:\s*/', '$1:', json_encode($options));
-
-      $query = <<<EOF
-{
-  productByHandle(handle: "${handle}") {
-    variantBySelectedOptions (selectedOptions: {$options})
-    {
-      id
-    }
-  }
-}
-EOF;
-      $results = StoreFrontService::request($query);
-
-      if (!isset($results['data']) || !isset($results['data']['productByHandle']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']['id'])) {
-        return FALSE;
-      }
-
-      $id = $results['data']['productByHandle']['variantBySelectedOptions']['id'];
-      $this->set('storefront_id', $id);
-      $this->save();
-    }
-    else {
-      $id = $this->get('storefront_id')->value;
-    }
-
-    return $id;
-
+    $variantId = $this->get('variant_id')->value;
+    $gid = "gid://shopify/ProductVariant/$variantId";
+    return base64_encode($gid);
   }
 
   /**

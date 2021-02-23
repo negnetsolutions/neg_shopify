@@ -8,8 +8,9 @@ use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 
 use Drupal\neg_shopify\ShopifyCollection;
-use Drupal\neg_shopify\ShopifyVendors;
+use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Drupal\neg_shopify\ShopifyCustomer;
+use Drupal\neg_shopify\ShopifyVendors;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\Settings;
 
@@ -132,7 +133,8 @@ class JsonController extends ControllerBase {
           throw new NotFoundHttpException();
         }
 
-        $data = ShopifyVendors::renderJson($slug, $sortOrder, $page, $perPage);
+        $vendor = ShopifyVendor::loadBySlug($slug);
+        $data = $vendor->renderProductJson($sortOrder, $page, $perPage);
         $tags = ['shopify_product_list'];
         break;
 
@@ -148,15 +150,38 @@ class JsonController extends ControllerBase {
         break;
 
       case 'vendors':
-        $filterTags = \Drupal::request()->query->get('id');
+        $parts = \Drupal::request()->query->get('id');
+        $parts = explode('[]', $parts);
+
+        $filterTags = $parts[0];
         $filterTags = str_replace('tags_', '', $filterTags);
         $filterTags = explode(',', $filterTags);
+        if (strlen(trim($filterTags)) > 0) {
+          $filterTags = explode(',', $filterTags);
+        }
+        else {
+          $filterTags = [];
+        }
+
+        $filterTypes = $parts[1];
+        $filterTypes = str_replace('types_', '', $filterTypes);
+        if (strlen(trim($filterTypes)) > 0) {
+          $filterTypes = explode(',', $filterTypes);
+        }
+        else {
+          $filterTypes = [];
+        }
 
         if ($page === NULL) {
           throw new NotFoundHttpException();
         }
 
-        $data = ShopifyVendors::renderVendorsPageJson($filterTags, $sortOrder, $page, $perPage);
+        $params = [
+          'tags' => $filterTags,
+          'types' => $filterTypes,
+        ];
+
+        $data = ShopifyVendors::renderVendorsPageJson($params, $sortOrder, $page, $perPage);
         $tags = ['shopify_product_list'];
 
     }

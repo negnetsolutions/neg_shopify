@@ -8,6 +8,7 @@ use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyVendors;
 
 /**
  * Class SyncShopify.
@@ -55,6 +56,11 @@ class SyncShopify extends QueueWorkerBase {
           Settings::log('Deleted %count orphaned products', ['%count' => $deleted], 'debug');
         }
 
+        break;
+
+      case 'syncVendors':
+        ShopifyVendors::syncVendors();
+        Settings::log('Synced Shopify Vendors', [], 'debug');
         break;
 
       case 'closeProductBatch':

@@ -1,0 +1,8 @@
+<figure {{ attributes }}>
+  <a href="{{ url }}">
+    {% if content.thumbnail | render %}
+    <div class="image">{{ content.thumbnail }}</div>
+    {% endif %}
+    <figcaption class="title">{{ name }}</figcaption>
+  </a>
+</figure>

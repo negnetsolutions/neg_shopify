@@ -51,13 +51,11 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'link' => NULL,
       ],
     ],
-    'shopify-vendor' => [
-      'template' => 'shopify-vendor' ,
+    'shopify_vendor_product_grid' => [
+      'template' => 'shopify-vendor-product-grid' ,
       'variables' => [
         'attributes' => NULL,
-        'name' => NULL,
-        'image' => NULL,
-        'slug' => NULL,
+        'products' => NULL,
       ],
     ],
     'shopify_vendors_page' => [
@@ -129,6 +127,13 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'email' => NULL,
         'perPage' => 5,
       ],
+    ],
+    'shopify_vendor' => [
+      'render element' => 'elements',
+    ],
+    'shopify_vendor__teaser' => [
+      'template' => 'shopify-vendor--teaser',
+      'base hook' => 'shopify_vendor',
     ],
     'shopify_product' => [
       'render element' => 'elements',
@@ -295,6 +300,18 @@ function neg_shopify_entity_extra_field_info() {
     'visible' => TRUE,
     'weight' => 150,
   ];
+  $extra['shopify_vendor']['shopify_vendor']['display']['thumbnail'] = [
+    'label' => t('Vendor Thumbnail'),
+    'description' => t('Displays the vendor thumbnail'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_vendor']['shopify_vendor']['display']['products'] = [
+    'label' => t('Vendor Products'),
+    'description' => t('Displays the vendor\'s products'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
   return $extra;
 }
 
@@ -386,6 +403,11 @@ function neg_shopify_renderable_links() {
       '#title' => t('Variant Display'),
       '#url' => Url::fromUri('internal:/admin/structure/shopify_product_variant/display'),
     ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Vendor Display'),
+      '#url' => Url::fromUri('internal:/admin/structure/shopify_vendor/display'),
+    ];
   }
 
   $shop_domain = Settings::shopInfo('domain');
@@ -419,6 +441,15 @@ function _neg_shopify_preprocess_taxonomy_term_shopify_collections(&$variables) 
 }
 
 /**
+ * Implements theme_suggestions__shopify_vendor.
+ */
+function neg_shopify_theme_suggestions_shopify_vendor(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'shopify_vendor__' . $variables['elements']['#view_mode'];
+  return $suggestions;
+}
+
+/**
  * Implements theme_suggestions__shopify_product.
  */
 function neg_shopify_theme_suggestions_shopify_product(array $variables) {
@@ -447,6 +478,36 @@ function neg_shopify_theme_suggestions_shopify_product_variant(array $variables)
  *   - shopify_product: The shopify product object.
  *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
  */
+function template_preprocess_shopify_vendor(&$variables) {
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['shopify_vendor'] = $variables['elements']['#shopify_vendor'];
+  $variables['attributes']['class'][] = 'shopify-vendor';
+  $variables['attributes']['class'][] = $variables['view_mode'];
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  $variables['name'] = $variables['elements']['name'];
+  $variables['slug'] = $variables['elements']['slug'];
+  $variables['type'] = $variables['elements']['type'];
+
+  $variables['url'] = !$variables['shopify_vendor']->isNew() ? $variables['shopify_vendor']->toUrl('canonical')->toString() : NULL;
+}
+
+/**
+ * Prepares variables for shopify product templates.
+ *
+ * Default template: shopify-product.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - shopify_product: The shopify product object.
+ *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
+ */
 function template_preprocess_shopify_product(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product'] = $variables['elements']['#shopify_product'];
@@ -457,9 +518,10 @@ function template_preprocess_shopify_product(&$variables) {
     $variables['imagethumbnail_large'] = ImageStyle::load('rs_image_2200w')->buildUrl($path);
   }
 
-  $variables['vendor_url'] = Url::fromRoute('neg_shopify.vendors', [
-    'vendor' => ShopifyProduct::slugify($variables['shopify_product']->get('vendor')->value),
-  ])->toString();
+  $vendor = $variables['shopify_product']->getShopifyVendor();
+  if ($vendor) {
+    $variables['vendor_url'] = $vendor->toUrl('canonical')->toString();
+  }
 
   // Helpful $content variable for templates.
   $variables += ['content' => []];
