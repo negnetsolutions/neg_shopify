@@ -21,7 +21,13 @@ class ShopifyVendorAccessControlHandler extends EntityAccessControlHandler {
 
     switch ($operation) {
       case 'view':
-        return AccessResult::allowedIfHasPermission($account, 'view shopify vendor entities');
+        $status = $entity->get('status')->value;
+        if ($status) {
+          return AccessResult::allowedIfHasPermission($account, 'view shopify vendor entities');
+        }
+        else {
+          return AccessResult::allowedIfHasPermission($account, 'view unpublished shopify vendor entities');
+        }
 
       case 'update':
         return AccessResult::allowedIfHasPermission($account, 'edit shopify vendor entities');

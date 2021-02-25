@@ -28,6 +28,7 @@ class ShopifyVendors {
 
       $vendor->tags = explode(',', $vendor->tags);
       $vendor->type = explode(',', $vendor->type);
+      $vendor->status = TRUE;
 
       // Attempt to load this variant.
       $entity = ShopifyVendor::loadBySlug($vendor->slug);

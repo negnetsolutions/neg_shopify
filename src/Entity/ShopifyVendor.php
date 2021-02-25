@@ -31,6 +31,11 @@ use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
  *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyVendorListBuilder",
  *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyVendorViewsData",
  *
+ *     "form" = {
+ *       "default" = "Drupal\neg_shopify\Entity\Form\ShopifyVendorForm",
+ *       "edit" = "Drupal\neg_shopify\Entity\Form\ShopifyVendorForm",
+ *     },
+ *
  *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyVendorAccessControlHandler",
  *   },
  *   base_table = "shopify_vendor",
@@ -38,10 +43,12 @@ use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "title",
+ *     "status" = "status",
  *     "uuid" = "uuid"
  *   },
  *   links = {
  *     "canonical" = "/admin/shopify_vendor/{shopify_vendor}",
+ *     "edit-form" = "/admin/shopify_vendor/{shopify_vendor}/edit",
  *   },
  *   field_ui_base_route = "shopify_vendor.settings"
  * )
@@ -107,6 +114,11 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     $query = \Drupal::entityTypeManager()
       ->getStorage('shopify_vendor')
       ->getQuery();
+
+    $user = \Drupal::currentUser();
+    if (!$user->hasPermission('view shopify toolbar')) {
+      $query->condition('status', TRUE);
+    }
 
     if (count($params['tags']) > 0) {
       $query->condition('tags', $params['tags'], 'IN');
@@ -258,16 +270,6 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
         'type' => 'author',
         'weight' => 0,
       ])
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete',
-        'weight' => 5,
-        'settings' => [
-          'match_operator' => 'CONTAINS',
-          'size' => '60',
-          'autocomplete_type' => 'tags',
-          'placeholder' => '',
-        ],
-      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -275,6 +277,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setLabel(t('Slug'))
       ->setDescription(t('The slug of the Shopify vendor entity.'))
       ->setRequired(TRUE)
+      ->setReadOnly(TRUE)
       ->setSettings([
         'text_processing' => 0,
       ])
@@ -284,6 +287,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setLabel(t('Title'))
       ->setDescription(t('The title of the Shopify vendor entity.'))
       ->setRequired(TRUE)
+      ->setReadOnly(TRUE)
       ->setSettings([
         'text_processing' => 0,
       ])
@@ -293,10 +297,6 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
         'type' => 'string',
         'weight' => -4,
       ])
-      ->setDisplayOptions('form', [
-        'type' => 'string_textfield',
-        'weight' => -4,
-      ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
@@ -304,6 +304,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setLabel(t('Type'))
       ->setDescription(t('The type of the Shopify vendor entity.'))
       ->setRequired(TRUE)
+      ->setReadOnly(TRUE)
       ->setSettings([
         'text_processing' => 0,
       ])
@@ -317,18 +318,27 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setSetting('target_bundles', ['shopify_tags' => 'shopify_tags'])
       ->setSetting('handler', 'default:taxonomy_term')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+      ->setReadOnly(TRUE)
       ->setDisplayOptions('view', [
         'label' => 'inline',
         'type' => 'entity_reference_label',
         'weight' => -20,
         'settings' => ['link' => TRUE],
       ])
-      ->setDisplayOptions('form', [
-        'type' => 'entity_reference_autocomplete_tags',
-        'weight' => -25,
-      ])
-      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['status'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Published'))
+      ->setDefaultValue(TRUE)
+      ->setDisplayOptions('form', [
+        'type' => 'boolean_checkbox',
+        'settings' => [
+          'display_label' => TRUE,
+        ],
+        'weight' => -10,
+      ])
+      ->setDisplayConfigurable('form', TRUE);
+
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))

@@ -300,12 +300,6 @@ function neg_shopify_entity_extra_field_info() {
     'visible' => TRUE,
     'weight' => 150,
   ];
-  $extra['shopify_vendor']['shopify_vendor']['display']['thumbnail'] = [
-    'label' => t('Vendor Thumbnail'),
-    'description' => t('Displays the vendor thumbnail'),
-    'visible' => TRUE,
-    'weight' => 150,
-  ];
   $extra['shopify_vendor']['shopify_vendor']['display']['products'] = [
     'label' => t('Vendor Products'),
     'description' => t('Displays the vendor\'s products'),
@@ -493,6 +487,9 @@ function template_preprocess_shopify_vendor(&$variables) {
   $variables['name'] = $variables['elements']['name'];
   $variables['slug'] = $variables['elements']['slug'];
   $variables['type'] = $variables['elements']['type'];
+  $variables['status'] = $variables['elements']['status'];
+
+  $variables['attributes']['class'][] = ($variables['status'] == TRUE) ? 'published' : 'unpublished';
 
   $variables['url'] = !$variables['shopify_vendor']->isNew() ? $variables['shopify_vendor']->toUrl('canonical')->toString() : NULL;
 }

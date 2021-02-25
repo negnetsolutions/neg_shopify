@@ -90,6 +90,16 @@ shopify_product_variant.settings:
   options:
     _admin_route: TRUE
 
+entity.shopify_vendor.collection:
+  path: '/admin/shopify_vendor'
+  defaults:
+    _entity_list: 'shopify_vendor'
+    _title: 'Shopify vendor list'
+  requirements:
+    _permission: 'administer shopify'
+  options:
+    _admin_route: TRUE
+
 entity.shopify_vendor.canonical:
   path: '/store/vendor/{shopify_vendor}'
   defaults:
@@ -152,6 +162,16 @@ shopify_product.settings:
    _title: 'Shopify product settings'
   requirements:
     _permission: 'administer shopify product entities'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_vendor.edit_form:
+  path: '/admin/shopify_vendor/{shopify_vendor}/edit'
+  defaults:
+    _entity_form: shopify_vendor.edit
+    _title: 'Edit Shopify vendor'
+  requirements:
+    _permission: 'edit shopify product entities'
   options:
     _admin_route: TRUE
 

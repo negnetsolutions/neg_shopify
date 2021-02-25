@@ -24,3 +24,13 @@ entity.shopify_product_variant.canonical:
  route_name: entity.shopify_product_variant.canonical
  base_route: entity.shopify_product_variant.canonical
  title: 'View'
+
+entity.shopify_vendor.canonical:
+  route_name: entity.shopify_vendor.canonical
+  base_route: entity.shopify_vendor.canonical
+  title: 'View'
+
+entity.shopify_vendor.edit_form:
+  route_name: entity.shopify_vendor.edit_form
+  base_route: entity.shopify_vendor.canonical
+  title: 'Edit'

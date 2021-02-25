@@ -1,7 +1,7 @@
 <figure {{ attributes }}>
   <a href="{{ url }}">
-    {% if content.thumbnail | render %}
-    <div class="image">{{ content.thumbnail }}</div>
+    {% if content.extra_field_thumbnail | render %}
+    <div class="image">{{ content.extra_field_thumbnail }}</div>
     {% endif %}
     <figcaption class="title">{{ name }}</figcaption>
   </a>

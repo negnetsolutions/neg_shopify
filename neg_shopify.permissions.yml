@@ -6,6 +6,18 @@ administer shopify product entities:
   title: 'Administer Shopify product entities'
   description: 'Allow to access the administration form to configure Shopify product entities.'
 
+delete shopify vendor entities:
+  title: 'Delete Shopify vendor entities'
+
+edit shopify vendor entities:
+  title: 'Edit Shopify vendor entities'
+
+view shopify vendor entities:
+  title: 'View Shopify vendor entities'
+
+view unpublished shopify vendor entities:
+  title: 'View Unpublished Shopify vendor entities'
+
 delete shopify product entities:
   title: 'Delete Shopify product entities'
 

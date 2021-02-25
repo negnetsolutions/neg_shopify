@@ -25,28 +25,7 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
     $build['name'] = $entity->get('title')->value;
     $build['slug'] = $entity->get('slug')->value;
     $build['type'] = $entity->get('type')->value;
-
-    if ($display->getComponent('thumbnail')) {
-      $params = [
-        'sort' => Settings::defaultSortOrder(),
-        'vendor_slug' => $entity->get('slug')->value,
-      ];
-
-      $search = new ShopifyProductSearch($params);
-      $products = $search->search(0, 1);
-
-      if (count($products) > 0) {
-        $product = reset($products);
-        if ($product->image->target_id) {
-          $view = $product->image->view();
-          if (count($view) > 0 && isset($view[0])) {
-            $build['thumbnail'] = $view[0];
-            $build['thumbnail']['#theme'] = 'responsive_image_formatter';
-            $build['thumbnail']['#responsive_image_style_id'] = 'rs_image';
-          }
-        }
-      }
-    }
+    $build['status'] = $entity->get('status')->value;
 
     if ($display->getComponent('products')) {
       // Get products.
