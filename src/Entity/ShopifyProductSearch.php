@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify\Entity;
 
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\SortArrayByProductId;
+use Drupal\neg_shopify\Entity\ShopifyProduct;
 
 /**
  * Class ShopifyProductSearch.
@@ -86,6 +87,49 @@ class ShopifyProductSearch {
       $group->condition('is_preorder', TRUE);
 
       $query->condition($group);
+    }
+
+    if (isset($params['tags'])) {
+      foreach ($params['tags'] as $tag) {
+        if (strlen($tag) > 0) {
+          $termManager = \Drupal::entityTypeManager()
+            ->getStorage('taxonomy_term');
+          $andTags = explode('-and-', $tag);
+
+          if (count($andTags) > 1) {
+            $group = $query->andConditionGroup();
+            foreach ($andTags as $tag) {
+              $tagResults = $termManager->getQuery()
+                ->condition('vid', 'shopify_tags', '=')
+                ->condition('name', $tag)
+                ->range(0, 1)
+                ->execute();
+              $group->condition('tags', $tagResults, 'IN');
+            }
+            $query->condition($group);
+          }
+          else if(count($orTags = explode('-or-', $tag)) > 1) {
+            $group = $query->orConditionGroup();
+            foreach ($andTags as $tag) {
+              $tagResults = $termManager->getQuery()
+                ->condition('vid', 'shopify_tags', '=')
+                ->condition('name', $tag)
+                ->range(0, 1)
+                ->execute();
+              $group->condition('tags', $tagResults, 'IN');
+            }
+            $query->condition($group);
+          }
+          else {
+            $tagResults = $termManager->getQuery()
+              ->condition('vid', 'shopify_tags', '=')
+              ->condition('name', $tag)
+              ->range(0, 1)
+              ->execute();
+            $query->condition('tags', $tagResults, 'IN');
+          }
+        }
+        }
     }
 
     if (isset($params['vendor_slug'])) {
@@ -241,4 +285,22 @@ class ShopifyProductSearch {
     return $query;
   }
 
+  /**
+   * Renders a json response for a search.
+   */
+  public static function renderJson($sortOrder = FALSE, $page = 0, $perPage = FALSE, $tags = []) {
+    $params = [
+      'tags' => $tags,
+      'sort' => $sortOrder,
+    ];
+
+    $search = new self($params);
+    $products = $search->search($page, $perPage);
+    $total = $search->count();
+
+    return [
+      'count' => $total,
+      'items' => ShopifyProduct::loadView($products, 'store_listing', FALSE),
+    ];
+  }
 }

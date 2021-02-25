@@ -10,8 +10,9 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
-use Drupal\neg_shopify\ShopifyProductVariantInterface;
+use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductVariantInterface;
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
  * Defines the Shopify product variant entity.
@@ -22,9 +23,9 @@ use Drupal\neg_shopify\Settings;
  *   id = "shopify_product_variant",
  *   label = @Translation("Shopify product variant"),
  *   handlers = {
- *     "view_builder" = "Drupal\neg_shopify\ShopifyProductVariantViewBuilder",
- *     "list_builder" = "Drupal\neg_shopify\ShopifyProductVariantListBuilder",
- *     "views_data" = "Drupal\neg_shopify\Entity\ShopifyProductVariantViewsData",
+ *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyProductVariantViewBuilder",
+ *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyProductVariantListBuilder",
+ *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyProductVariantViewsData",
  *
  *     "form" = {
  *       "default" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantForm",
@@ -32,7 +33,7 @@ use Drupal\neg_shopify\Settings;
  *       "edit" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantForm",
  *       "delete" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantDeleteForm",
  *     },
- *     "access" = "Drupal\neg_shopify\ShopifyProductVariantAccessControlHandler",
+ *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyProductVariantAccessControlHandler",
  *   },
  *   base_table = "shopify_product_variant",
  *   admin_permission = "administer ShopifyProductVariant entity",

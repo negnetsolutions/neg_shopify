@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Api;
 
 use PHPShopify\ShopifySDK;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Shopify Service.

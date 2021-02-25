@@ -2,8 +2,8 @@
 
 namespace Drupal\neg_shopify;
 
-use Drupal\neg_shopify\StoreFrontService;
-use Drupal\neg_shopify\ShopifyService;
+use Drupal\neg_shopify\Api\StoreFrontService;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\neg_shopify\Settings;
 
 /**

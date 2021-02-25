@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify;
 
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Url;

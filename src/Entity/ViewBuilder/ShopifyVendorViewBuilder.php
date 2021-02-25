@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Entity\ViewBuilder;
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;

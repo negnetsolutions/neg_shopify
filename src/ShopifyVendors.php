@@ -6,7 +6,6 @@ use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\image\Entity\ImageStyle;
 use Drupal\Core\Url;
 use Drupal\Core\Render\RenderContext;
 

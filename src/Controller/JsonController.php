@@ -9,6 +9,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Entity\ShopifyVendor;
+use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\ShopifyCustomer;
 use Drupal\neg_shopify\ShopifyVendors;
 use Drupal\neg_shopify\UserManagement;
@@ -147,6 +148,15 @@ class JsonController extends ControllerBase {
 
         $data = ShopifyCollection::renderJson($id, $sortOrder, $page, $perPage);
         $tags = ShopifyCollection::cacheTags($id);
+        break;
+
+      case 'product_search':
+        $tags = \Drupal::request()->query->get('id');
+        $tags = explode('|', $tags);
+
+        $data = ShopifyProductSearch::renderJson($sortOrder, $page, $perPage, $tags);
+        $tags = ['shopify_product_list'];
+
         break;
 
       case 'vendors':

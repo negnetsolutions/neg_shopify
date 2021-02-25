@@ -12,10 +12,11 @@ use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\taxonomy\Entity\Term;
-use Drupal\neg_shopify\ShopifyVendorInterface;
+use Drupal\neg_shopify\Entity\EntityInterface\ShopifyVendorInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
  * Defines the Shopify vendor entity.
@@ -26,11 +27,11 @@ use Drupal\neg_shopify\Settings;
  *   id = "shopify_vendor",
  *   label = @Translation("Shopify Vendor"),
  *   handlers = {
- *     "view_builder" = "Drupal\neg_shopify\ShopifyVendorViewBuilder",
- *     "list_builder" = "Drupal\neg_shopify\ShopifyVendorListBuilder",
- *     "views_data" = "Drupal\neg_shopify\Entity\ShopifyVendorViewsData",
+ *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyVendorViewBuilder",
+ *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyVendorListBuilder",
+ *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyVendorViewsData",
  *
- *     "access" = "Drupal\neg_shopify\ShopifyVendorAccessControlHandler",
+ *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyVendorAccessControlHandler",
  *   },
  *   base_table = "shopify_vendor",
  *   admin_permission = "administer ShopifyVendor entity",

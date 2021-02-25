@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Entity\EntityInterface;
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityChangedInterface;

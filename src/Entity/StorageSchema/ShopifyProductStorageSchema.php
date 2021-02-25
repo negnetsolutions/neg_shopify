@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify\Entity;
+namespace Drupal\neg_shopify\Entity\StorageSchema;
 
 use Drupal\Core\Entity\Sql\SqlContentEntityStorageSchema;
 use Drupal\Core\Entity\ContentEntityTypeInterface;

@@ -2,7 +2,7 @@
 
 namespace Drupal\neg_shopify\Plugin;
 
-use Drupal\neg_shopify\ShopifyService;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\Settings;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Entity\RouteProvider;
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;

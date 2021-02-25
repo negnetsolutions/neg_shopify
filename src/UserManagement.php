@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify;
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Api\ShopifyService;
 
 /**
  * Provides user management for Shopify Users.

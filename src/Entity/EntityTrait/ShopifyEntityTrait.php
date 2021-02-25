@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify\Entity;
+namespace Drupal\neg_shopify\Entity\EntityTrait;
 
 use Drupal\Core\File\FileSystemInterface;
 

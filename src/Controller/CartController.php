@@ -10,7 +10,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Cache;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
-use Drupal\neg_shopify\StoreFrontService;
+use Drupal\neg_shopify\Api\StoreFrontService;
 
 /**
  * Class CartController.

@@ -1,6 +1,8 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Api;
+
+use Drupal\Settings;
 
 /**
  * Shopify Storefront Service.

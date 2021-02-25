@@ -9,13 +9,14 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\FileInterface;
-use Drupal\neg_shopify\ShopifyProductInterface;
+use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductInterface;
 use Drupal\neg_shopify\Settings;
-use Drupal\neg_shopify\ShopifyService;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Cache\Cache;
+use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
  * Defines the Shopify product entity.
@@ -26,10 +27,10 @@ use Drupal\Core\Cache\Cache;
  *   id = "shopify_product",
  *   label = @Translation("Shopify product"),
  *   handlers = {
- *     "storage_schema" = "Drupal\neg_shopify\Entity\ShopifyProductStorageSchema",
- *     "view_builder" = "Drupal\neg_shopify\ShopifyProductViewBuilder",
- *     "list_builder" = "Drupal\neg_shopify\ShopifyProductListBuilder",
- *     "views_data" = "Drupal\neg_shopify\ShopifyProductViewsData",
+ *     "storage_schema" = "Drupal\neg_shopify\Entity\StorageSchema\ShopifyProductStorageSchema",
+ *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyProductViewBuilder",
+ *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyProductListBuilder",
+ *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyProductViewsData",
  *
  *     "form" = {
  *       "default" = "Drupal\neg_shopify\Entity\Form\ShopifyProductForm",
@@ -38,9 +39,9 @@ use Drupal\Core\Cache\Cache;
  *       "delete" = "Drupal\neg_shopify\Entity\Form\ShopifyProductDeleteForm",
  *     },
  *     "route_provider" = {
- *       "html" = "Drupal\neg_shopify\ShopifyProductHtmlRouteProvider",
+ *       "html" = "Drupal\neg_shopify\Entity\RouteProvider\ShopifyProductHtmlRouteProvider",
  *     },
- *     "access" = "Drupal\neg_shopify\ShopifyProductAccessControlHandler",
+ *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyProductAccessControlHandler",
  *   },
  *   base_table = "shopify_product",
  *   admin_permission = "administer ShopifyProduct entity",

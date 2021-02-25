@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\neg_shopify;
+namespace Drupal\neg_shopify\Entity\ViewsData;
 
 use Drupal\views\EntityViewsData;
 

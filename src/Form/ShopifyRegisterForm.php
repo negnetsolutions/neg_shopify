@@ -4,7 +4,7 @@ namespace Drupal\neg_shopify\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\neg_shopify\StoreFrontService;
+use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\UserManagement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\UserStorageInterface;
