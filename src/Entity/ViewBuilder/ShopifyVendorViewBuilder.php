@@ -9,7 +9,6 @@ use Drupal\file\Entity\File;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
-use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\Core\Url;
 
 /**
@@ -40,13 +39,7 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    * Get's a default thumbnail.
    */
   protected function getDefaultThumbnail(EntityInterface $entity, $rsImageStyle = 'rs_image') {
-    $params = [
-      'sort' => Settings::defaultSortOrder(),
-      'vendor_slug' => $entity->get('slug')->value,
-    ];
-
-    $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, 1);
+    $products = $entity->getProducts(1);
 
     $build = [];
 
@@ -69,14 +62,8 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    * Renders products.
    */
   protected function renderProducts(EntityInterface $entity) {
-    $params = [
-      'sort' => Settings::defaultSortOrder(),
-      'vendor_slug' => $entity->get('slug')->value,
-    ];
-
-    $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, Settings::productsPerPage());
-    $total = $search->count();
+    $products = $entity->getProducts(Settings::productsPerPage(), 0);
+    $total = $entity->getProductCount();
 
     $productsBuild = [
       '#theme' => 'shopify_product_grid',

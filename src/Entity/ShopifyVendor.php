@@ -136,6 +136,34 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
   }
 
   /**
+   * Get's first X number of vendor products.
+   */
+  public function getProducts($limit = 1, $offset = 0) {
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+      'vendor_slug' => $this->get('slug')->value,
+    ];
+
+    $search = new ShopifyProductSearch($params);
+    $products = $search->search(0, 1);
+
+    return $products;
+  }
+
+  /**
+   * Get's product count.
+   */
+  public function getProductCount() {
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+      'vendor_slug' => $this->get('slug')->value,
+    ];
+
+    $search = new ShopifyProductSearch($params);
+    return $search->count();
+  }
+
+  /**
    * Renders product json.
    */
   public function renderProductJson($sortOrder = FALSE, $page = 0, $perPage = FALSE) {
