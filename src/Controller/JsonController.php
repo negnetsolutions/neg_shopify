@@ -165,9 +165,8 @@ class JsonController extends ControllerBase {
 
         $filterTags = $parts[0];
         $filterTags = str_replace('tags_', '', $filterTags);
-        $filterTags = explode(',', $filterTags);
-        if (strlen(trim($filterTags)) > 0) {
-          $filterTags = explode(',', $filterTags);
+        if (strlen($filterTags) > 0) {
+          $filterTags = array_map('trim', explode(',', $filterTags));
         }
         else {
           $filterTags = [];
@@ -176,7 +175,7 @@ class JsonController extends ControllerBase {
         $filterTypes = $parts[1];
         $filterTypes = str_replace('types_', '', $filterTypes);
         if (strlen(trim($filterTypes)) > 0) {
-          $filterTypes = explode(',', $filterTypes);
+          $filterTypes = array_map('trim', explode(',', $filterTypes));
         }
         else {
           $filterTypes = [];

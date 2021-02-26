@@ -22,16 +22,47 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
 
-    $build['name'] = $entity->get('title')->value;
-    $build['slug'] = $entity->get('slug')->value;
-    $build['type'] = $entity->get('type')->value;
-    $build['status'] = $entity->get('status')->value;
+    if ($settings = $display->getComponent('thumbnail')) {
+      if ($entity->get('thumbnail')->isEmpty()) {
+        $responsiveImageStyle = (isset($settings['settings']['responsive_image_style'])) ? $settings['settings']['responsive_image_style'] : 'rs_image';
+        $build['thumbnail'] = $this->getDefaultThumbnail($entity, $responsiveImageStyle);
+      }
+    }
 
     if ($display->getComponent('products')) {
       // Get products.
       $build['products'] = $this->renderProducts($entity);
     }
 
+  }
+
+  /**
+   * Get's a default thumbnail.
+   */
+  protected function getDefaultThumbnail(EntityInterface $entity, $rsImageStyle = 'rs_image') {
+    $params = [
+      'sort' => Settings::defaultSortOrder(),
+      'vendor_slug' => $entity->get('slug')->value,
+    ];
+
+    $search = new ShopifyProductSearch($params);
+    $products = $search->search(0, 1);
+
+    $build = [];
+
+    if (count($products) > 0) {
+      $product = reset($products);
+      if ($product->image->target_id) {
+        $view = $product->image->view();
+        if (count($view) > 0 && isset($view[0])) {
+          $build = $view[0];
+          $build['#theme'] = 'responsive_image_formatter';
+          $build['#responsive_image_style_id'] = $rsImageStyle;
+        }
+      }
+    }
+
+    return $build;
   }
 
   /**

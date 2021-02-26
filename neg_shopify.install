@@ -115,3 +115,36 @@ function neg_shopify_update_8714(&$sandbox) {
 
   return t('shopify_vendor.status');
 }
+
+/**
+ * Adds "shopify_vendor.thumbnail"
+ */
+function neg_shopify_update_8715(&$sandbox) {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('shopify_vendor');
+  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_vendor');
+
+  $field_storage_definitions['thumbnail'] = BaseFieldDefinition::create('image')
+    ->setName('thumbnail')
+    ->setTargetEntityTypeId('shopify_vendor')
+    ->setTargetBundle(NULL)
+    ->setLabel(t('Thumbnail Image'))
+    ->setDefaultValue('')
+    ->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'image',
+      'weight' => -40,
+      'settings' => ['image_style' => '', 'image_link' => 'content'],
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'image_image',
+      'weight' => 2,
+    ])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  return t('shopify_vendor.thumbnail');
+}

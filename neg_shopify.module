@@ -473,6 +473,7 @@ function neg_shopify_theme_suggestions_shopify_product_variant(array $variables)
  *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
  */
 function template_preprocess_shopify_vendor(&$variables) {
+  $entity = $variables['elements']['#shopify_vendor'];
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_vendor'] = $variables['elements']['#shopify_vendor'];
   $variables['attributes']['class'][] = 'shopify-vendor';
@@ -484,10 +485,10 @@ function template_preprocess_shopify_vendor(&$variables) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
-  $variables['name'] = $variables['elements']['name'];
-  $variables['slug'] = $variables['elements']['slug'];
-  $variables['type'] = $variables['elements']['type'];
-  $variables['status'] = $variables['elements']['status'];
+  $variables['name'] = $entity->get('title')->value;
+  $variables['slug'] = $entity->get('slug')->value;
+  $variables['type'] = $entity->get('type')->value;
+  $variables['status'] = $entity->get('status')->value;
 
   $variables['attributes']['class'][] = ($variables['status'] == TRUE) ? 'published' : 'unpublished';
 

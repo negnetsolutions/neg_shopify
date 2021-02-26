@@ -6,7 +6,6 @@
   "require": {
     "phpclassic/php-shopify": "^1.1",
     "drupal/form_options_attributes": "^1.2",
-    "drupal/extra_field_plus": "^2.0",
     "negnet/neg_paragraphs": "master"
   }
 }
