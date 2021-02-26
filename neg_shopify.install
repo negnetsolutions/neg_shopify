@@ -125,6 +125,24 @@ function neg_shopify_update_8715(&$sandbox) {
   $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
   $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_vendor');
 
+  $field_storage_definitions['description'] = BaseFieldDefinition::create('text_long')
+    ->setName('description')
+    ->setTargetEntityTypeId('shopify_vendor')
+    ->setTargetBundle(NULL)
+    ->setLabel(t('Description'))
+    ->setDefaultValue('')
+    ->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'text_default',
+      'weight' => -30,
+    ])
+    ->setDisplayOptions('form', [
+      'type' => 'text_textfield',
+      'weight' => -2,
+    ])
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
   $field_storage_definitions['thumbnail'] = BaseFieldDefinition::create('image')
     ->setName('thumbnail')
     ->setTargetEntityTypeId('shopify_vendor')

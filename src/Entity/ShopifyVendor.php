@@ -145,7 +145,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     ];
 
     $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, 1);
+    $products = $search->search($offset, $limit);
 
     return $products;
   }
@@ -366,6 +366,21 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
         'weight' => -10,
       ])
       ->setDisplayConfigurable('form', TRUE);
+
+    $fields['description'] = BaseFieldDefinition::create('text_long')
+      ->setLabel(t('Description'))
+      ->setDefaultValue('')
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'text_default',
+        'weight' => -30,
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'text_textfield',
+        'weight' => -2,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     $fields['thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail Image'))

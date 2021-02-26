@@ -45,14 +45,7 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
 
     if (count($products) > 0) {
       $product = reset($products);
-      if ($product->image->target_id) {
-        $view = $product->image->view();
-        if (count($view) > 0 && isset($view[0])) {
-          $build = $view[0];
-          $build['#theme'] = 'responsive_image_formatter';
-          $build['#responsive_image_style_id'] = $rsImageStyle;
-        }
-      }
+      $build = $product->renderThumbnail($rsImageStyle);
     }
 
     return $build;

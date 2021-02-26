@@ -604,6 +604,36 @@ EOL;
   }
 
   /**
+   * Get's product thumbnail image.
+   */
+  public function getThumbnailImage() {
+    if ($this->image->target_id) {
+      return $this->image;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Get's product thumbnail rendered.
+   */
+  public function renderThumbnail($image_style = 'rs_image', $formatter = 'responsive_image_formatter') {
+    $build = [];
+
+    $image = $this->getThumbnailImage();
+    if ($image) {
+      $view = $image->view();
+      if (count($view) > 0 && isset($view[0])) {
+        $build = $view[0];
+        $build['#theme'] = $formatter;
+        $build['#responsive_image_style_id'] = $image_style;
+      }
+    }
+
+    return $build;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getGoogleProductCategoryTags() {
