@@ -387,9 +387,9 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['image_style' => '', 'image_link' => 'content'],
+        'settings' => ['responsive_image_style' => 'rs_image'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',
@@ -404,7 +404,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
         'label' => 'hidden',
         'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['responsive_image_style' => 'rs_image', 'image_link' => 'nothing'],
+        'settings' => ['responsive_image_style' => 'rs_image'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',

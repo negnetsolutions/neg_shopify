@@ -688,7 +688,8 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
-        'type' => 'image',
+        'type' => 'responsive_image',
+        'settings' => ['responsive_image_style' => 'rs_image'],
         'weight' => 2,
       ])
       ->setDisplayOptions('form', [
@@ -704,7 +705,7 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
         'label' => 'hidden',
         'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['responsive_image_style' => 'rs_5x4', 'image_link' => 'content'],
+        'settings' => ['responsive_image_style' => 'rs_5x4'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',

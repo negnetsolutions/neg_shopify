@@ -797,9 +797,9 @@ EOL;
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['image_style' => '', 'image_link' => 'content'],
+        'settings' => ['responsive_image_style' => 'rs_image'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',
@@ -814,7 +814,8 @@ EOL;
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'responsive_image',
+        'settings' => ['responsive_image_style' => 'rs_image'],
         'weight' => -35,
       ])
       ->setDisplayOptions('form', [
@@ -830,7 +831,7 @@ EOL;
         'label' => 'hidden',
         'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['responsive_image_style' => 'rs_5x4', 'image_link' => 'content'],
+        'settings' => ['responsive_image_style' => 'rs_5x4'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',
