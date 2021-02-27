@@ -21,11 +21,8 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
 
-    if ($settings = $display->getComponent('thumbnail')) {
-      if ($entity->get('thumbnail')->isEmpty()) {
-        $responsiveImageStyle = (isset($settings['settings']['responsive_image_style'])) ? $settings['settings']['responsive_image_style'] : 'rs_image';
-        $build['thumbnail'] = $this->getDefaultThumbnail($entity, $responsiveImageStyle);
-      }
+    if ($display->getComponent('dynamic_thumbnail')) {
+      $build['thumbnail'] = $build['dynamic_thumbnail'];
     }
 
     if ($display->getComponent('products')) {

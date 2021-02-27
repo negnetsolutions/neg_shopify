@@ -398,6 +398,23 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['dynamic_thumbnail'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Dynamic Thumbnail Image'))
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'responsive_image',
+        'weight' => -40,
+        'settings' => ['responsive_image_style' => 'rs_image', 'image_link' => 'nothing'],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'image_image',
+        'weight' => 2,
+      ])
+      ->setDisplayConfigurable('view', TRUE)
+      ->setComputed(TRUE)
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicVendorImage')
+    ;
+
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))
       ->setDescription(t('The language code for the Shopify vendor entity.'));
