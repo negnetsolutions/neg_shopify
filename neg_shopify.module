@@ -258,12 +258,6 @@ function neg_shopify_entity_extra_field_info() {
     'visible' => TRUE,
     'weight' => 100,
   ];
-  $extra['shopify_product']['shopify_product']['display']['dynamic_product_image'] = [
-    'label' => t('Dynamic product image'),
-    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
-    'visible' => TRUE,
-    'weight' => 150,
-  ];
   $extra['shopify_product']['shopify_product']['display']['active_variant'] = [
     'label' => t('Active variant'),
     'description' => t('Renders the active variant.'),
@@ -275,12 +269,6 @@ function neg_shopify_entity_extra_field_info() {
     'description' => t('Displays related items'),
     'visible' => FALSE,
     'weight' => 255,
-  ];
-  $extra['shopify_product_variant']['shopify_product_variant']['display']['dynamic_product_image'] = [
-    'label' => t('Dynamic product image'),
-    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
-    'visible' => TRUE,
-    'weight' => 150,
   ];
   $extra['shopify_product_variant']['shopify_product_variant']['display']['product_title'] = [
     'label' => t('Product Title'),

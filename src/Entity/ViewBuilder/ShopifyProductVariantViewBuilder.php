@@ -24,19 +24,6 @@ class ShopifyProductVariantViewBuilder extends EntityViewBuilder {
       $product = $entity->getProduct();
     }
 
-    if ($display->getComponent('dynamic_product_image')) {
-      if ($entity->image->isEmpty()) {
-        $view = $product->get('image')->get(0)->view();
-      }
-      else {
-        $view = $entity->get('image')->get(0)->view();
-      }
-
-      $build['dynamic_product_image'] = $view;
-      $build['dynamic_product_image']['#theme'] = 'responsive_image_formatter';
-      $build['dynamic_product_image']['#responsive_image_style_id'] = 'rs_5x4';
-    }
-
     if ($display->getComponent('product_title')) {
       $build['product_title'] = [
         '#markup' => '<div class="title">' . $product->get('title')->value . '</div>',

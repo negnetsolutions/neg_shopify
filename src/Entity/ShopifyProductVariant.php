@@ -698,6 +698,24 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['dynamic_product_image'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Dynamic Product Image'))
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'responsive_image',
+        'weight' => -40,
+        'settings' => ['responsive_image_style' => 'rs_5x4', 'image_link' => 'content'],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'image_image',
+        'weight' => 2,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setComputed(TRUE)
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductVariantImage')
+    ;
+
     $fields['option1'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Option 1'))
       ->setDefaultValue('')

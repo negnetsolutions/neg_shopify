@@ -41,24 +41,6 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       }
     }
 
-    if ($display->getComponent('dynamic_product_image')) {
-      $view = [];
-      // Setup the image from the active variant.
-      if ($active_variant instanceof ShopifyProductVariant) {
-        if ($active_variant->image->target_id) {
-          $view = $active_variant->image->view();
-        }
-        elseif ($entity->image->target_id) {
-          $view = $entity->image->view();
-        }
-        if (count($view) > 0 && isset($view[0])) {
-          $build['dynamic_product_image'] = $view[0];
-          $build['dynamic_product_image']['#theme'] = 'responsive_image_formatter';
-          $build['dynamic_product_image']['#responsive_image_style_id'] = 'rs_image';
-        }
-      }
-    }
-
     if ($display->getComponent('active_variant')) {
 
       // Display the active variant.
