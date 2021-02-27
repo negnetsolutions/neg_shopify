@@ -8,6 +8,7 @@ use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Url;
 use Drupal\Core\Render\RenderContext;
+use Drupal\neg_shopify\Settings;
 
 /**
  * ShopifyVendors Class.
@@ -19,43 +20,61 @@ class ShopifyVendors {
   /**
    * Syncs shopify vendors with current products.
    */
-  public static function syncVendors() {
+  public static function syncVendors(array $specificVendors = []) {
 
-    $vendors = self::fetchVendorsFromProducts();
+    $vendors = self::fetchVendorsFromProducts($specificVendors);
     $vendorIds = [];
 
     foreach ($vendors as $vendor) {
 
       $vendor->tags = explode(',', $vendor->tags);
       $vendor->type = explode(',', $vendor->type);
-      $vendor->status = TRUE;
+
+      $modified = FALSE;
 
       // Attempt to load this variant.
       $entity = ShopifyVendor::loadBySlug($vendor->slug);
       if ($entity instanceof ShopifyVendor) {
-        $entity->update((array) $vendor);
+        $oldTags = [];
+        foreach ($entity->get('tags')->getValue() as $tag) {
+          $oldTags[] = $tag['target_id'];
+        }
+
+        $oldType = $entity->get('type')->value;
+        $vendor->status = $entity->get('status')->value;
+
+        if ($oldTags != $vendor->tags || $oldType != $vendor->type[0]) {
+          $entity->update((array) $vendor);
+          $modified = TRUE;
+        }
       }
       else {
+        $vendor->status = TRUE;
         $entity = ShopifyVendor::create((array) $vendor);
+        $modified = TRUE;
       }
 
       if ($entity) {
-        $entity->save();
+        if ($modified === TRUE) {
+          $entity->save();
+        }
+
         $vendorIds[] = $entity->id();
       }
 
     }
 
-    // Delete all vendors not in vendorIds.
-    $toDelete = \Drupal::entityTypeManager()
-      ->getStorage('shopify_vendor')
-      ->getQuery()
-      ->condition('id', $vendorIds, 'NOT IN')
-      ->execute();
+    if (count($specificVendors) === 0) {
+      // Delete all vendors not in vendorIds.
+      $toDelete = \Drupal::entityTypeManager()
+        ->getStorage('shopify_vendor')
+        ->getQuery()
+        ->condition('id', $vendorIds, 'NOT IN')
+        ->execute();
 
-    foreach ($toDelete as $entity) {
-
-      $entity->delete();
+      foreach ($toDelete as $entity) {
+        $entity->delete();
+      }
     }
 
   }
@@ -139,14 +158,16 @@ class ShopifyVendors {
   /**
    * Creates list of valid vendors from product data.
    */
-  public static function fetchVendorsFromProducts() {
+  public static function fetchVendorsFromProducts(array $specificVendors = []) {
+    $specificVendorsQuery = (count($specificVendors) > 0) ? 'AND product.id IN (' . implode(',', $specificVendors) . ')' : '';
+
     $query = <<<EOL
 SELECT
   product.vendor as title, product.vendor_slug as slug, GROUP_CONCAT(distinct tags.tags_target_id ORDER BY tags_target_id DESC SEPARATOR ',') as tags, GROUP_CONCAT(distinct product.product_type ORDER BY product_type ASC SEPARATOR ',') as type
 FROM
   shopify_product product
   left join shopify_product__tags tags on tags.entity_id = product.id
-  left join taxonomy_term_field_data term on term.tid = tags.tags_target_id
+  left join taxonomy_term_field_data term on term.tid = tags.tags_target_id $specificVendorsQuery
 WHERE
   (product.is_available = 1 or product.is_preorder = 1)
 GROUP BY

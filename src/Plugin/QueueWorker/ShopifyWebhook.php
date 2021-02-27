@@ -56,7 +56,9 @@ class ShopifyWebhook extends QueueWorkerBase {
       case 'products/update':
         $product = ShopifyProduct::updateProduct($data['payload']);
         if ($product !== FALSE) {
-          ShopifyVendors::syncVendors();
+          ShopifyVendors::syncVendors([
+            $product->id(),
+          ]);
           Settings::log('Synced Product id: %id', ['%id' => $data['payload']['id'], 'debug']);
         }
         else {

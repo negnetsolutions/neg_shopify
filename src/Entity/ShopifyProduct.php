@@ -165,7 +165,6 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     if (isset($values['vendor'])) {
       $slug = self::slugify($values['vendor']);
       $values['vendor_slug'] = $slug;
-      Cache::invalidateTags(['shopify_vendor:' . $slug]);
     }
 
     if (!isset($values['extra_images']) || empty($values['extra_images'])) {
