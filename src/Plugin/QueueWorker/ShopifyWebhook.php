@@ -9,6 +9,7 @@ use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
 use Drupal\neg_shopify\ShopifyVendors;
+use Drupal\neg_shopify\Event\WebhookEvent;
 
 /**
  * Class ShopifyWebhook.
@@ -20,7 +21,17 @@ class ShopifyWebhook extends QueueWorkerBase {
    */
   public function processItem($data) {
 
+    $event = new WebhookEvent($data);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch(WebhookEvent::PREPROCESS, $event);
+
     switch ($data['hook']) {
+
+      case 'orders/create':
+      case 'orders/updated':
+      case 'orders/cancelled':
+        break;
+
       case 'customers/create':
       case 'customers/update':
         $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
@@ -98,6 +109,8 @@ class ShopifyWebhook extends QueueWorkerBase {
         }
         break;
     }
+
+    $event_dispatcher->dispatch(WebhookEvent::POSTPROCESS, $event);
   }
 
 }
