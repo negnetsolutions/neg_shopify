@@ -13,6 +13,7 @@ class ShopifyService {
   protected static $instance = FALSE;
   protected $client;
   protected $productService = FALSE;
+  protected $orderService = FALSE;
   protected $metafieldService = FALSE;
   protected $smartCollectionService = FALSE;
   protected $customerService = FALSE;
@@ -53,6 +54,7 @@ class ShopifyService {
 
     $this->client = new ShopifySDK();
     $this->productService = $this->client->Product;
+    $this->orderService = $this->client->Order;
     $this->metafieldService = $this->client->Metafield;
     $this->smartCollectionService = $this->client->SmartCollection;
     $this->customerService = $this->client->Customer;
@@ -219,6 +221,32 @@ class ShopifyService {
     }
 
     return $hooks;
+  }
+
+  /**
+   * Creates an order.
+   */
+  public function createOrder(array $params) {
+    try {
+      return $this->orderService->post($params);
+    }
+    catch (\Exception $e) {
+      \Drupal::messenger()->addError($e->getMessage(), TRUE);
+      return FALSE;
+    }
+  }
+
+  /**
+   * Updates an order.
+   */
+  public function updateOrder($order_id, array $params) {
+    try {
+      return $this->client->Order($order_id)->put($params);
+    }
+    catch (\Exception $e) {
+      \Drupal::messenger()->addError($e->getMessage(), TRUE);
+      return FALSE;
+    }
   }
 
   /**
