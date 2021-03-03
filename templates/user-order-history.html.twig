@@ -12,7 +12,7 @@
     </thead>
     <tbody>
       <tr v-for="record in records">
-        <td class='order'><a target="_blank" :href="'{{ url('neg_shopify.customer.order.json') }}?order=' + btoa(record.id)">{% verbatim %}{{ record.orderNumber }}{% endverbatim %}</a></td>
+        <td class='order'><a target="_blank" :href="'{{ url('neg_shopify.customer.receipt') }}?order=' + btoa(record.id)">{% verbatim %}{{ record.orderNumber }}{% endverbatim %}</a></td>
         <td class='date'>{% verbatim %}{{ formatDate(record.processedAt) }}{% endverbatim %}</td>
         <td class='amount'>{% verbatim %}<span v-if="record.totalPriceV2.currencyCode == 'USD'">$</span>{{ formatMoney(record.totalPriceV2.amount) }} <span v-if="record.totalPriceV2.currencyCode != 'USD'">{{ record.totalPriceV2.currencyCode }}</span>{% endverbatim %}</td>
         <td class="financial_status">{% verbatim %}{{ formatStatus(record.financialStatus) }}{% endverbatim %}</td>

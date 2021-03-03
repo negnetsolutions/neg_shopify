@@ -65,8 +65,8 @@ neg_shopify.webhook:
   requirements:
     _permission: 'access content'
 
-neg_shopify.customer.order.json:
-  path: '/account/order.json'
+neg_shopify.customer.receipt:
+  path: '/account/receipt'
   defaults:
     _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrder'
     _title: 'Receipt'
