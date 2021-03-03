@@ -91,7 +91,7 @@ class ShopifyUserEditForm extends ProfileForm {
       '#type' => 'password_confirm',
       '#size' => 25,
       '#description' => $this->t('To change the current user password, enter the new password in both fields.'),
-      '#access' => ($user == $entity) ? TRUE : FALSE,
+      '#access' => ($user->id() === $account->id()) ? TRUE : FALSE,
     ];
 
     $roles = array_map(['\Drupal\Component\Utility\Html', 'escape'], user_role_names(TRUE));
