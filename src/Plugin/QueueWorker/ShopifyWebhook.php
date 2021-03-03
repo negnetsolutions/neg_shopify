@@ -40,7 +40,6 @@ class ShopifyWebhook extends QueueWorkerBase {
         }
 
         UserManagement::syncUserWithShopify($data['payload']);
-
         break;
 
       case 'customers/delete':

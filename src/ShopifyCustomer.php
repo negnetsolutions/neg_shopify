@@ -60,6 +60,69 @@ class ShopifyCustomer {
   }
 
   /**
+   * Updates shopify user with user input.
+   */
+  public function updateShopifyUser(array $input) {
+
+    $customerInput = [];
+    foreach ($input as $key => $value) {
+      $customerInput[] = "$key: \"$value\"";
+    }
+    $customerInputString = implode(', ', $customerInput);
+
+    $accessToken = $this->accessToken;
+
+    // Let's use the storefront api.
+    if ($accessToken) {
+      $query = <<<EOF
+  mutation customerUpdate {
+    customerUpdate(customerAccessToken: "${accessToken}", customer: { ${customerInputString} }) {
+      customer {
+        id
+      }
+      customerUserErrors {
+        code
+        field
+        message
+      }
+    }
+  }
+EOF;
+      $results = StoreFrontService::request($query);
+      if (isset($results['data']['customerUpdate']['customer']['id']) && $results['data']['customerUpdate']['customer']['id'] !== NULL) {
+        return TRUE;
+      }
+    }
+    else {
+      $id = $this->user->get('field_shopify_id')->value;
+      if ($id === NULL) {
+        throw new \Exception("Shopify ID missing!");
+      }
+
+      $query = <<<EOF
+mutation customerUpdate {
+  customerUpdate(input: { id: "${id}", ${customerInputString} }) {
+    customer {
+      id
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+EOF;
+
+      $results = ShopifyService::instance()->graphQL($query);
+      if (isset($results['data']['customerUpdate']['customer']['id']) && $results['data']['customerUpdate']['customer']['id'] !== NULL) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Get's customer info.
    */
   public function getCustomerInfo() {
@@ -364,6 +427,10 @@ EOF;
         'content' => ['user', 'url.query_args'],
       ],
     ];
+
+    if ($this->user) {
+      $build['#cache']['tags'] = $this->user->getCacheTags();
+    }
 
     Settings::attachShopifyJs($build);
 

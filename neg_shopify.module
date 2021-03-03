@@ -157,6 +157,17 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * @param array $entity_types
+ */
+function neg_shopify_entity_type_alter(array &$entity_types)
+{
+  $user_entity_type = $entity_types['user'];
+  $handlers = $user_entity_type->getHandlerClasses();
+  $handlers['form']['default'] = 'Drupal\neg_shopify\Form\ShopifyUserEditForm';
+  $user_entity_type->setHandlerClass('form', $handlers['form']);
+}
+
+/**
  * Implements hook_form_alter().
  */
 function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
@@ -669,9 +680,9 @@ function neg_shopify_entity_delete(EntityInterface $entity) {
 
 function neg_shopify_preprocess_user(&$vars) {
   $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+  $user = $vars['user'];
 
-  if ($allowShopifyLogins) {
-    $user = $vars['user'];
+  if ($allowShopifyLogins && $user->hasRole('shopify_customer')) {
     $customer = new ShopifyCustomer([
       'user' => $user,
     ]);
