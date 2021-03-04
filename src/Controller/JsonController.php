@@ -21,7 +21,7 @@ use Drupal\neg_shopify\Settings;
 class JsonController extends ControllerBase {
 
   /**
-   * Renders user order.
+   * Renders user receipt.
    */
   public function userOrder() {
     $order = \Drupal::request()->query->get('order');
