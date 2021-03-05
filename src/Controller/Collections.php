@@ -94,7 +94,7 @@ class Collections extends ControllerBase {
   public function renderAll() {
     $build = [
       '#theme' => 'shopify-collection-all',
-      '#name' => 'Products',
+      '#name' => ucwords(Settings::productsLabel()),
     ];
     ShopifyCollection::renderAll($build);
     return $build;
