@@ -519,6 +519,7 @@ function template_preprocess_shopify_vendor(&$variables) {
 function template_preprocess_shopify_product(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product'] = $variables['elements']['#shopify_product'];
+  $variables['shopify_product_id'] = $variables['shopify_product']->id();
 
   if ($variables['shopify_product']->image->target_id) {
     $path = $variables['shopify_product']->image->entity->getFileUri();
