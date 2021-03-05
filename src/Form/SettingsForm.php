@@ -99,6 +99,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'details',
       '#title' => t('Product Display'),
     ];
+
     $form['product_display']['products_per_page'] = [
       '#type' => 'number',
       '#title' => t('Products to display per page'),
@@ -106,6 +107,16 @@ class SettingsForm extends ConfigFormBase {
       '#description' => t('Enter the number of products to display on each page.'),
       '#required' => TRUE,
     ];
+
+    $form['product_display']['products_label'] = [
+      '#type' => 'textfield',
+      '#title' => t('Product Label'),
+      '#default_value' => ($config->get('products_label') !== NULL) ? $config->get('products_label') : 'products',
+      '#maxlength' => '255',
+      '#description' => t('Enter product label, ie., products/items.'),
+      '#required' => TRUE,
+    ];
+
     $form['product_display']['presale_text'] = [
       '#type' => 'textfield',
       '#title' => t('Presale Text'),
@@ -392,6 +403,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('users_frequency', $form_state->getValue('users_frequency'))
       ->set('products_per_page', $form_state->getValue('products_per_page'))
+      ->set('products_label', $form_state->getValue('products_label'))
       ->set('allow_shopify_users', $form_state->getValue('allow_shopify_users'))
       ->set('presale_text', $form_state->getValue('presale_text'))
       ->set('google_product_category', $form_state->getValue('google_product_category'))

@@ -145,6 +145,7 @@ class ShopifyVendors {
     $variables['#vendors'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => $vendors,
+      '#products_label' => Settings::productsLabel(),
       '#count' => $count,
       '#controls' => FALSE,
       '#defaultSort' => Settings::defaultSortOrder(),

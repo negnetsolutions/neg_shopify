@@ -59,6 +59,7 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
       '#count' => $total,
+      '#products_label' => Settings::productsLabel(),
       '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
         'contexts' => ['user.roles'],

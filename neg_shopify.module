@@ -105,6 +105,7 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'defaultSort' => NULL,
         'allowManualSort' => FALSE,
         'controls' => TRUE,
+        'products_label' => 'products',
       ],
     ],
     'neg_shopify_cart' => [
@@ -412,6 +413,16 @@ function neg_shopify_renderable_links() {
     ];
   }
   return $links;
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function neg_shopify_preprocess_shopify_product_grid(&$variables) {
+
+  if (substr($variables['products_label'], -1, 1) === 's' && $variables['count'] == 1) {
+    $variables['products_label'] = substr($variables['products_label'], 0, strlen($variables['products_label']) - 1);
+  }
 }
 
 /**

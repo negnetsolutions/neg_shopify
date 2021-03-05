@@ -168,6 +168,19 @@ class Settings {
   }
 
   /**
+   * Gets products label.
+   */
+  public static function productsLabel() {
+    $config = self::config();
+    $label = $config->get('products_label');
+    if ($label === NULL) {
+      return 'products';
+    }
+
+    return $label;
+  }
+
+  /**
    * Gets default sort order.
    */
   public static function defaultSortOrder() {

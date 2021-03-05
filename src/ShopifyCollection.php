@@ -131,6 +131,7 @@ class ShopifyCollection {
     $variables['#products'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#products_label' => Settings::productsLabel(),
       '#count' => $total,
       '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
@@ -313,6 +314,7 @@ class ShopifyCollection {
     $variables['products'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#products_label' => Settings::productsLabel(),
       '#count' => $total,
       '#defaultSort' => $variables['attributes']['data-sort'],
       '#allowManualSort' => $allowManualSorting,
