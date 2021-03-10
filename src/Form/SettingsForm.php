@@ -272,6 +272,12 @@ class SettingsForm extends ConfigFormBase {
         '#submit' => ['::deleteAllProducts'],
       ];
 
+      $form['delete']['delete_vendors'] = [
+        '#type' => 'submit',
+        '#value' => t('Delete All Vendors'),
+        '#submit' => ['::deleteAllVendors'],
+      ];
+
       $form['delete']['delete_collections'] = [
         '#type' => 'submit',
         '#value' => t('Delete All Collections'),
@@ -285,6 +291,13 @@ class SettingsForm extends ConfigFormBase {
       ];
     }
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Deletes all vendors.
+   */
+  public function deleteAllVendors(array &$form, FormStateInterface $form_state) {
+    Sync::deleteAllVendors();
   }
 
   /**

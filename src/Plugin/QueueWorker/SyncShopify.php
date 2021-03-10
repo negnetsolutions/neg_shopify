@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify\Plugin\QueueWorker;
 
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\ShopifyCollection;
@@ -33,6 +34,16 @@ class SyncShopify extends QueueWorkerBase {
           Settings::log('Synced Product id: %id', ['%id' => $product['id'], 'debug']);
         }
 
+        break;
+
+      case 'deleteVendor':
+        try {
+          $product = ShopifyVendor::load($data['id']);
+          $product->delete();
+        }
+        catch (\Exception $e) {
+          Settings::log('Could not delete shopify vendor id %id', ['%id' => $data['id']], 'error');
+        }
         break;
 
       case 'deleteProduct':

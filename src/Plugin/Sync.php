@@ -13,6 +13,27 @@ use Drupal\neg_shopify\Settings;
 class Sync {
 
   /**
+   * Deletes all vendors.
+   */
+  public static function deleteAllVendors() {
+    // Get the product queue.
+    $queue = Settings::queue();
+
+    // Get all Products.
+    $query = \Drupal::entityQuery('shopify_vendor');
+    $ids = $query->execute();
+
+    foreach ($ids as $id) {
+      $queue->createItem([
+        'op' => 'deleteVendor',
+        'id' => $id,
+      ]);
+    }
+
+    \Drupal::messenger()->addStatus('Queue all products to be deleted!', TRUE);
+  }
+
+  /**
    * Deletes all products.
    */
   public static function deleteAllProducts() {
