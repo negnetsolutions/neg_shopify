@@ -72,7 +72,8 @@ class ShopifyVendors {
         ->condition('id', $vendorIds, 'NOT IN')
         ->execute();
 
-      foreach ($toDelete as $entity) {
+      $entities = ShopifyVendor::loadMultiple($toDelete);
+      foreach ($entities as $entity) {
         $entity->delete();
       }
     }
