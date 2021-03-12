@@ -15,6 +15,29 @@ class Sync {
   /**
    * Deletes all vendors.
    */
+  public static function deleteAllCustomers() {
+    // Get the product queue.
+    $queue = Settings::usersQueue();
+
+    // Get all Products.
+    $query = \Drupal::entityQuery('user')
+      ->condition('roles', 'shopify_customer', 'CONTAINS');
+
+    $ids = $query->execute();
+
+    foreach ($ids as $id) {
+      $queue->createItem([
+        'op' => 'deleteUser',
+        'id' => $id,
+      ]);
+    }
+
+    \Drupal::messenger()->addStatus('Queue all products to be deleted!', TRUE);
+  }
+
+  /**
+   * Deletes all vendors.
+   */
   public static function deleteAllVendors() {
     // Get the product queue.
     $queue = Settings::queue();
@@ -119,7 +142,7 @@ class Sync {
     $queue = Settings::usersQueue();
 
     if ($queue->numberOfItems() > 0) {
-      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear', TRUE);
+      \Drupal::messenger()->addError('There are items in the user queue. Skipping sync until queue is cleared.', TRUE);
       return FALSE;
     }
 
@@ -165,7 +188,7 @@ class Sync {
     $product_count = 0;
 
     if ($queue->numberOfItems() > 0) {
-      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear', TRUE);
+      \Drupal::messenger()->addError('There are items in the collection queue. Skipping sync until queue is cleared.', TRUE);
       return FALSE;
     }
 
@@ -209,7 +232,7 @@ class Sync {
     $product_count = 0;
 
     if ($queue->numberOfItems() > 0) {
-      \Drupal::messenger()->addError('There are items in the queue to sync. Can not force sync until queue is clear!', TRUE);
+      \Drupal::messenger()->addError('There are items in the product queue. Skipping sync until queue is cleared.', TRUE);
       return FALSE;
     }
 

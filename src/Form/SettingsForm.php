@@ -289,8 +289,21 @@ class SettingsForm extends ConfigFormBase {
         '#value' => t('Delete All Tags'),
         '#submit' => ['::deleteAllTags'],
       ];
+
+      $form['delete']['delete_shopify_users'] = [
+        '#type' => 'submit',
+        '#value' => t('Delete All Shopify Customers'),
+        '#submit' => ['::deleteAllCustomers'],
+      ];
     }
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * Deletes all customers.
+   */
+  public function deleteAllCustomers(array &$form, FormStateInterface $form_state) {
+    Sync::deleteAllCustomers();
   }
 
   /**
