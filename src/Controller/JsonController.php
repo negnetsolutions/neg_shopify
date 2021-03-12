@@ -6,13 +6,13 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\user\Entity\User;
 
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\ShopifyCustomer;
 use Drupal\neg_shopify\ShopifyVendors;
-use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\Settings;
 
 /**
@@ -30,11 +30,14 @@ class JsonController extends ControllerBase {
     }
 
     $current_user = \Drupal::currentUser();
+
     if (!$current_user->hasPermission('view own shopify customer data')) {
       throw new NotFoundHttpException();
     }
 
     $customer = new ShopifyCustomer();
+    $uid = $current_user->getAccount()->id();
+    $user = User::load($uid);
 
     $data = $customer->getOrderDetails($order);
 
@@ -47,8 +50,8 @@ class JsonController extends ControllerBase {
         ],
       ],
       '#cache' => [
-        'max-age' => 30,
         'contexts' => ['user', 'url.query_args'],
+        'tags' => $user->getCacheTags(),
       ],
     ];
 

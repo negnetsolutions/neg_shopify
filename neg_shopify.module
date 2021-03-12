@@ -17,6 +17,7 @@ use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
+use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 
 /**
  * Implements hook_theme().
@@ -160,8 +161,7 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 /**
  * @param array $entity_types
  */
-function neg_shopify_entity_type_alter(array &$entity_types)
-{
+function neg_shopify_entity_type_alter(array &$entity_types) {
   $user_entity_type = $entity_types['user'];
   $handlers = $user_entity_type->getHandlerClasses();
   $handlers['form']['default'] = 'Drupal\neg_shopify\Form\ShopifyUserEditForm';
@@ -173,24 +173,24 @@ function neg_shopify_entity_type_alter(array &$entity_types)
  */
 function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   switch ($form_id) {
-    case 'user_login_form' :
+    case 'user_login_form':
       $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
       if ($allowShopifyLogins === TRUE) {
-        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
         $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyLoginForm');
       }
 
       $form['#cache']['tags'][] = 'config:neg_shopify.settings';
-    break;
+      break;
 
-    case 'user_register_form' :
+    case 'user_register_form':
       $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
       if ($allowShopifyLogins === TRUE) {
-        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
         $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyRegisterForm');
       }
       $form['#cache']['tags'][] = 'config:neg_shopify.settings';
-    break;
+      break;
   }
 }
 
@@ -219,7 +219,7 @@ function neg_shopify_form_taxonomy_overview_terms_alter(array &$form, FormStateI
 /**
  * Implements hook_entity_bundle_info_alter().
  *
- * @todo: Doesn't work because link_templates['canonical'] override this.
+ * @todo Doesn't work because link_templates['canonical'] override this.
  *
  * @see Drupal\Core\Entity\Entity::toUrl()
  */
@@ -426,6 +426,37 @@ function neg_shopify_preprocess_shopify_product_grid(&$variables) {
 }
 
 /**
+ * Preprocesses receipts.
+ *
+ * This is mostly to find product images if shopify doesn't supply them.
+ */
+function neg_shopify_preprocess_neg_shopify_order_receipt(&$variables) {
+
+  foreach ($variables['order']['lineItems']['edges'] as &$line) {
+    $lineItem = &$line['node'];
+
+    // Shopify doesn't have an image. Let's try and find from out database.
+    if ($lineItem['sku'] !== NULL && $lineItem['image'] === NULL) {
+
+      $results = \Drupal::entityTypeManager()
+        ->getStorage('shopify_product_variant')
+        ->getQuery()
+        ->condition('sku', $lineItem['sku'])
+        ->range(0, 1)
+        ->execute();
+
+      $variants = ShopifyProductVariant::loadMultiple($results);
+
+      if (count($variants) > 0) {
+        $variant = reset($variants);
+        $product = $variant->getProduct();
+        $lineItem['thumbnail'] = $product->renderThumbnail();
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_preprocess_paragraph().
  */
 function neg_shopify_preprocess_taxonomy_term(&$variables) {
@@ -463,7 +494,7 @@ function neg_shopify_theme_suggestions_shopify_product(array $variables) {
 }
 
 /**
- * Implements theme_suggestions__shopify_product_variant
+ * Implements theme_suggestions__shopify_product_variant.
  */
 function neg_shopify_theme_suggestions_shopify_product_variant(array $variables) {
   $suggestions = [];
@@ -558,7 +589,7 @@ function template_preprocess_shopify_product_variant(&$variables) {
   $variables['shopify_product'] = $variables['shopify_product_variant']->getProduct();
 
   // Helpful $content variable for templates.
-  $variables += array('content' => array());
+  $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
@@ -690,6 +721,9 @@ function neg_shopify_entity_delete(EntityInterface $entity) {
   }
 }
 
+/**
+ * Implements hook_preprocess_user.
+ */
 function neg_shopify_preprocess_user(&$vars) {
   $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
   $user = $vars['user'];

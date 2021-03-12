@@ -37,6 +37,8 @@
         <div class="image">
           {% if line.node.image.transformedSrc %}
           <img decoding="async" loading="lazy" width="{{ line.node.image.width }}" height="{{ line.node.image.height }}" alt="{{ line.node.image.altText }}" src="{{ line.node.image.transformedSrc }}" />
+          {% elseif line.node.thumbnail %}
+            {{ line.node.thumbnail }}
           {% endif %}
         </div>
         <div class="description">

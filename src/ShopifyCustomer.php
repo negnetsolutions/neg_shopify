@@ -423,13 +423,15 @@ EOF;
         ],
       ],
       '#cache' => [
-        'max-age' => 30,
         'content' => ['user', 'url.query_args'],
       ],
     ];
 
     if ($this->user) {
       $build['#cache']['tags'] = $this->user->getCacheTags();
+    }
+    else {
+      $build['#cache']['max-age'] = 30;
     }
 
     Settings::attachShopifyJs($build);
