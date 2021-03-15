@@ -30,7 +30,7 @@ class UserManagement {
     $query = \Drupal::entityQuery('user');
     $query->condition('field_shopify_id', $users_ids, 'NOT IN');
     $ids = $query->execute();
-    $users = User::loadMultiple($ids);
+    $users = (count($ids) > 0) ? User::loadMultiple($ids) : [];
 
     foreach ($users as $user) {
       // Check if user can be deleted.
@@ -100,7 +100,7 @@ class UserManagement {
     $query = \Drupal::entityQuery('user');
     $query->condition('field_shopify_id', $id, '=');
     $ids = $query->execute();
-    $users = User::loadMultiple($ids);
+    $users = (count($ids) > 0) ? User::loadMultiple($ids) : [];
 
     return (count($users) > 0) ? reset($users) : NULL;
   }

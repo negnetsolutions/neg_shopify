@@ -368,7 +368,7 @@ class ShopifyCollection {
     $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('field_shopify_collection_id', $collection_id);
     $ids = $query->execute();
-    if ($ids) {
+    if (count($ids) > 0) {
       $terms = Term::loadMultiple($ids);
       return reset($terms);
     }

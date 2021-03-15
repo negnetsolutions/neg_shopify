@@ -445,7 +445,7 @@ function neg_shopify_preprocess_neg_shopify_order_receipt(&$variables) {
         ->range(0, 1)
         ->execute();
 
-      $variants = ShopifyProductVariant::loadMultiple($results);
+      $variants = (count($results) > 0) ? ShopifyProductVariant::loadMultiple($results) : [];
 
       if (count($variants) > 0) {
         $variant = reset($variants);

@@ -112,7 +112,7 @@ class Sync {
     $query->condition('vid', ShopifyCollection::SHOPIFY_COLLECTION_TERM_VID);
     $ids = $query->execute();
 
-    if ($ids) {
+    if (count($ids) > 0) {
       $terms = Term::loadMultiple($ids);
       foreach ($terms as $term) {
         try {

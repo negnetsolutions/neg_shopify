@@ -431,7 +431,7 @@ EOL;
       $ids[] = $record->id;
     }
 
-    return self::loadMultiple($ids);
+    return (count($ids) > 0) ? self::loadMultiple($ids) : [];
   }
 
   /**
@@ -490,7 +490,7 @@ EOL;
     $query = \Drupal::entityQuery('shopify_product');
     $query->condition('product_id', $product_ids, 'NOT IN');
     $ids = $query->execute();
-    $products = self::loadMultiple($ids);
+    $products = (count($ids) > 0) ? self::loadMultiple($ids) : [];
 
     foreach ($products as $product) {
       $deleted_products[] = $product;

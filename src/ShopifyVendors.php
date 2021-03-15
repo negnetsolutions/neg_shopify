@@ -72,7 +72,7 @@ class ShopifyVendors {
         ->condition('id', $vendorIds, 'NOT IN')
         ->execute();
 
-      $entities = ShopifyVendor::loadMultiple($toDelete);
+      $entities = (count($toDelete) > 0) ? ShopifyVendor::loadMultiple($toDelete) : [];
       foreach ($entities as $entity) {
         $entity->delete();
       }
@@ -101,7 +101,8 @@ class ShopifyVendors {
 
     $vendors = [];
     $vids = ShopifyVendor::search($page, $perPage, $params)->execute();
-    $availableVendors = ShopifyVendor::loadMultiple($vids);
+
+    $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
     foreach ($availableVendors as $vendor) {
       $vendors[] = $vendor->loadView('teaser', FALSE);
@@ -137,7 +138,7 @@ class ShopifyVendors {
 
     $vendors = [];
     $vids = ShopifyVendor::search(0, Settings::productsPerPage(), $params)->execute();
-    $availableVendors = ShopifyVendor::loadMultiple($vids);
+    $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
     foreach ($availableVendors as $vendor) {
       $vendors[] = $vendor->loadView();
