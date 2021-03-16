@@ -74,6 +74,11 @@ class ShopifyProductSearch {
     // Require published product.
     $query->condition('published_at', time(), '<=');
 
+    // Check if user can see all products.
+    if (\Drupal::currentUser()->hasPermission('view unavailable shopify product entities')) {
+      $params['show'] = 'all';
+    }
+
     $show = isset($params['show']) ? $params['show'] : 'available';
 
     if ($show === 'available') {

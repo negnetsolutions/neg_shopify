@@ -27,6 +27,9 @@ edit shopify product entities:
 view shopify product entities:
   title: 'View Shopify product entities'
 
+view unavailable shopify product entities:
+  title: 'View Unavailable Shopify product entities in searches'
+
 add shopify product variant entities:
   title: 'Create new Shopify product variant entities'
 
