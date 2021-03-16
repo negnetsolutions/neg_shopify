@@ -353,6 +353,10 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
    */
   public function getGoogleAnalyticsImpression() {
     $variant = $this->getFirstAvailableVariant();
+    if (!$variant) {
+      return FALSE;
+    }
+
     $item = [
       'item_name' => $this->get('title')->value,
       'item_id' => $variant->get('sku')->value,
@@ -458,6 +462,29 @@ EOL;
 
     foreach ($products as $product) {
       $view[] = $product->getView($style, $defaultContext);
+    }
+
+    if ($defaultContext === FALSE) {
+      // Attempt to add analytics events.
+      $items = [];
+      foreach ($products as $product) {
+        $impression = $product->getGoogleAnalyticsImpression();
+        if ($impression) {
+          $items[] = $impression;
+        }
+      }
+
+      if (count($items) > 0) {
+        $items = json_encode($items);
+        $script = <<<EOL
+  <script>
+  if (typeof events === 'object') {
+    events.triggerEvent('view_item_list', {'items': {$items}});
+  }
+  </script>
+EOL;
+        $view[] = $script;
+      }
     }
 
     return $view;
