@@ -184,6 +184,20 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Loads a variant by it's sku.
+   *
+   * @param string $sku
+   *   Sku as string.
+   *
+   * @return ShopifyProductVariant
+   *   Product variant.
+   */
+  public static function loadBySku($sku) {
+    $variants = (array) self::loadByProperties(['sku' => $sku]);
+    return reset($variants);
+  }
+
+  /**
    * Loads a variant by it's variant_id.
    *
    * @param string $variant_id

@@ -5,8 +5,8 @@ namespace Drupal\neg_shopify\Entity\ViewBuilder;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
-use Drupal\file\Entity\File;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
+use Drupal\neg_analytics\Impression;
 
 /**
  * Class ShopifyProductViewBuilder.
@@ -17,6 +17,16 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
    * {@inheritdoc}
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+
+    // Add analytics impression.
+    $impressionType = 'list';
+    switch ($view_mode) {
+      case 'full':
+        $impressionType = 'detail';
+        break;
+    }
+    Impression::instance()->addProductImpression($entity, $impressionType);
+
     if (isset($build['body_html'])) {
       $build['body_html'][0]['#format'] = 'html';
     }

@@ -156,7 +156,35 @@ const shopping_cart = new function (){
 
   };
 
+  this.findItemByVariantId = function findItemByVariantId(variant_id) {
+    for (let i = 0; i < _.cart.items.length; i++) {
+      let item = _.cart.items[i];
+      if (item.variantId == variant_id) {
+        return item;
+      }
+    }
+
+    return null;
+  };
+
   this.updateItem = function updateItem(variant_id, qty) {
+    // Attempt to queue analytics event.
+    if (typeof events === 'object') {
+      let item = _.findItemByVariantId(variant_id);
+      let qtyDiff = qty - item.quantity;
+      if (qtyDiff === 0) {
+        return;
+      }
+
+      let event = (qtyDiff > 0) ? 'addToCart' : 'removeFromCart';
+      const details = {
+        'sku': item.sku,
+        'qty': Math.abs(qtyDiff)
+      };
+
+      events.triggerEvent(event, details);
+    }
+
     _.request(
       {
         request: 'update',
@@ -180,6 +208,25 @@ const shopping_cart = new function (){
   };
 
   this.checkout = function checkout() {
+    // Attempt to queue analytics event.
+    if (typeof events === 'object') {
+
+      let items = [];
+      for (let i = 0; i < _.cart.items.length; i++) {
+        let item = _.cart.items[i];
+        items.push({
+          'sku': item.sku,
+          'qty': item.quantity
+        });
+      }
+
+      const details = {
+        'items': items
+      };
+
+      events.triggerEvent('checkout', details);
+    }
+
     _.request(
       {
         request: 'checkout'

@@ -15,7 +15,6 @@ use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
-use Drupal\Core\Cache\Cache;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
@@ -350,6 +349,22 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   }
 
   /**
+   * Get's google analytics view.
+   */
+  public function getGoogleAnalyticsImpression() {
+    $variant = $this->getFirstAvailableVariant();
+    $item = [
+      'item_name' => $this->get('title')->value,
+      'item_id' => $variant->get('sku')->value,
+      'item_brand' => $this->get('vendor')->value,
+      'price' => $variant->get('price')->value,
+      '#tags' => $this->getCacheTags(),
+    ];
+
+    return $item;
+  }
+
+  /**
    * Loads a view array.
    */
   public function getView(string $style = 'store_listing', $defaultContext = TRUE) {
@@ -442,19 +457,7 @@ EOL;
     $view = [];
 
     foreach ($products as $product) {
-      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($product, $style);
-
-      if ($defaultContext === FALSE) {
-        $rendered_view = NULL;
-        \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
-          $rendered_view = render($build);
-        });
-      }
-      else {
-        $rendered_view = $build;
-      }
-
-      $view[] = $rendered_view;
+      $view[] = $product->getView($style, $defaultContext);
     }
 
     return $view;

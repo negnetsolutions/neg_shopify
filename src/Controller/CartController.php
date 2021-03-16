@@ -130,7 +130,10 @@ class CartController extends ControllerBase {
       return $this->removeItem($variantId);
     }
 
+    $variant = ShopifyProductVariant::loadByVariantId($variantId);
+
     $item = [
+      'sku' => $variant->get('sku')->value,
       'variantId' => $variantId,
       'quantity' => $desiredQuantity,
     ];
