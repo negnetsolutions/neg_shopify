@@ -113,7 +113,7 @@ class ShopifyProductSearch {
             }
             $query->condition($group);
           }
-          else if(count($orTags = explode('-or-', $tag)) > 1) {
+          elseif (count($orTags = explode('-or-', $tag)) > 1) {
             $group = $query->orConditionGroup();
             foreach ($andTags as $tag) {
               $tagResults = $termManager->getQuery()
@@ -134,7 +134,7 @@ class ShopifyProductSearch {
             $query->condition('tags', $tagResults, 'IN');
           }
         }
-        }
+      }
     }
 
     if (isset($params['vendor_slug'])) {
@@ -281,7 +281,7 @@ class ShopifyProductSearch {
       }
     }
 
-    $query->sort('is_available', 'ASC');
+    $query->sort('is_available', 'DESC');
 
     foreach ($sort as $option) {
       $query->sort($option, $direction);
