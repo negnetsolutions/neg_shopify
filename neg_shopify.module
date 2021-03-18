@@ -461,7 +461,7 @@ function neg_shopify_preprocess_neg_shopify_order_receipt(&$variables) {
  */
 function neg_shopify_preprocess_taxonomy_term(&$variables) {
   $term = $variables['term'];
-  $vid = $term->getVocabularyId();
+  $vid = $term->bundle();
   $method = '_neg_shopify_preprocess_taxonomy_term_' . $vid;
   if (function_exists($method)) {
     $method($variables);
