@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Form\UserLoginForm;
 use Drupal\neg_shopify\Api\StoreFrontService;
+use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
 
@@ -181,7 +182,20 @@ class ShopifyLoginForm extends UserLoginForm {
     $password = trim($form_state->getValue('pass'));
     $this->userPass = $password;
 
-    if (!$this->authenticateShopifyUser()) {
+    try {
+      if (!$this->authenticateShopifyUser()) {
+        return;
+      }
+    }
+    catch (GraphQlException $e) {
+      $errors = $e->getErrors();
+      $errors = reset($errors);
+      $msg = $errors['message'];
+
+      $form_state->setErrorByName('name', $this->t('Login Error: %m', [
+        '%m' => $msg,
+      ]));
+
       return;
     }
 
@@ -228,17 +242,17 @@ mutation customerAccessTokenCreate {
 }
 EOF;
 
-    try {
-      $results = StoreFrontService::request($query);
+    $results = StoreFrontService::request($query);
 
-      if (isset($results['data']['customerAccessTokenCreate']['customerAccessToken']) && $results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
-        // Successful Shopify Login.
-        $this->accessToken = $results['data']['customerAccessTokenCreate']['customerAccessToken'];
+    if (isset($results['data']['customerAccessTokenCreate']['customerAccessToken']) && $results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
+      // Successful Shopify Login.
+      $this->accessToken = $results['data']['customerAccessTokenCreate']['customerAccessToken'];
 
-        return TRUE;
-      }
+      return TRUE;
     }
-    catch (\Exception $e) {
+
+    if (isset($results['data']['customerAccessTokenCreate']['customerUserErrors'])) {
+      throw new GraphQlException($results['data']['customerAccessTokenCreate']['customerUserErrors'], $query);
     }
 
     return FALSE;

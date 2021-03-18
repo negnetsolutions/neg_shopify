@@ -30,7 +30,7 @@ class StoreFrontService {
     $response = json_decode($request->getBody(), TRUE);
 
     if (isset($response['errors'])) {
-      throw new \Exception('GraphQL Error: ' . print_r($response['errors'], TRUE) . "\nGRAPHQL: $graphQL");
+      throw new GraphQlException($response['errors'], $graphQL);
     }
 
     return $response;

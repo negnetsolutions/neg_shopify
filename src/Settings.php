@@ -32,7 +32,7 @@ class Settings {
    */
   public static function webhookRouteUrl() {
     // TODO.
-    return 'https://ca40f15dd152.ngrok.io/shopify/webhook';
+    return 'https://e9147ab74425.ngrok.io/shopify/webhook';
     return Url::fromRoute('neg_shopify.webhook')->setAbsolute()->toString();
   }
 

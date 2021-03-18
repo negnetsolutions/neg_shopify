@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\neg_shopify\Api\StoreFrontService;
+use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\UserStorageInterface;
@@ -148,6 +149,8 @@ EOF;
     try {
       $results = StoreFrontService::request($query);
 
+      \kint($results);
+
       // User is logged in.
       if ($results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
         // User is logged in. Go with it!.
@@ -173,7 +176,14 @@ EOF;
       }
 
     }
-    catch (\Exception $e) {
+    catch (GraphQlException $e) {
+      $errors = $e->getErrors();
+      $errors = reset($errors);
+      $msg = $errors['message'];
+
+      $form_state->setErrorByName('mail', $this->t('Login API Error: %m', [
+        '%m' => $msg,
+      ]));
     }
 
   }
