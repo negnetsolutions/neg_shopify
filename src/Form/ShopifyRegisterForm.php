@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
@@ -154,12 +155,25 @@ EOF;
         // User is logged in. Go with it!.
         $accessTokenData = $results['data']['customerAccessTokenCreate']['customerAccessToken'];
 
+        $id = base64_decode($results['data']['customerCreate']['customer']['id']);
+        $id = str_replace('gid://shopify/Customer/', '', $id);
+
+        $shopifyUser = [
+          'id' => $id,
+          'first_name' => $firstName,
+          'last_name' => $lastName,
+          'email' => $mail,
+        ];
+
         if (!$this->drupalUser) {
           // Create a new user.
           $this->drupalUser = UserManagement::provisionDrupalUser($mail);
         }
 
         if ($this->drupalUser) {
+          // Sync user with data from login.
+          UserManagement::syncUserWithShopify($shopifyUser, $this->drupalUser);
+
           // Login the user and set shopify state variables.
           UserManagement::setShopifyUserState($this->drupalUser, $accessTokenData);
           $form_state->set('uid', $this->drupalUser->id());
@@ -169,24 +183,7 @@ EOF;
       else {
         // Login failed!
         if (isset($results['data']['customerCreate']['customerUserErrors']) && $results['data']['customerCreate']['customerUserErrors'] !== NULL) {
-
-          // Customer likely exists already. Let's try logging them in.
-          $accessTokenData = StoreFrontService::authenticateUser($mail, $password);
-          if ($accessTokenData) {
-            if (!$this->drupalUser) {
-              // Create a new user.
-              $this->drupalUser = UserManagement::provisionDrupalUser($mail);
-            }
-
-            if ($this->drupalUser) {
-              // Login the user and set shopify state variables.
-              UserManagement::setShopifyUserState($this->drupalUser, $accessTokenData);
-              $form_state->set('uid', $this->drupalUser->id());
-            }
-          }
-          else {
-            $form_state->setErrorByName('mail', $this->t('A user already exists with this email address. Please try logging in or resetting your password.', []));
-          }
+          throw new GraphQlException($results['data']['customerCreate']['customerUserErrors'], $query);
         }
       }
 
@@ -194,10 +191,9 @@ EOF;
     catch (GraphQlException $e) {
       $errors = $e->getErrors();
       $errors = reset($errors);
-      $msg = $errors['message'];
 
-      $form_state->setErrorByName('mail', $this->t('Login API Error: %m', [
-        '%m' => $msg,
+      $form_state->setErrorByName('mail', $this->t('%m', [
+        '%m' => $errors['message'],
       ]));
     }
 

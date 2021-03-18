@@ -6,6 +6,14 @@ neg_shopify.settings:
   requirements:
     _permission: 'Administer Shopify API'
 
+neg_shopify.user.activatebyurl:
+  path: '/user/activate'
+  defaults:
+     _form: '\Drupal\neg_shopify\Form\ShopifyUserActivateForm'
+     _title: 'Activate your account'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.vendors_page:
   path: '/vendors'
   defaults:

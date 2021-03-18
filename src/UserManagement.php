@@ -4,7 +4,6 @@ namespace Drupal\neg_shopify;
 
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
-use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Api\ShopifyService;
 
 /**
@@ -47,7 +46,7 @@ class UserManagement {
   /**
    * Syncs user with shopify.
    */
-  public static function syncUserWithShopify($shopifyUser) {
+  public static function syncUserWithShopify($shopifyUser, $user = FALSE) {
     $mail = $shopifyUser['email'];
 
     if (strlen(trim($mail)) == 0) {
@@ -59,15 +58,13 @@ class UserManagement {
     $gid = 'gid://shopify/Customer/' . $shopifyUser['id'];
 
     // Try to find the user.
-    $user = self::loadUserByShopifyId($shopifyUser['id']);
+    if (!$user) {
+      $user = self::loadUserByShopifyId($shopifyUser['id']);
+    }
 
-    // Check for email address change.
-    if ($user && $user->getEmail() != $mail) {
-      Settings::log('User email change from %email1 to %email2. Deleting Original User.', ['%email1' => $user->getEmail(), '%email2' => $mail]);
-      // Let's delete this user and add a new one.
-      self::clearShopifyUserState($user);
-      $user->delete();
-      $user = NULL;
+    if (!$user) {
+      // Try by mail.
+      $user = self::loadUserByMail($mail);
     }
 
     if (!$user) {
@@ -79,6 +76,7 @@ class UserManagement {
       Settings::log('Updating User: %email', ['%email' => $mail]);
       $user->field_first_name->setValue(['value' => $firstName]);
       $user->field_last_name->setValue(['value' => $lastName]);
+      $user->mail->setValue(['value' => $mail]);
       $user->field_shopify_id->setValue(['value' => $gid]);
       $user->save();
 
@@ -111,7 +109,7 @@ class UserManagement {
   public static function loadUserByMail($mail) {
 
     $load_by_name = \Drupal::entityTypeManager()->getStorage('user')
-                                ->loadByProperties(['name' => $mail]);
+      ->loadByProperties(['name' => $mail]);
     return $load_by_name ? reset($load_by_name) : NULL;
   }
 
@@ -120,10 +118,10 @@ class UserManagement {
    */
   public static function getAdminRoles() {
     return \Drupal::entityTypeManager()
-                        ->getStorage('user_role')
-                        ->getQuery()
-                        ->condition('is_admin', TRUE)
-                        ->execute();
+      ->getStorage('user_role')
+      ->getQuery()
+      ->condition('is_admin', TRUE)
+      ->execute();
   }
 
   /**
@@ -173,8 +171,8 @@ class UserManagement {
    */
   public static function provisionDrupalUser($mail): object {
     $users = \Drupal::entityTypeManager()
-                  ->getStorage('user')
-                  ->loadByProperties(['mail' => $mail]);
+      ->getStorage('user')
+      ->loadByProperties(['mail' => $mail]);
 
     $user_data = [
       'name' => $mail,
