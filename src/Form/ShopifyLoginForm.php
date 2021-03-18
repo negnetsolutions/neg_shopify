@@ -224,38 +224,17 @@ class ShopifyLoginForm extends UserLoginForm {
    * Authenticates user against shopify.
    */
   protected function authenticateShopifyUser() {
+
     $username = $this->userName;
     $password = $this->userPass;
-    $query = <<<EOF
-mutation customerAccessTokenCreate {
-  customerAccessTokenCreate(input: { email: "{$username}", password: "{$password}" }) {
-    customerUserErrors {
-      code
-      field
-      message
-    }
-    customerAccessToken {
-      accessToken
-      expiresAt
-    }
-  }
-}
-EOF;
 
-    $results = StoreFrontService::request($query);
+    $this->accessToken = StoreFrontService::authenticateUser($username, $password);
 
-    if (isset($results['data']['customerAccessTokenCreate']['customerAccessToken']) && $results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
-      // Successful Shopify Login.
-      $this->accessToken = $results['data']['customerAccessTokenCreate']['customerAccessToken'];
-
-      return TRUE;
+    if ($this->accessToken === FALSE) {
+      return FALSE;
     }
 
-    if (isset($results['data']['customerAccessTokenCreate']['customerUserErrors'])) {
-      throw new GraphQlException($results['data']['customerAccessTokenCreate']['customerUserErrors'], $query);
-    }
-
-    return FALSE;
+    return TRUE;
   }
 
 }

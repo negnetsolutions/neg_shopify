@@ -36,4 +36,38 @@ class StoreFrontService {
     return $response;
   }
 
+  /**
+   * Authenticates a customer with shopify.
+   */
+  public function authenticateUser($username, $password) {
+    $query = <<<EOF
+mutation customerAccessTokenCreate {
+  customerAccessTokenCreate(input: { email: "{$username}", password: "{$password}" }) {
+    customerUserErrors {
+      code
+      field
+      message
+    }
+    customerAccessToken {
+      accessToken
+      expiresAt
+    }
+  }
+}
+EOF;
+
+    $results = self::request($query);
+
+    if (isset($results['data']['customerAccessTokenCreate']['customerAccessToken']) && $results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
+      // Successful Shopify Login.
+      return $results['data']['customerAccessTokenCreate']['customerAccessToken'];
+    }
+
+    if (isset($results['data']['customerAccessTokenCreate']['customerUserErrors'])) {
+      throw new GraphQlException($results['data']['customerAccessTokenCreate']['customerUserErrors'], $query);
+    }
+
+    return FALSE;
+  }
+
 }

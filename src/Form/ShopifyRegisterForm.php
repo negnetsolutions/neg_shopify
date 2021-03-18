@@ -149,8 +149,6 @@ EOF;
     try {
       $results = StoreFrontService::request($query);
 
-      \kint($results);
-
       // User is logged in.
       if ($results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
         // User is logged in. Go with it!.
@@ -171,7 +169,24 @@ EOF;
       else {
         // Login failed!
         if (isset($results['data']['customerCreate']['customerUserErrors']) && $results['data']['customerCreate']['customerUserErrors'] !== NULL) {
-          $form_state->setErrorByName('mail', $this->t('A user already exists with this email address. Please try logging in or resetting your password.', []));
+
+          // Customer likely exists already. Let's try logging them in.
+          $accessTokenData = StoreFrontService::authenticateUser($mail, $password);
+          if ($accessTokenData) {
+            if (!$this->drupalUser) {
+              // Create a new user.
+              $this->drupalUser = UserManagement::provisionDrupalUser($mail);
+            }
+
+            if ($this->drupalUser) {
+              // Login the user and set shopify state variables.
+              UserManagement::setShopifyUserState($this->drupalUser, $accessTokenData);
+              $form_state->set('uid', $this->drupalUser->id());
+            }
+          }
+          else {
+            $form_state->setErrorByName('mail', $this->t('A user already exists with this email address. Please try logging in or resetting your password.', []));
+          }
         }
       }
 
