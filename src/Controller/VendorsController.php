@@ -8,7 +8,7 @@ use Drupal\neg_shopify\ShopifyVendors;
 /**
  * Class Vendors.
  */
-class Vendors extends ControllerBase {
+class VendorsController extends ControllerBase {
 
   /**
    * Renders /vendors title.

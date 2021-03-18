@@ -9,8 +9,8 @@ neg_shopify.settings:
 neg_shopify.vendors_page:
   path: '/vendors'
   defaults:
-    _controller: '\Drupal\neg_shopify\Controller\Vendors::renderAll'
-    _title_callback: '\Drupal\neg_shopify\Controller\Vendors::getVendorPageTitle'
+    _controller: '\Drupal\neg_shopify\Controller\VendorsController::renderAll'
+    _title_callback: '\Drupal\neg_shopify\Controller\VendorsController::getVendorPageTitle'
   requirements:
     _permission: 'access content'
 
