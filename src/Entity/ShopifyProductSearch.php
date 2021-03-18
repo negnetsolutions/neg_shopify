@@ -46,7 +46,7 @@ class ShopifyProductSearch {
     $nodes = (count($ids) > 0) ? ShopifyProduct::loadMultiple($ids) : [];
 
     // See if there is a preset sort_order.
-    if ($this->params['sort'] === 'manual-ascending' && isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
+    if (isset($this->params['sort']) && $this->params['sort'] === 'manual-ascending' && isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
       $this->sortByProductId($nodes, $this->params['collection_sort']['items']);
     }
 
@@ -106,9 +106,10 @@ class ShopifyProductSearch {
             foreach ($andTags as $tag) {
               $tagResults = $termManager->getQuery()
                 ->condition('vid', 'shopify_tags', '=')
-                ->condition('name', $tag)
+                ->condition('name', "%$tag%", 'LIKE')
                 ->range(0, 1)
                 ->execute();
+              $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
               $group->condition('tags', $tagResults, 'IN');
             }
             $query->condition($group);
@@ -118,9 +119,10 @@ class ShopifyProductSearch {
             foreach ($andTags as $tag) {
               $tagResults = $termManager->getQuery()
                 ->condition('vid', 'shopify_tags', '=')
-                ->condition('name', $tag)
+                ->condition('name', "%$tag%", 'LIKE')
                 ->range(0, 1)
                 ->execute();
+              $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
               $group->condition('tags', $tagResults, 'IN');
             }
             $query->condition($group);
@@ -128,13 +130,18 @@ class ShopifyProductSearch {
           else {
             $tagResults = $termManager->getQuery()
               ->condition('vid', 'shopify_tags', '=')
-              ->condition('name', $tag)
+              ->condition('name', "%$tag%", 'LIKE')
               ->range(0, 1)
               ->execute();
-            $query->condition('tags', $tagResults, 'IN');
+            $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
+            $query->condition('tags', array_values($tagResults), 'IN');
           }
         }
       }
+    }
+
+    if (isset($params['vendor_name'])) {
+      $query->condition('vendor', "%{$params['vendor_name']}%", 'LIKE');
     }
 
     if (isset($params['vendor_slug'])) {
@@ -293,11 +300,15 @@ class ShopifyProductSearch {
   /**
    * Renders a json response for a search.
    */
-  public static function renderJson($sortOrder = FALSE, $page = 0, $perPage = FALSE, $tags = []) {
+  public static function renderJson($sortOrder = FALSE, $page = 0, $perPage = FALSE, $tags = [], $vendors = []) {
     $params = [
       'tags' => $tags,
       'sort' => $sortOrder,
     ];
+
+    if (count($vendors) > 0) {
+      $params['vendor_name'] = $vendors[0];
+    }
 
     $search = new self($params);
     $products = $search->search($page, $perPage);

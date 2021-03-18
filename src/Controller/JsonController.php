@@ -156,8 +156,9 @@ class JsonController extends ControllerBase {
       case 'product_search':
         $tags = \Drupal::request()->query->get('id');
         $tags = explode('|', $tags);
+        $vendors = ShopifyVendor::filterTagsForVendors($tags);
 
-        $data = ShopifyProductSearch::renderJson($sortOrder, $page, $perPage, $tags);
+        $data = ShopifyProductSearch::renderJson($sortOrder, $page, $perPage, $tags, $vendors);
         $tags = ['shopify_product_list'];
 
         break;
