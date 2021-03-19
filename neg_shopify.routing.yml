@@ -14,6 +14,14 @@ neg_shopify.user.activatebyurl:
   requirements:
     _permission: 'access content'
 
+neg_shopify.user.resetpasswordbyurl:
+  path: '/user/password/reset'
+  defaults:
+     _form: '\Drupal\neg_shopify\Form\ShopifyUserPasswordResetForm'
+     _title: 'Activate your account'
+  requirements:
+    _permission: 'access content'
+
 neg_shopify.vendors_page:
   path: '/vendors'
   defaults:

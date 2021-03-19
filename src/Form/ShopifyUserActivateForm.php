@@ -9,7 +9,6 @@ use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\UserStorageInterface;
-use Drupal\neg_shopify\Settings;
 
 /**
  * Form handler for the user activation forms.
@@ -137,9 +136,6 @@ EOF;
 
     try {
       $results = StoreFrontService::request($query);
-      Settings::log('RESTULS: %r', [
-        '%r' => print_r($results, TRUE),
-      ]);
 
       // User is logged in.
       if (!isset($results['data']['customerActivateByUrl']['customer']['email'])) {

@@ -2,15 +2,11 @@
 
 namespace Drupal\neg_shopify\Form;
 
-use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\user\ProfileForm;
-use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
-
 
 /**
  * Provides a user password reset form.
@@ -34,6 +30,9 @@ class ShopifyUserEditForm extends ProfileForm {
     return $form;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     if ($this->isShopifyUser()) {
       // Display Shopify User Form.

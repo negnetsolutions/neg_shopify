@@ -159,13 +159,15 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * @param array $entity_types
+ * Implements hook_entity_type_alter().
  */
 function neg_shopify_entity_type_alter(array &$entity_types) {
-  $user_entity_type = $entity_types['user'];
-  $handlers = $user_entity_type->getHandlerClasses();
-  $handlers['form']['default'] = 'Drupal\neg_shopify\Form\ShopifyUserEditForm';
-  $user_entity_type->setHandlerClass('form', $handlers['form']);
+  if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+    $user_entity_type = $entity_types['user'];
+    $handlers = $user_entity_type->getHandlerClasses();
+    $handlers['form']['default'] = 'Drupal\neg_shopify\Form\ShopifyUserEditForm';
+    $user_entity_type->setHandlerClass('form', $handlers['form']);
+  }
 }
 
 /**
@@ -173,9 +175,15 @@ function neg_shopify_entity_type_alter(array &$entity_types) {
  */
 function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   switch ($form_id) {
+    case 'user_pass':
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyUserPassForm');
+      }
+
+      break;
+
     case 'user_login_form':
-      $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
-      if ($allowShopifyLogins === TRUE) {
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
         // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
         $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyLoginForm');
       }
@@ -184,8 +192,7 @@ function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id
       break;
 
     case 'user_register_form':
-      $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
-      if ($allowShopifyLogins === TRUE) {
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
         // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
         $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyRegisterForm');
       }
