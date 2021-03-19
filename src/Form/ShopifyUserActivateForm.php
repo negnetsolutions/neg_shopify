@@ -108,6 +108,11 @@ class ShopifyUserActivateForm extends FormBase {
       return;
     }
 
+    if (!empty($form_state->get('uid'))) {
+      // If we have a uid already (from a borked first try, skip re-activation.
+      return;
+    }
+
     $query = <<<EOF
 mutation activateCustomer {
   customerActivateByUrl(activationUrl: "{$url}", password: "{$password}") {
@@ -187,8 +192,6 @@ EOF;
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    \kint($form_state);
-
     if (empty($uid = $form_state->get('uid'))) {
       return;
     }
