@@ -7,6 +7,8 @@ use Drupal\user\ProfileForm;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
+use Drupal\negnet_utility\FieldUtilities;
+use Drupal\neg_shopify\Api\GraphQlException;
 
 /**
  * Provides a user password reset form.
@@ -63,6 +65,11 @@ class ShopifyUserEditForm extends ProfileForm {
   protected function buildShopifyUserForm(array $form, FormStateInterface $form_state) {
     $account = $this->entity;
     $user = $this->currentUser();
+    $customer = new ShopifyCustomer([
+      'user' => $account,
+    ]);
+
+    $details = $customer->getCustomerDetails();
 
     $form['account']['field_first_name'] = [
       '#type' => 'textfield',
@@ -81,20 +88,45 @@ class ShopifyUserEditForm extends ProfileForm {
     $form['account']['mail'] = [
       '#type' => 'email',
       '#title' => $this->t('Email address'),
-      '#description' => $this->t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
       '#required' => TRUE,
       '#default_value' => $account->getEmail(),
     ];
 
-    $form['account']['pass'] = [
-      '#type' => 'password_confirm',
+    $form['account']['phone'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Phone'),
+      '#default_value' => FieldUtilities::formatPhoneNumber($details['phone']),
+    ];
+
+    $form['account']['accepts_marketing'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Subscribed to Marketing Emails?'),
+      '#default_value' => $details['accepts_marketing'],
+    ];
+
+    $form['pass'] = [
+      '#title' => $this->t('Password'),
+      '#type' => 'password',
       '#size' => 25,
-      '#description' => $this->t('To change the current user password, enter the new password in both fields.'),
+      '#description' => t('Enter a new password to change your password.'),
       '#access' => ($user->id() === $account->id()) ? TRUE : FALSE,
+      '#attributes' => [
+        'placeholder' => 'Password',
+      ],
+    ];
+
+    $form['confirm'] = [
+      '#title' => $this->t('Confirm Password'),
+      '#type' => 'password',
+      '#size' => 25,
+      '#access' => ($user->id() === $account->id()) ? TRUE : FALSE,
+      '#attributes' => [
+        'placeholder' => 'Confirm Password',
+      ],
     ];
 
     $roles = array_map(['\Drupal\Component\Utility\Html', 'escape'], user_role_names(TRUE));
-    $form['account']['roles'] = [
+    $form['roles'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Roles'),
       '#default_value' => $account->getRoles(),
@@ -124,13 +156,20 @@ class ShopifyUserEditForm extends ProfileForm {
       'email' => $form_state->getValue('mail'),
       'firstName' => $form_state->getValue('field_first_name'),
       'lastName' => $form_state->getValue('field_last_name'),
+      'acceptsMarketing' => ($form_state->getValue('accepts_marketing') == 1) ? TRUE : FALSE,
+      'phone' => preg_replace('/[^0-9\+]/', '', $form_state->getValue('phone')),
     ];
 
-    if ($password !== NULL) {
+    if ($form_state->hasValue('pass') && strlen($form_state->getValue('pass')) > 0) {
       $input['password'] = $form_state->getValue('pass');
+      $confirm = $form_state->getValue('confirm');
+
+      if ($input['password'] !== $confirm) {
+        $form_state->setErrorByName('pass', 'Passwords do not match.');
+      }
     }
 
-    if ($this->entity === $this->currentUser()) {
+    if ($this->entity->id() === $this->currentUser()->id()) {
       $accessToken = UserManagement::getAccessToken($this->entity->id());
 
       if ($accessToken === NULL) {
@@ -153,8 +192,15 @@ class ShopifyUserEditForm extends ProfileForm {
     try {
       $ret = $customer->updateShopifyUser($input);
     }
-    catch (\Exception $e) {
-      $form_state->setErrorByName('field_first_name', $e->getMessage());
+    catch (GraphQlException $e) {
+      $errors = $e->getErrors();
+      $errors = reset($errors);
+      $msg = $errors['message'];
+
+      $form_state->setErrorByName('field_first_name', $this->t('%m', [
+        '%m' => $errors['message'],
+      ]));
+
       return;
     }
 
@@ -165,6 +211,9 @@ class ShopifyUserEditForm extends ProfileForm {
       $account->set('field_last_name', $form_state->getValue('field_last_name'));
       $account->set('mail', $form_state->getValue('mail'));
       $account->save();
+
+      // Clear shopify details to force a re-load.
+      UserManagement::clearShopifyUserDetailsState($account);
     }
   }
 
@@ -173,6 +222,14 @@ class ShopifyUserEditForm extends ProfileForm {
    */
   public function submitShopifyUserForm(array &$form, FormStateInterface $form_state) {
     \Drupal::messenger()->addStatus('Account Settings Successfully Updated!', TRUE);
+
+    if ($form_state->hasValue('roles')) {
+      $user = $this->getEntity($form_state);
+      $roles = $form_state->getValue('roles');
+      $roles = array_keys(array_filter($roles));
+      $user->set('roles', $roles);
+      $user->save();
+    }
 
     $form_state->setRedirect(
       'entity.user.canonical',

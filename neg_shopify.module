@@ -725,6 +725,7 @@ function neg_shopify_cron() {
 function neg_shopify_entity_delete(EntityInterface $entity) {
   if ($entity->getEntityTypeId() === 'user') {
     UserManagement::clearShopifyUserState($entity);
+    UserManagement::clearShopifyUserDetailsState($entity);
   }
 }
 

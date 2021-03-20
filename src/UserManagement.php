@@ -205,6 +205,14 @@ class UserManagement {
   /**
    * Clears state for user.
    */
+  public static function clearShopifyUserDetailsState($user) {
+    $uid = $user->id();
+    \Drupal::state()->delete("shopify_user_details_$uid");
+  }
+
+  /**
+   * Clears state for user.
+   */
   public static function clearShopifyUserState($user) {
     $uid = $user->id();
     \Drupal::state()->delete("shopify_user_access_token_$uid");

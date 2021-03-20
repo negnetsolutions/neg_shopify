@@ -4,7 +4,7 @@ namespace Drupal\neg_shopify;
 
 use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\Api\ShopifyService;
-use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Api\GraphQlException;
 
 /**
  * Provides User data via shopify GRAPH api.
@@ -38,9 +38,11 @@ class ShopifyCustomer {
   public function __construct(array $params = []) {
     if (isset($params['accessToken'])) {
       $this->accessToken = $params['accessToken'];
-    } else if (isset($params['email'])) {
+    }
+    elseif (isset($params['email'])) {
       $this->email = $params['email'];
-    } else if (isset($params['user'])) {
+    }
+    elseif (isset($params['user'])) {
       $this->user = $params['user'];
       $this->email = $this->user->getEmail();
     }
@@ -66,7 +68,12 @@ class ShopifyCustomer {
 
     $customerInput = [];
     foreach ($input as $key => $value) {
-      $customerInput[] = "$key: \"$value\"";
+      if (is_bool($value)) {
+        $customerInput[] = "$key: " . (($value) ? 'true' : 'false');
+      }
+      else {
+        $customerInput[] = "$key: \"$value\"";
+      }
     }
     $customerInputString = implode(', ', $customerInput);
 
@@ -91,6 +98,10 @@ EOF;
       $results = StoreFrontService::request($query);
       if (isset($results['data']['customerUpdate']['customer']['id']) && $results['data']['customerUpdate']['customer']['id'] !== NULL) {
         return TRUE;
+      }
+
+      if ($results['data']['customerUpdate']['customerUserErrors']['message']) {
+        throw new GraphQlException($results['data']['customerUpdate']['customerUserErrors'], $query);
       }
     }
     else {
@@ -117,9 +128,47 @@ EOF;
       if (isset($results['data']['customerUpdate']['customer']['id']) && $results['data']['customerUpdate']['customer']['id'] !== NULL) {
         return TRUE;
       }
+
+      if ($results['data']['customerUpdate']['userErrors']['message']) {
+        throw new GraphQlException($results['data']['customerUpdate']['userErrors'], $query);
+      }
     }
 
     return FALSE;
+  }
+
+  /**
+   * Get's rest api user id.
+   */
+  public function getRestFormattedUserId($gid) {
+    return str_replace('gid://shopify/Customer/', '', $gid);
+  }
+
+  /**
+   * Get's user details.
+   */
+  public function getCustomerDetails() {
+    $uid = $this->user->id();
+    $details = \Drupal::state()->get("shopify_user_details_$uid");
+
+    if ($details === NULL) {
+      $shopify_user_id = $this->getRestFormattedUserId($this->user->get('field_shopify_id')->value);
+      try {
+        $details = ShopifyService::instance()->client()->Customer($shopify_user_id)->get([
+          'fields' => 'email,firstName,lastName,order_count,phone,accepts_marketing',
+        ]);
+      }
+      catch (\Exception $e) {
+        \Drupal::messenger()->addError(t('An error occurred while accessing your data.', []));
+        return [];
+      }
+
+      \Drupal::state()->setMultiple([
+        "shopify_user_details_$uid" => $details,
+      ]);
+    }
+
+    return $details;
   }
 
   /**
@@ -443,17 +492,18 @@ EOF;
    * Detects if a string is base64 encoded.
    */
   private function isBase64Encoded(string $s) : bool {
-    if ((bool) preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s) === false) {
-      return false;
+    if ((bool) preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $s) === FALSE) {
+      return FALSE;
     }
-    $decoded = base64_decode($s, true);
-    if ($decoded === false) {
-      return false;
+    $decoded = base64_decode($s, TRUE);
+    if ($decoded === FALSE) {
+      return FALSE;
     }
     $encoding = mb_detect_encoding($decoded);
-    if (! in_array($encoding, ['UTF-8', 'ASCII'], true)) {
-      return false;
+    if (!in_array($encoding, ['UTF-8', 'ASCII'], TRUE)) {
+      return FALSE;
     }
-    return $decoded !== false && base64_encode($decoded) === $s;
+    return $decoded !== FALSE && base64_encode($decoded) === $s;
   }
+
 }
