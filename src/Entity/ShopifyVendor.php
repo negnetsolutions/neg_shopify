@@ -114,19 +114,26 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
   /**
    * Filters out vendors from tags.
    */
-  public static function filterTagsForVendors($tags) {
+  public static function filterTagsForVendors(&$tags) {
     $vendors = self::getVendorNames();
+    $vendors = array_map('strtolower', $vendors);
     $vendorsFound = [];
+    $vendorsIndexesFound = [];
 
     for ($i = 0; $i < count($tags); $i++) {
       $tag = $tags[$i];
-      if (array_search($tag, $vendors) !== FALSE) {
-        $artistsFound[] = $tag;
-        unset($tags[$i]);
+      if (array_search(strtolower($tag), $vendors) !== FALSE) {
+        $vendorsFound[] = $tag;
+        $vendorsIndexesFound[] = $i;
       }
     }
 
-    return array_values($tags);
+    foreach ($vendorsIndexesFound as $i) {
+      unset($tags[$i]);
+    }
+
+    $tags = array_values($tags);
+    return $vendorsFound;
   }
 
   /**
