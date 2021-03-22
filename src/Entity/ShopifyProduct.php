@@ -349,26 +349,6 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   }
 
   /**
-   * Get's google analytics view.
-   */
-  public function getGoogleAnalyticsImpression() {
-    $variant = $this->getFirstAvailableVariant();
-    if (!$variant) {
-      return FALSE;
-    }
-
-    $item = [
-      'item_name' => $this->get('title')->value,
-      'item_id' => $variant->get('sku')->value,
-      'item_brand' => $this->get('vendor')->value,
-      'price' => $variant->get('price')->value,
-      '#tags' => $this->getCacheTags(),
-    ];
-
-    return $item;
-  }
-
-  /**
    * Loads a view array.
    */
   public function getView(string $style = 'store_listing', $defaultContext = TRUE) {
