@@ -12,6 +12,7 @@ use Drupal\file\FileInterface;
 use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductInterface;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Api\ShopifyService;
+use Drupal\neg_shopify\Event\LoadMultipleProductsViewEvent;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
@@ -434,38 +435,25 @@ EOL;
   }
 
   /**
-   * Loads a view array.
+   * Loads a view array of multiple products.
    */
   public static function loadView(array $products, string $style = 'full', $defaultContext = TRUE) {
 
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+
     $view = [];
+
+    // Run preprocess event.
+    $event = new LoadMultipleProductsViewEvent($products, $view, $style, $defaultContext);
+    $event_dispatcher->dispatch(LoadMultipleProductsViewEvent::PREPROCESS, $event);
 
     foreach ($products as $product) {
       $view[] = $product->getView($style, $defaultContext);
     }
 
-    if ($defaultContext === FALSE) {
-      // Attempt to add analytics events.
-      $items = [];
-      foreach ($products as $product) {
-        $impression = $product->getGoogleAnalyticsImpression();
-        if ($impression) {
-          $items[] = $impression;
-        }
-      }
-
-      if (count($items) > 0) {
-        $items = json_encode($items);
-        $script = <<<EOL
-  <script>
-  if (typeof events === 'object') {
-    events.triggerEvent('view_item_list', {'items': {$items}});
-  }
-  </script>
-EOL;
-        $view[] = $script;
-      }
-    }
+    // Run postprocess event.
+    $event = new LoadMultipleProductsViewEvent($products, $view, $style, $defaultContext);
+    $event_dispatcher->dispatch(LoadMultipleProductsViewEvent::POSTPROCESS, $event);
 
     return $view;
   }
