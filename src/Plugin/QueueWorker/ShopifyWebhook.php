@@ -47,18 +47,7 @@ class ShopifyWebhook extends QueueWorkerBase {
         $user = UserManagement::loadUserByShopifyId($gid);
 
         if ($user) {
-          // Check if user is an admin.
-          $admin_roles = UserManagement::getAdminRoles();
-          if (!empty(array_intersect($user->getRoles(), $admin_roles))) {
-            // If so; don't delete.
-            return;
-          }
-
-          Settings::log('Deleting User: %email', ['%email' => $user->getEmail()]);
-
-          // Delete the user.
-          UserManagement::clearShopifyUserState($user);
-          $user->delete();
+          UserManagement::deleteUser($user);
         }
         break;
 

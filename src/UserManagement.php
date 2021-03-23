@@ -44,14 +44,28 @@ class UserManagement {
   }
 
   /**
+   * Deletes a user.
+   */
+  public static function deleteUser($user) {
+    // Check if user is an admin.
+    $admin_roles = self::getAdminRoles();
+    if (!empty(array_intersect($user->getRoles(), $admin_roles))) {
+      // If so; don't delete.
+      return;
+    }
+
+    Settings::log('Deleting User: %email', ['%email' => $user->getEmail()]);
+
+    // Delete the user.
+    self::clearShopifyUserState($user);
+    $user->delete();
+  }
+
+  /**
    * Syncs user with shopify.
    */
   public static function syncUserWithShopify($shopifyUser, $user = FALSE) {
     $mail = $shopifyUser['email'];
-
-    if (strlen(trim($mail)) == 0) {
-      return FALSE;
-    }
 
     $firstName = $shopifyUser['first_name'];
     $lastName = $shopifyUser['last_name'];
@@ -60,6 +74,16 @@ class UserManagement {
     // Try to find the user.
     if (!$user) {
       $user = self::loadUserByShopifyId($shopifyUser['id']);
+
+      // The email has been removed. We need to delete this user.
+      if ($user && $mail == NULL) {
+        return self::deleteUser($user);
+      }
+    }
+
+    // Stop execution if email is blank.
+    if (strlen(trim($mail)) == 0) {
+      return FALSE;
     }
 
     if (!$user) {
@@ -72,7 +96,7 @@ class UserManagement {
       $user = self::provisionDrupalUser($mail);
     }
 
-    if ($user) {
+    if ($user && self::shopifyUserIsChanged($user, $shopifyUser)) {
       Settings::log('Updating User: %email', ['%email' => $mail]);
       $user->field_first_name->setValue(['value' => $firstName]);
       $user->field_last_name->setValue(['value' => $lastName]);
@@ -80,6 +104,34 @@ class UserManagement {
       $user->field_shopify_id->setValue(['value' => $gid]);
       $user->save();
 
+      self::clearShopifyUserDetailsState($user);
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Runs crc check to see if anything has changed on user account.
+   */
+  protected static function shopifyUserIsChanged($user, $shopifyUser) {
+    $userCrc = [
+      $user->field_first_name->value,
+      $user->field_last_name->value,
+      $user->mail->value,
+      $user->field_shopify_id->value,
+    ];
+
+    $shopifyUserCrc = [
+      $shopifyUser['first_name'],
+      $shopifyUser['last_name'],
+      $shopifyUser['email'],
+      'gid://shopify/Customer/' . $shopifyUser['id'],
+    ];
+
+    $diff = array_diff($userCrc, $shopifyUserCrc);
+
+    if (count($diff) > 0) {
       return TRUE;
     }
 

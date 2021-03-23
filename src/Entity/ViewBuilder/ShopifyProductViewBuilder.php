@@ -21,13 +21,17 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       $build['body_html'][0]['#format'] = 'html';
     }
 
+    $active_variant = NULL;
+
     if ($variant_id = \Drupal::request()->get('variant_id')) {
       $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
     }
     else {
       $variants = $entity->variants;
       $variant_id = $this->getFirstVariantId($variants);
-      $active_variant = ShopifyProductVariant::load($variant_id);
+      if ($variant_id !== FALSE) {
+        $active_variant = ShopifyProductVariant::load($variant_id);
+      }
     }
 
     if ($display->getComponent('related_items')) {
@@ -86,4 +90,5 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
 
     return FALSE;
   }
+
 }

@@ -8,13 +8,10 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\Entity\EntityInterface\ShopifyVendorInterface;
-use Drupal\neg_shopify\Entity\ShopifyProduct;
-use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
@@ -421,6 +418,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     $fields['thumbnail'] = BaseFieldDefinition::create('image')
       ->setLabel(t('Thumbnail Image'))
       ->setDefaultValue('')
+      ->setDescription(t('Set a vendor thumbnail with this field. Leave blank to use the most recent available product as the thumbnail.'))
       ->setDisplayOptions('view', [
         'label' => 'hidden',
         'type' => 'responsive_image',
@@ -447,9 +445,9 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
         'weight' => 2,
       ])
       ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', FALSE)
       ->setComputed(TRUE)
-      ->setClass('\Drupal\neg_shopify\TypedData\DynamicVendorImage')
-    ;
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicVendorImage');
 
     $fields['langcode'] = BaseFieldDefinition::create('language')
       ->setLabel(t('Language code'))

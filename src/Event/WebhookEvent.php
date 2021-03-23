@@ -14,6 +14,8 @@ class WebhookEvent extends Event {
 
   /**
    * The webhook event.
+   *
+   * @var array
    */
   public $hook;
 

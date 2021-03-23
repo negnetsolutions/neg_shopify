@@ -223,6 +223,23 @@ class ShopifyService {
   }
 
   /**
+   * Updates a product variant.
+   */
+  public function updateVariant($variant_id, array $params) {
+    try {
+      return $this->client->ProductVariant($variant_id)->put($params);
+    }
+    catch (\Exception $e) {
+      Settings::log('updateVariant Error: Message: %m Params: %p', [
+        '%m' => $e->getMessage(),
+        '%p' => print_r($params, true),
+      ]);
+      \Drupal::messenger()->addError($e->getMessage(), TRUE);
+      return FALSE;
+    }
+  }
+
+  /**
    * Creates an order.
    */
   public function createOrder(array $params) {
@@ -230,6 +247,10 @@ class ShopifyService {
       return $this->orderService->post($params);
     }
     catch (\Exception $e) {
+      Settings::log('createOrder Error: Message: %m Params: %p', [
+        '%m' => $e->getMessage(),
+        '%p' => print_r($params, true),
+      ]);
       \Drupal::messenger()->addError($e->getMessage(), TRUE);
       return FALSE;
     }
@@ -243,6 +264,10 @@ class ShopifyService {
       return $this->client->Order($order_id)->put($params);
     }
     catch (\Exception $e) {
+      Settings::log('updateOrder Error: Message: %m Params: %p', [
+        '%m' => $e->getMessage(),
+        '%p' => print_r($params, true),
+      ]);
       \Drupal::messenger()->addError($e->getMessage(), TRUE);
       return FALSE;
     }
