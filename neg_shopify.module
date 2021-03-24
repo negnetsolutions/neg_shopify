@@ -161,6 +161,66 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_entity_bundle_field_info().
+ */
+function neg_shopify_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  // // Whether the hook implementation was called for our group type.
+  // if ($entity_type->id() === 'user' && $bundle == 'ourgroup' && !empty($base_field_definitions['label'])) {
+  if ($entity_type->id() === 'user') {
+    $fields = [];
+
+    $fields['field_first_name'] = BaseFieldDefinition::create('string')
+      ->setLabel('First Name')
+      ->setRequired(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_last_name'] = BaseFieldDefinition::create('string')
+      ->setLabel('Last Name')
+      ->setRequired(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    $fields['field_shopify_id'] = BaseFieldDefinition::create('string')
+      ->setLabel('Shopify ID')
+      ->setRequired(FALSE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setDisplayConfigurable('form', TRUE);
+
+    return $fields;
+  }
+
+}
+
+/**
+ * Implements hook_entity_field_storage_info().
+ */
+function neg_shopify_entity_field_storage_info(EntityTypeInterface $entity_type) {
+  if ($entity_type->id() == 'user') {
+    $definitions = [];
+
+    $definitions['field_first_name'] = BaseFieldDefinition::create('string')
+      ->setName('field_first_name')
+      ->setLabel(t('First Name'))
+      ->setTargetEntityTypeId($entity_type->id());
+
+    $definitions['field_last_name'] = BaseFieldDefinition::create('string')
+      ->setName('field_last_name')
+      ->setLabel(t('Last Name'))
+      ->setTargetEntityTypeId($entity_type->id());
+
+    $definitions['field_shopify_id'] = BaseFieldDefinition::create('string')
+      ->setName('field_shopify_id')
+      ->setLabel(t('Shopify ID'))
+      ->setTargetEntityTypeId($entity_type->id());
+
+    return $definitions;
+  }
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function neg_shopify_entity_type_alter(array &$entity_types) {
