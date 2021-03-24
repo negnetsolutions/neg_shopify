@@ -549,6 +549,17 @@ EOL;
   /**
    * Gets first available variant.
    */
+  public function getFirstVariant() {
+    foreach ($this->get('variants') as $variant) {
+      return $variant->entity;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Gets first available variant.
+   */
   public function getFirstAvailableVariant() {
     foreach ($this->get('variants') as $variant) {
       if ($variant->entity->isAvailable() || $this->get('is_preorder')->value == TRUE) {
@@ -586,6 +597,20 @@ EOL;
     return \Drupal::entityTypeManager()
       ->getStorage('shopify_product')
       ->loadByProperties($props);
+  }
+
+  /**
+   * Converts a shopify product id to a graph ql id.
+   */
+  public static function idToGraphQlId($id, $base64Encoded = FALSE) {
+    return ShopifyService::idToGraphQlId($id, 'Product', $base64Encoded);
+  }
+
+  /**
+   * Converts a shopify graph ql product id to a rest id.
+   */
+  public static function graphQlIdToId($id, $base64Encoded = FALSE) {
+    return ShopifyService::graphQlIdToId($id, 'Product', $base64Encoded);
   }
 
   /**

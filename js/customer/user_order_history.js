@@ -40,6 +40,7 @@ const shopifyCustomerHistoryWidget = new function() {
       hasNextPage: null,
       hasPrevPage: null,
       cursor: 0,
+      loading: true,
       direction: 'after',
       perPage: (el.dataset.perPage != "null") ? el.dataset.perPage : 10,
       email: el.dataset.email,
@@ -63,6 +64,7 @@ const shopifyCustomerHistoryWidget = new function() {
         const self = this;
         loadJSON(this.url, this, function(data) {
           self.cursor = data.lastCursor;
+          self.loading = false;
           if (data.pageInfo != null) {
             self.hasNextPage = data.pageInfo.hasNextPage;
             self.hasPrevPage = data.pageInfo.hasPreviousPage;

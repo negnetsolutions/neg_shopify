@@ -4,10 +4,10 @@ namespace Drupal\neg_shopify\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyCustomer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\UserStorageInterface;
 
@@ -154,9 +154,7 @@ EOF;
       if ($results['data']['customerAccessTokenCreate']['customerAccessToken'] !== NULL) {
         // User is logged in. Go with it!.
         $accessTokenData = $results['data']['customerAccessTokenCreate']['customerAccessToken'];
-
-        $id = base64_decode($results['data']['customerCreate']['customer']['id']);
-        $id = str_replace('gid://shopify/Customer/', '', $id);
+        $id = ShopifyCustomer::graphQlIdToId($results['data']['customerCreate']['customer']['id'], TRUE);
 
         $shopifyUser = [
           'id' => $id,

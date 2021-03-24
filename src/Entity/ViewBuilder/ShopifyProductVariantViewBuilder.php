@@ -5,11 +5,9 @@ namespace Drupal\neg_shopify\Entity\ViewBuilder;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
-use Drupal\file\Entity\File;
-use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 
 /**
- * Class ShopifyProductVariantViewBuilder.
+ * Class View builder for Shopify Variants.
  */
 class ShopifyProductVariantViewBuilder extends EntityViewBuilder {
 

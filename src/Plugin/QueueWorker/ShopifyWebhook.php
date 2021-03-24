@@ -43,7 +43,7 @@ class ShopifyWebhook extends QueueWorkerBase {
         break;
 
       case 'customers/delete':
-        $gid = 'gid://shopify/Customer/' . $data['payload']['id'];
+        $gid = ShopifyCustomer::idToGraphQlId($data['payload']['id']);
         $user = UserManagement::loadUserByShopifyId($gid);
 
         if ($user) {

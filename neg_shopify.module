@@ -525,7 +525,7 @@ function neg_shopify_theme_suggestions_shopify_product_variant(array $variables)
  *   - shopify_product: The shopify product object.
  *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
  */
-function template_preprocess_shopify_vendor(&$variables) {
+function template_preprocess_shopify_vendor(array &$variables) {
   $entity = $variables['elements']['#shopify_vendor'];
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_vendor'] = $variables['elements']['#shopify_vendor'];
@@ -559,7 +559,7 @@ function template_preprocess_shopify_vendor(&$variables) {
  *   - shopify_product: The shopify product object.
  *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
  */
-function template_preprocess_shopify_product(&$variables) {
+function template_preprocess_shopify_product(array &$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product'] = $variables['elements']['#shopify_product'];
   $variables['shopify_product_id'] = $variables['shopify_product']->id();

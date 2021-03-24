@@ -8,7 +8,7 @@ use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 
 /**
- * Class ShopifyProductViewBuilder.
+ * Class View Builder for Shopify Products.
  */
 class ShopifyProductViewBuilder extends EntityViewBuilder {
 
@@ -21,21 +21,7 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       $build['body_html'][0]['#format'] = 'html';
     }
 
-    $active_variant = NULL;
-
-    if ($variant_id = \Drupal::request()->get('variant_id')) {
-      $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
-    }
-    else {
-      $variants = $entity->variants;
-      $variant_id = $this->getFirstVariantId($variants);
-      if ($variant_id !== FALSE) {
-        $active_variant = ShopifyProductVariant::load($variant_id);
-      }
-    }
-
     if ($display->getComponent('related_items')) {
-
       $items = $entity->renderRelatedItems();
       if (count($items) > 0) {
         $build['related_items'] = [
@@ -46,6 +32,18 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
     }
 
     if ($display->getComponent('active_variant')) {
+      $active_variant = NULL;
+
+      if ($variant_id = \Drupal::request()->get('variant_id')) {
+        $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
+      }
+      else {
+        $variants = $entity->variants;
+        $variant_id = $this->getFirstVariantId($variants);
+        if ($variant_id !== FALSE) {
+          $active_variant = ShopifyProductVariant::load($variant_id);
+        }
+      }
 
       // Display the active variant.
       if ($active_variant instanceof ShopifyProductVariant) {
@@ -82,7 +80,7 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
    * Gets first variant id.
    */
   private function getFirstVariantId(object $variants) {
-    foreach ($variants as $i => $variant) {
+    foreach ($variants as $variant) {
       if ($variant->entity->isAvailable()) {
         return $variant->entity->id();
       }

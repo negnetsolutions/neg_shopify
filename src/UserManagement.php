@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify;
 use Drupal\user\UserInterface;
 use Drupal\user\Entity\User;
 use Drupal\neg_shopify\Api\ShopifyService;
+use Drupal\neg_shopify\ShopifyCustomer;
 
 /**
  * Provides user management for Shopify Users.
@@ -20,7 +21,7 @@ class UserManagement {
     $users = ShopifyService::instance()->fetchAllUsers($options);
 
     foreach ($users as $user) {
-      $gid = 'gid://shopify/Customer/' . $user['id'];
+      $gid = ShopifyCustomer::idToGraphQlId($user['id']);
       $users_ids[] = $gid;
     }
 
@@ -69,7 +70,7 @@ class UserManagement {
 
     $firstName = $shopifyUser['first_name'];
     $lastName = $shopifyUser['last_name'];
-    $gid = 'gid://shopify/Customer/' . $shopifyUser['id'];
+    $gid = ShopifyCustomer::idToGraphQlId($shopifyUser['id']);
 
     // Try to find the user.
     if (!$user) {
@@ -126,7 +127,7 @@ class UserManagement {
       $shopifyUser['first_name'],
       $shopifyUser['last_name'],
       $shopifyUser['email'],
-      'gid://shopify/Customer/' . $shopifyUser['id'],
+      ShopifyCustomer::idToGraphQlId($shopifyUser['id']),
     ];
 
     $diff = array_diff($userCrc, $shopifyUserCrc);
@@ -144,7 +145,7 @@ class UserManagement {
   public static function loadUserByShopifyId($id) {
 
     if (!str_starts_with($id, 'gid://shopify/Customer/')) {
-      $id = "gid://shopify/Customer/$id";
+      $id = ShopifyCustomer::idToGraphQlId($id);
     }
 
     $query = \Drupal::entityQuery('user');

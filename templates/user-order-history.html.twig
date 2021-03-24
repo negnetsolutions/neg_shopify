@@ -21,6 +21,10 @@
     </tbody>
   </table>
 
+  <template v-else-if="loading === true">
+    <p>Loading...</p>
+  </template>
+
   <template v-else>
   <p>You don't have any orders yet.</p>
   </template>

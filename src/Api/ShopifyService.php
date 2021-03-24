@@ -105,6 +105,30 @@ class ShopifyService {
   }
 
   /**
+   * Converts a graph ql id to a rest id.
+   */
+  public static function graphQlIdToId($id, string $type, $base64Encoded = FALSE) {
+    if ($base64Encoded) {
+      $id = base64_decode($id);
+    }
+
+    $id = str_replace("gid://shopify/$type/", '', $id);
+    return $id;
+  }
+
+  /**
+   * Converts a rest api id to a graph ql id.
+   */
+  public static function idToGraphQlId($id, string $type, $base64Encoded = FALSE) {
+    $id = "gid://shopify/$type/$id";
+    if ($base64Encoded) {
+      $id = base64_encode($id);
+    }
+
+    return $id;
+  }
+
+  /**
    * Runs GraphQL Query.
    */
   public function graphQL(string $graphQL, $variables = []) {

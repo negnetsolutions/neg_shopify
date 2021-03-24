@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\neg_shopify\Api\StoreFrontService;
 use Drupal\neg_shopify\Api\GraphQlException;
 use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyCustomer;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\user\UserStorageInterface;
 
@@ -157,8 +158,7 @@ EOF;
         // Create a new user.
         $drupalUser = UserManagement::provisionDrupalUser($email);
 
-        $id = base64_decode($results['data']['customerActivateByUrl']['customer']['id']);
-        $id = str_replace('gid://shopify/Customer/', '', $id);
+        $id = ShopifyCustomer::graphQlIdToId($results['data']['customerActivateByUrl']['customer']['id'], TRUE);
         $shopifyUser = [
           'id' => $id,
           'first_name' => $results['data']['customerActivateByUrl']['customer']['firstName'],

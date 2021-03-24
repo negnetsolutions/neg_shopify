@@ -11,7 +11,7 @@ use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductVariantInterface;
-use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
@@ -227,6 +227,20 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Converts a shopify product id to a graph ql id.
+   */
+  public static function idToGraphQlId($id, $base64Encoded = FALSE) {
+    return ShopifyService::idToGraphQlId($id, 'ProductVariant', $base64Encoded);
+  }
+
+  /**
+   * Converts a shopify graph ql product id to a rest id.
+   */
+  public static function graphQlIdToId($id, $base64Encoded = FALSE) {
+    return ShopifyService::graphQlIdToId($id, 'ProductVariant', $base64Encoded);
+  }
+
+  /**
    * Gets product url.
    */
   public function getProductUrl() {
@@ -361,8 +375,7 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    */
   public function getStoreFrontId() {
     $variantId = $this->get('variant_id')->value;
-    $gid = "gid://shopify/ProductVariant/$variantId";
-    return base64_encode($gid);
+    return self::idToGraphQlId($variantId, TRUE);
   }
 
   /**

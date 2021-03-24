@@ -138,10 +138,17 @@ EOF;
   }
 
   /**
-   * Get's rest api user id.
+   * Converts a shopify product id to a graph ql id.
    */
-  public function getRestFormattedUserId($gid) {
-    return str_replace('gid://shopify/Customer/', '', $gid);
+  public static function idToGraphQlId($id, $base64Encoded = FALSE) {
+    return ShopifyService::idToGraphQlId($id, 'Customer', $base64Encoded);
+  }
+
+  /**
+   * Converts a shopify graph ql product id to a rest id.
+   */
+  public static function graphQlIdToId($id, $base64Encoded = FALSE) {
+    return ShopifyService::graphQlIdToId($id, 'Customer', $base64Encoded);
   }
 
   /**
@@ -152,7 +159,7 @@ EOF;
     $details = \Drupal::state()->get("shopify_user_details_$uid");
 
     if ($details === NULL) {
-      $shopify_user_id = $this->getRestFormattedUserId($this->user->get('field_shopify_id')->value);
+      $shopify_user_id = self::graphQlIdToId($this->user->get('field_shopify_id')->value);
       try {
         $details = ShopifyService::instance()->client()->Customer($shopify_user_id)->get([
           'fields' => 'email,firstName,lastName,order_count,phone,accepts_marketing',
