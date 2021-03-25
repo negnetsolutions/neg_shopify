@@ -5,15 +5,21 @@
  * Shopify module.
  */
 
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyCustomer;
+use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 
 /**
  * Implements hook_theme().
@@ -48,6 +54,29 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'link' => NULL,
       ],
     ],
+    'shopify_vendor_product_grid' => [
+      'template' => 'shopify-vendor-product-grid' ,
+      'variables' => [
+        'attributes' => NULL,
+        'products' => NULL,
+      ],
+    ],
+    'shopify_vendors_page' => [
+      'template' => 'shopify-vendors-page' ,
+      'variables' => [
+        'attributes' => NULL,
+        'name' => 'Vendors',
+        'vendors' => NULL,
+      ],
+    ],
+    'shopify-vendor-page' => [
+      'template' => 'shopify-vendor-page' ,
+      'variables' => [
+        'attributes' => NULL,
+        'name' => NULL,
+        'products' => NULL,
+      ],
+    ],
     'shopify-collection-all' => [
       'template' => 'shopify-collection' ,
       'variables' => [
@@ -78,6 +107,8 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'count' => NULL,
         'defaultSort' => NULL,
         'allowManualSort' => FALSE,
+        'controls' => TRUE,
+        'products_label' => 'products',
       ],
     ],
     'neg_shopify_cart' => [
@@ -87,6 +118,26 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
     'neg_shopify_minicart' => [
       'template' => 'mini-cart',
       'variables' => [],
+    ],
+    'neg_shopify_order_receipt' => [
+      'template' => 'order-receipt',
+      'variables' => [
+        'order' => NULL,
+      ],
+    ],
+    'neg_shopify_user_order_history' => [
+      'template' => 'user-order-history',
+      'variables' => [
+        'email' => NULL,
+        'perPage' => 5,
+      ],
+    ],
+    'shopify_vendor' => [
+      'render element' => 'elements',
+    ],
+    'shopify_vendor__teaser' => [
+      'template' => 'shopify-vendor--teaser',
+      'base hook' => 'shopify_vendor',
     ],
     'shopify_product' => [
       'render element' => 'elements',
@@ -107,6 +158,54 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
       'base hook' => 'shopify_product_variant',
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ */
+function neg_shopify_entity_type_alter(array &$entity_types) {
+  if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+    $user_entity_type = $entity_types['user'];
+    $handlers = $user_entity_type->getHandlerClasses();
+    $handlers['form']['default'] = 'Drupal\neg_shopify\Form\ShopifyUserEditForm';
+    $user_entity_type->setHandlerClass('form', $handlers['form']);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  switch ($form_id) {
+    case 'shopify_vendor_edit_form':
+      // $form['dynamic_thumbnail']['#access'] = FALSE;
+      unset($form['dynamic_thumbnail']);
+      break;
+
+    case 'user_pass':
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyUserPassForm');
+      }
+
+      break;
+
+    case 'user_login_form':
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyLoginForm');
+      }
+
+      $form['#cache']['tags'][] = 'config:neg_shopify.settings';
+      break;
+
+    case 'user_register_form':
+      if ((BOOL) Settings::config()->get('allow_shopify_users') === TRUE) {
+        // Replace form built at Drupal\user\Plugin\Block\UserLoginBlock.
+        $form = \Drupal::formBuilder()->getForm('Drupal\neg_shopify\Form\ShopifyRegisterForm');
+      }
+      $form['#cache']['tags'][] = 'config:neg_shopify.settings';
+      break;
+  }
 }
 
 /**
@@ -134,7 +233,7 @@ function neg_shopify_form_taxonomy_overview_terms_alter(array &$form, FormStateI
 /**
  * Implements hook_entity_bundle_info_alter().
  *
- * @todo: Doesn't work because link_templates['canonical'] override this.
+ * @todo Doesn't work because link_templates['canonical'] override this.
  *
  * @see Drupal\Core\Entity\Entity::toUrl()
  */
@@ -185,12 +284,6 @@ function neg_shopify_entity_extra_field_info() {
     'visible' => TRUE,
     'weight' => 100,
   ];
-  $extra['shopify_product']['shopify_product']['display']['dynamic_product_image'] = [
-    'label' => t('Dynamic product image'),
-    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
-    'visible' => TRUE,
-    'weight' => 150,
-  ];
   $extra['shopify_product']['shopify_product']['display']['active_variant'] = [
     'label' => t('Active variant'),
     'description' => t('Renders the active variant.'),
@@ -202,12 +295,6 @@ function neg_shopify_entity_extra_field_info() {
     'description' => t('Displays related items'),
     'visible' => FALSE,
     'weight' => 255,
-  ];
-  $extra['shopify_product_variant']['shopify_product_variant']['display']['dynamic_product_image'] = [
-    'label' => t('Dynamic product image'),
-    'description' => t('Displays the product image by default, or the variant image if one is selected.'),
-    'visible' => TRUE,
-    'weight' => 150,
   ];
   $extra['shopify_product_variant']['shopify_product_variant']['display']['product_title'] = [
     'label' => t('Product Title'),
@@ -224,6 +311,12 @@ function neg_shopify_entity_extra_field_info() {
   $extra['shopify_product_variant']['shopify_product_variant']['display']['product_vendor'] = [
     'label' => t('Product Vendor'),
     'description' => t('Displays the parent product vendor'),
+    'visible' => TRUE,
+    'weight' => 150,
+  ];
+  $extra['shopify_vendor']['shopify_vendor']['display']['products'] = [
+    'label' => t('Vendor Products'),
+    'description' => t('Displays the vendor\'s products'),
     'visible' => TRUE,
     'weight' => 150,
   ];
@@ -318,6 +411,11 @@ function neg_shopify_renderable_links() {
       '#title' => t('Variant Display'),
       '#url' => Url::fromUri('internal:/admin/structure/shopify_product_variant/display'),
     ];
+    $links[] = [
+      '#type' => 'link',
+      '#title' => t('Vendor Display'),
+      '#url' => Url::fromUri('internal:/admin/structure/shopify_vendor/display'),
+    ];
   }
 
   $shop_domain = Settings::shopInfo('domain');
@@ -332,11 +430,52 @@ function neg_shopify_renderable_links() {
 }
 
 /**
+ * Implements hook_preprocess().
+ */
+function neg_shopify_preprocess_shopify_product_grid(&$variables) {
+
+  if (substr($variables['products_label'], -1, 1) === 's' && $variables['count'] == 1) {
+    $variables['products_label'] = substr($variables['products_label'], 0, strlen($variables['products_label']) - 1);
+  }
+}
+
+/**
+ * Preprocesses receipts.
+ *
+ * This is mostly to find product images if shopify doesn't supply them.
+ */
+function neg_shopify_preprocess_neg_shopify_order_receipt(&$variables) {
+
+  foreach ($variables['order']['lineItems']['edges'] as &$line) {
+    $lineItem = &$line['node'];
+
+    // Shopify doesn't have an image. Let's try and find from out database.
+    if ($lineItem['sku'] !== NULL && $lineItem['image'] === NULL) {
+
+      $results = \Drupal::entityTypeManager()
+        ->getStorage('shopify_product_variant')
+        ->getQuery()
+        ->condition('sku', $lineItem['sku'])
+        ->range(0, 1)
+        ->execute();
+
+      $variants = (count($results) > 0) ? ShopifyProductVariant::loadMultiple($results) : [];
+
+      if (count($variants) > 0) {
+        $variant = reset($variants);
+        $product = $variant->getProduct();
+        $lineItem['thumbnail'] = $product->renderThumbnail();
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_preprocess_paragraph().
  */
 function neg_shopify_preprocess_taxonomy_term(&$variables) {
   $term = $variables['term'];
-  $vid = $term->getVocabularyId();
+  $vid = $term->bundle();
   $method = '_neg_shopify_preprocess_taxonomy_term_' . $vid;
   if (function_exists($method)) {
     $method($variables);
@@ -351,6 +490,15 @@ function _neg_shopify_preprocess_taxonomy_term_shopify_collections(&$variables) 
 }
 
 /**
+ * Implements theme_suggestions__shopify_vendor.
+ */
+function neg_shopify_theme_suggestions_shopify_vendor(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'shopify_vendor__' . $variables['elements']['#view_mode'];
+  return $suggestions;
+}
+
+/**
  * Implements theme_suggestions__shopify_product.
  */
 function neg_shopify_theme_suggestions_shopify_product(array $variables) {
@@ -360,7 +508,7 @@ function neg_shopify_theme_suggestions_shopify_product(array $variables) {
 }
 
 /**
- * Implements theme_suggestions__shopify_product_variant
+ * Implements theme_suggestions__shopify_product_variant.
  */
 function neg_shopify_theme_suggestions_shopify_product_variant(array $variables) {
   $suggestions = [];
@@ -379,9 +527,44 @@ function neg_shopify_theme_suggestions_shopify_product_variant(array $variables)
  *   - shopify_product: The shopify product object.
  *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
  */
-function template_preprocess_shopify_product(&$variables) {
+function template_preprocess_shopify_vendor(array &$variables) {
+  $entity = $variables['elements']['#shopify_vendor'];
+  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['shopify_vendor'] = $variables['elements']['#shopify_vendor'];
+  $variables['attributes']['class'][] = 'shopify-vendor';
+  $variables['attributes']['class'][] = $variables['view_mode'];
+
+  // Helpful $content variable for templates.
+  $variables += ['content' => []];
+  foreach (Element::children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  $variables['name'] = $entity->get('title')->value;
+  $variables['slug'] = $entity->get('slug')->value;
+  $variables['type'] = $entity->get('type')->value;
+  $variables['status'] = $entity->get('status')->value;
+
+  $variables['attributes']['class'][] = ($variables['status'] == TRUE) ? 'published' : 'unpublished';
+
+  $variables['url'] = !$variables['shopify_vendor']->isNew() ? $variables['shopify_vendor']->toUrl('canonical')->toString() : NULL;
+}
+
+/**
+ * Prepares variables for shopify product templates.
+ *
+ * Default template: shopify-product.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - elements: An array of elements to display in view mode.
+ *   - shopify_product: The shopify product object.
+ *   - view_mode: View mode; e.g., 'full', 'store_listing', etc.
+ */
+function template_preprocess_shopify_product(array &$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   $variables['shopify_product'] = $variables['elements']['#shopify_product'];
+  $variables['shopify_product_id'] = $variables['shopify_product']->id();
 
   if ($variables['shopify_product']->image->target_id) {
     $path = $variables['shopify_product']->image->entity->getFileUri();
@@ -389,9 +572,10 @@ function template_preprocess_shopify_product(&$variables) {
     $variables['imagethumbnail_large'] = ImageStyle::load('rs_image_2200w')->buildUrl($path);
   }
 
-  $variables['vendor_url'] = Url::fromRoute('neg_shopify.vendors', [
-    'vendor' => ShopifyProduct::slugify($variables['shopify_product']->get('vendor')->value),
-  ])->toString();
+  $vendor = $variables['shopify_product']->getShopifyVendor();
+  if ($vendor) {
+    $variables['vendor_url'] = $vendor->toUrl('canonical')->toString();
+  }
 
   // Helpful $content variable for templates.
   $variables += ['content' => []];
@@ -419,7 +603,7 @@ function template_preprocess_shopify_product_variant(&$variables) {
   $variables['shopify_product'] = $variables['shopify_product_variant']->getProduct();
 
   // Helpful $content variable for templates.
-  $variables += array('content' => array());
+  $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
@@ -528,5 +712,42 @@ function neg_shopify_cron() {
   // Check if we need to sync.
   if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
     Sync::syncAllCollections();
+  }
+
+  // Users.
+  $cache_lifetime = $config->get('users_frequency');
+  $cache_lifetime = ($cache_lifetime === NULL) ? 0 : $cache_lifetime;
+
+  $last_sync = \Drupal::state()->get('neg_shopify.last_users_sync', 0);
+
+  // Check if we need to sync.
+  if ((int) $cache_lifetime > 0 && (((int) $last_sync + (int) $cache_lifetime) < (int) $runtime)) {
+    Sync::syncAllUsers();
+  }
+}
+
+/**
+ * Watches for user deletions and cleans up state.
+ */
+function neg_shopify_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'user') {
+    UserManagement::clearShopifyUserState($entity);
+    UserManagement::clearShopifyUserDetailsState($entity);
+  }
+}
+
+/**
+ * Implements hook_preprocess_user.
+ */
+function neg_shopify_preprocess_user(&$vars) {
+  $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
+  $user = $vars['user'];
+
+  if ($allowShopifyLogins && $user->hasRole('shopify_customer')) {
+    $customer = new ShopifyCustomer([
+      'user' => $user,
+    ]);
+
+    $vars['content']['order_history'] = $customer->renderOrderHistoryBlock(10);
   }
 }

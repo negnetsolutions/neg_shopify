@@ -4,12 +4,16 @@ namespace Drupal\neg_shopify\Plugin\QueueWorker;
 
 use Drupal\Core\Queue\QueueWorkerBase;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Drupal\neg_shopify\Settings;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\ShopifyCollection;
+use Drupal\neg_shopify\UserManagement;
+use Drupal\neg_shopify\ShopifyVendors;
+use Drupal\user\Entity\User;
 
 /**
- * Class SyncShopify.
+ * Syncs with shopify queue items.
  */
 class SyncShopify extends QueueWorkerBase {
 
@@ -33,6 +37,16 @@ class SyncShopify extends QueueWorkerBase {
 
         break;
 
+      case 'deleteVendor':
+        try {
+          $product = ShopifyVendor::load($data['id']);
+          $product->delete();
+        }
+        catch (\Exception $e) {
+          Settings::log('Could not delete shopify vendor id %id', ['%id' => $data['id']], 'error');
+        }
+        break;
+
       case 'deleteProduct':
         try {
           $product = ShopifyProduct::load($data['id']);
@@ -54,6 +68,11 @@ class SyncShopify extends QueueWorkerBase {
           Settings::log('Deleted %count orphaned products', ['%count' => $deleted], 'debug');
         }
 
+        break;
+
+      case 'syncVendors':
+        ShopifyVendors::syncVendors();
+        Settings::log('Synced Shopify Vendors', [], 'debug');
         break;
 
       case 'closeProductBatch':
@@ -111,6 +130,51 @@ class SyncShopify extends QueueWorkerBase {
         Settings::log('Closing Collection Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
         break;
 
+      case 'deleteUser':
+        $uid = $data['id'];
+        $user = User::load($uid);
+
+        // Check to make sure it's ok to delete the user.
+        if (UserManagement::verifyUserAllowed($user)) {
+          $user->delete();
+          Settings::log('Deleing user uid: %user', ['%user' => $data['id']], 'info');
+        }
+
+        break;
+
+      case 'openUsersBatch':
+        Settings::log('Starting Users Sync Batch. (Syncing %count Users)', ['%count' => $data['users_count']], 'info');
+        break;
+
+      case 'syncUser':
+        $user = $data['user'];
+        UserManagement::syncUserWithShopify($user);
+
+        break;
+
+      case 'deleteOrphanedUsers':
+
+        $users = UserManagement::deleteOrphanedUsers([
+          'limit' => 250,
+          'fields' => 'id',
+        ]);
+
+        $deleted = count($users);
+
+        if ($deleted > 0) {
+          Settings::log('Deleted %count orphaned users', ['%count' => $deleted], 'debug');
+        }
+
+        break;
+
+      case 'closeUsersBatch':
+        $config = Settings::editableConfig();
+        $last_updated = time();
+        $datetime = new \DateTime();
+        $last_updated_human = $datetime->format('Y-m-d H:i');
+        \Drupal::state()->set('neg_shopify.last_users_sync', $last_updated);
+        Settings::log('Closing Users Sync Batch. Last Sync: %last', ['%last' => $last_updated_human], 'info');
+        break;
     }
   }
 

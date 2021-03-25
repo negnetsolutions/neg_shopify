@@ -1,5 +1,6 @@
-<header class="controls">
-  <div class="count">{{ count }} products</div>
+{% if controls %}
+  <header class="controls">
+    <div class="count">{{ count }} {{ products_label }}</div>
   <div class="sort_order">
     <label for="SortBy" class="label--hidden">Sort By</label>
     <select aria-label="Change Sort Order" name="sort_order" id="sort_order" class="">
@@ -15,6 +16,7 @@
     </select>
   </div>
 </header>
+{% endif %}
 <section class="items products">
   {{ products }}
 </section>

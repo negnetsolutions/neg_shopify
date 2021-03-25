@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify;
 
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
+use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Url;
@@ -130,6 +131,7 @@ class ShopifyCollection {
     $variables['#products'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#products_label' => Settings::productsLabel(),
       '#count' => $total,
       '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
@@ -312,6 +314,7 @@ class ShopifyCollection {
     $variables['products'] = [
       '#theme' => 'shopify_product_grid',
       '#products' => ShopifyProduct::loadView($products, 'store_listing'),
+      '#products_label' => Settings::productsLabel(),
       '#count' => $total,
       '#defaultSort' => $variables['attributes']['data-sort'],
       '#allowManualSort' => $allowManualSorting,
@@ -365,7 +368,7 @@ class ShopifyCollection {
     $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('field_shopify_collection_id', $collection_id);
     $ids = $query->execute();
-    if ($ids) {
+    if (count($ids) > 0) {
       $terms = Term::loadMultiple($ids);
       return reset($terms);
     }

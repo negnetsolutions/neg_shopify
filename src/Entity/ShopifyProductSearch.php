@@ -4,6 +4,7 @@ namespace Drupal\neg_shopify\Entity;
 
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\SortArrayByProductId;
+use Drupal\neg_shopify\Entity\ShopifyProduct;
 
 /**
  * Class ShopifyProductSearch.
@@ -42,10 +43,10 @@ class ShopifyProductSearch {
 
     $ids = $query->execute();
 
-    $nodes = ShopifyProduct::loadMultiple($ids);
+    $nodes = (count($ids) > 0) ? ShopifyProduct::loadMultiple($ids) : [];
 
     // See if there is a preset sort_order.
-    if ($this->params['sort'] === 'manual-ascending' && isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
+    if (isset($this->params['sort']) && $this->params['sort'] === 'manual-ascending' && isset($this->params['collection_sort']) && isset($this->params['collection_sort']['sort_order']) && $this->params['collection_sort']['sort_order'] === 'manual' && isset($this->params['collection_sort']['items'])) {
       $this->sortByProductId($nodes, $this->params['collection_sort']['items']);
     }
 
@@ -73,6 +74,11 @@ class ShopifyProductSearch {
     // Require published product.
     $query->condition('published_at', time(), '<=');
 
+    // Check if user can see all products.
+    if (\Drupal::currentUser()->hasPermission('view unavailable shopify product entities')) {
+      $params['show'] = 'all';
+    }
+
     $show = isset($params['show']) ? $params['show'] : 'available';
 
     if ($show === 'available') {
@@ -86,6 +92,56 @@ class ShopifyProductSearch {
       $group->condition('is_preorder', TRUE);
 
       $query->condition($group);
+    }
+
+    if (isset($params['tags'])) {
+      foreach ($params['tags'] as $tag) {
+        if (strlen($tag) > 0) {
+          $termManager = \Drupal::entityTypeManager()
+            ->getStorage('taxonomy_term');
+          $andTags = explode('-and-', $tag);
+
+          if (count($andTags) > 1) {
+            $group = $query->andConditionGroup();
+            foreach ($andTags as $tag) {
+              $tagResults = $termManager->getQuery()
+                ->condition('vid', 'shopify_tags', '=')
+                ->condition('name', "%$tag%", 'LIKE')
+                ->range(0, 1)
+                ->execute();
+              $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
+              $group->condition('tags', $tagResults, 'IN');
+            }
+            $query->condition($group);
+          }
+          elseif (count($orTags = explode('-or-', $tag)) > 1) {
+            $group = $query->orConditionGroup();
+            foreach ($andTags as $tag) {
+              $tagResults = $termManager->getQuery()
+                ->condition('vid', 'shopify_tags', '=')
+                ->condition('name', "%$tag%", 'LIKE')
+                ->range(0, 1)
+                ->execute();
+              $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
+              $group->condition('tags', $tagResults, 'IN');
+            }
+            $query->condition($group);
+          }
+          else {
+            $tagResults = $termManager->getQuery()
+              ->condition('vid', 'shopify_tags', '=')
+              ->condition('name', "%$tag%", 'LIKE')
+              ->range(0, 1)
+              ->execute();
+            $tagResults = (count($tagResults) > 0) ? $tagResults : [0];
+            $query->condition('tags', array_values($tagResults), 'IN');
+          }
+        }
+      }
+    }
+
+    if (isset($params['vendor_name'])) {
+      $query->condition('vendor', "%{$params['vendor_name']}%", 'LIKE');
     }
 
     if (isset($params['vendor_slug'])) {
@@ -232,7 +288,7 @@ class ShopifyProductSearch {
       }
     }
 
-    $query->sort('is_available', 'ASC');
+    $query->sort('is_available', 'DESC');
 
     foreach ($sort as $option) {
       $query->sort($option, $direction);
@@ -241,4 +297,26 @@ class ShopifyProductSearch {
     return $query;
   }
 
+  /**
+   * Renders a json response for a search.
+   */
+  public static function renderJson($sortOrder = FALSE, $page = 0, $perPage = FALSE, $tags = [], $vendors = []) {
+    $params = [
+      'tags' => $tags,
+      'sort' => $sortOrder,
+    ];
+
+    if (count($vendors) > 0) {
+      $params['vendor_name'] = $vendors[0];
+    }
+
+    $search = new self($params);
+    $products = $search->search($page, $perPage);
+    $total = $search->count();
+
+    return [
+      'count' => $total,
+      'items' => ShopifyProduct::loadView($products, 'store_listing', FALSE),
+    ];
+  }
 }

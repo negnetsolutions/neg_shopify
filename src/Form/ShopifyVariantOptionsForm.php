@@ -52,7 +52,6 @@ class ShopifyVariantOptionsForm extends FormBase {
       $attributes = [];
 
       if (!$variant->entity->isAvailable()) {
-
         $attributes['disabled'] = 'disabled';
       }
 
@@ -70,7 +69,7 @@ class ShopifyVariantOptionsForm extends FormBase {
     // Check to see if variant_id is false and this is the first index.
     if ($variant_id === FALSE) {
       $keys = array_keys($optionsAttributes);
-      if (isset($optionsAttributes[$keys[0]]['disabled'])) {
+      if (count($keys) > 0 && isset($optionsAttributes[$keys[0]]['disabled'])) {
         // The default attribute is disabled. We need to try to
         // redirect to an available product.
         foreach ($optionsAttributes as $key => $attributes) {
@@ -125,27 +124,10 @@ class ShopifyVariantOptionsForm extends FormBase {
    * Gets first variant id.
    */
   private function getFirstVariantId(object $variants) {
-    $optionsAttributes = [];
     foreach ($variants as $i => $variant) {
-      $attributes = [];
-
-      if (!$variant->entity->isAvailable()) {
-
-        $attributes['disabled'] = 'disabled';
-      }
-
-      $key = $variant->entity->get('variant_id')->value;
-      $optionsAttributes[$key] = $attributes;
-    }
-
-    $keys = array_keys($optionsAttributes);
-    if (isset($optionsAttributes[$keys[0]]['disabled'])) {
-      // The default attribute is disabled. We need to try to
-      // redirect to an available product.
-      foreach ($optionsAttributes as $key => $attributes) {
-        if (!isset($attributes['disabled'])) {
-          return $key;
-        }
+      if ($variant->entity->isAvailable()) {
+        $key = $variant->entity->get('variant_id')->value;
+        return $key;
       }
     }
 

@@ -1,0 +1,9 @@
+<article {{ attributes }}>
+    <h1 class="title">{{ name }}</h1>
+
+    {% if content.thumbnail|render %}
+    <figure class="thumbnail">{{ content.thumbnail }}</figure>
+    {% endif %}
+
+    {{ content.products }}
+</article>

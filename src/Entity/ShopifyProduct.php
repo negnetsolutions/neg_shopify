@@ -9,13 +9,14 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\FileInterface;
-use Drupal\neg_shopify\ShopifyProductInterface;
+use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductInterface;
 use Drupal\neg_shopify\Settings;
-use Drupal\neg_shopify\ShopifyService;
+use Drupal\neg_shopify\Api\ShopifyService;
+use Drupal\neg_shopify\Event\LoadMultipleProductsViewEvent;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
-use Drupal\Core\Cache\Cache;
+use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
  * Defines the Shopify product entity.
@@ -26,10 +27,10 @@ use Drupal\Core\Cache\Cache;
  *   id = "shopify_product",
  *   label = @Translation("Shopify product"),
  *   handlers = {
- *     "storage_schema" = "Drupal\neg_shopify\Entity\ShopifyProductStorageSchema",
- *     "view_builder" = "Drupal\neg_shopify\ShopifyProductViewBuilder",
- *     "list_builder" = "Drupal\neg_shopify\ShopifyProductListBuilder",
- *     "views_data" = "Drupal\neg_shopify\ShopifyProductViewsData",
+ *     "storage_schema" = "Drupal\neg_shopify\Entity\StorageSchema\ShopifyProductStorageSchema",
+ *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyProductViewBuilder",
+ *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyProductListBuilder",
+ *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyProductViewsData",
  *
  *     "form" = {
  *       "default" = "Drupal\neg_shopify\Entity\Form\ShopifyProductForm",
@@ -38,9 +39,9 @@ use Drupal\Core\Cache\Cache;
  *       "delete" = "Drupal\neg_shopify\Entity\Form\ShopifyProductDeleteForm",
  *     },
  *     "route_provider" = {
- *       "html" = "Drupal\neg_shopify\ShopifyProductHtmlRouteProvider",
+ *       "html" = "Drupal\neg_shopify\Entity\RouteProvider\ShopifyProductHtmlRouteProvider",
  *     },
- *     "access" = "Drupal\neg_shopify\ShopifyProductAccessControlHandler",
+ *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyProductAccessControlHandler",
  *   },
  *   base_table = "shopify_product",
  *   admin_permission = "administer ShopifyProduct entity",
@@ -63,7 +64,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   use ShopifyEntityTrait;
 
   const SHOPIFY_COLLECTIONS_VID = 'shopify_collections';
-  const SHOPIFY_TAGS_VID = 'shopify_tags';
+  public const SHOPIFY_TAGS_VID = 'shopify_tags';
   const SHOPIFY_VENDORS_VID = 'shopify_vendors';
 
   /**
@@ -164,7 +165,6 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     if (isset($values['vendor'])) {
       $slug = self::slugify($values['vendor']);
       $values['vendor_slug'] = $slug;
-      Cache::invalidateTags(['shopify_vendor:' . $slug]);
     }
 
     if (!isset($values['extra_images']) || empty($values['extra_images'])) {
@@ -431,31 +431,29 @@ EOL;
       $ids[] = $record->id;
     }
 
-    return self::loadMultiple($ids);
+    return (count($ids) > 0) ? self::loadMultiple($ids) : [];
   }
 
   /**
-   * Loads a view array.
+   * Loads a view array of multiple products.
    */
   public static function loadView(array $products, string $style = 'full', $defaultContext = TRUE) {
 
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+
     $view = [];
 
+    // Run preprocess event.
+    $event = new LoadMultipleProductsViewEvent($products, $view, $style, $defaultContext);
+    $event_dispatcher->dispatch(LoadMultipleProductsViewEvent::PREPROCESS, $event);
+
     foreach ($products as $product) {
-      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($product, $style);
-
-      if ($defaultContext === FALSE) {
-        $rendered_view = NULL;
-        \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
-          $rendered_view = render($build);
-        });
-      }
-      else {
-        $rendered_view = $build;
-      }
-
-      $view[] = $rendered_view;
+      $view[] = $product->getView($style, $defaultContext);
     }
+
+    // Run postprocess event.
+    $event = new LoadMultipleProductsViewEvent($products, $view, $style, $defaultContext);
+    $event_dispatcher->dispatch(LoadMultipleProductsViewEvent::POSTPROCESS, $event);
 
     return $view;
   }
@@ -490,7 +488,7 @@ EOL;
     $query = \Drupal::entityQuery('shopify_product');
     $query->condition('product_id', $product_ids, 'NOT IN');
     $ids = $query->execute();
-    $products = self::loadMultiple($ids);
+    $products = (count($ids) > 0) ? self::loadMultiple($ids) : [];
 
     foreach ($products as $product) {
       $deleted_products[] = $product;
@@ -526,6 +524,14 @@ EOL;
     return FALSE;
   }
 
+
+  /**
+   * Get's shopiy vendor entity.
+   */
+  public function getShopifyVendor() {
+    return ShopifyVendor::loadBySlug($this->get('vendor_slug')->value);
+  }
+
   /**
    * Gets available variants.
    */
@@ -538,6 +544,17 @@ EOL;
     }
 
     return $variants;
+  }
+
+  /**
+   * Gets first available variant.
+   */
+  public function getFirstVariant() {
+    foreach ($this->get('variants') as $variant) {
+      return $variant->entity;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -583,6 +600,20 @@ EOL;
   }
 
   /**
+   * Converts a shopify product id to a graph ql id.
+   */
+  public static function idToGraphQlId($id, $base64Encoded = FALSE) {
+    return ShopifyService::idToGraphQlId($id, 'Product', $base64Encoded);
+  }
+
+  /**
+   * Converts a shopify graph ql product id to a rest id.
+   */
+  public static function graphQlIdToId($id, $base64Encoded = FALSE) {
+    return ShopifyService::graphQlIdToId($id, 'Product', $base64Encoded);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getTagArray() {
@@ -592,6 +623,36 @@ EOL;
     }
 
     return $tags;
+  }
+
+  /**
+   * Get's product thumbnail image.
+   */
+  public function getThumbnailImage() {
+    if ($this->image->target_id) {
+      return $this->image;
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Get's product thumbnail rendered.
+   */
+  public function renderThumbnail($image_style = 'rs_image', $formatter = 'responsive_image_formatter') {
+    $build = [];
+
+    $image = $this->getThumbnailImage();
+    if ($image) {
+      $view = $image->view();
+      if (count($view) > 0 && isset($view[0])) {
+        $build = $view[0];
+        $build['#theme'] = $formatter;
+        $build['#responsive_image_style_id'] = $image_style;
+      }
+    }
+
+    return $build;
   }
 
   /**
@@ -705,14 +766,9 @@ EOL;
       ->setSetting('handler', 'default')
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('form', [
-        // @todo: Would prefer to use inline entity form, but it's buggy, not working...
-        // 'type' => 'inline_entity_form_complex'.
         'type' => 'entity_reference_autocomplete_tags',
         'weight' => -25,
         'settings' => [
-        // 'match_operator' => 'CONTAINS',
-        // 'autocomplete_type' => 'tags',
-        // 'placeholder' => ''.
         ],
       ])
       ->setDisplayConfigurable('form', TRUE)
@@ -764,9 +820,9 @@ EOL;
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'responsive_image',
         'weight' => -40,
-        'settings' => ['image_style' => '', 'image_link' => 'content'],
+        'settings' => ['responsive_image_style' => 'rs_image'],
       ])
       ->setDisplayOptions('form', [
         'type' => 'image_image',
@@ -781,7 +837,8 @@ EOL;
       ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
       ->setDisplayOptions('view', [
         'label' => 'hidden',
-        'type' => 'image',
+        'type' => 'responsive_image',
+        'settings' => ['responsive_image_style' => 'rs_image'],
         'weight' => -35,
       ])
       ->setDisplayOptions('form', [
@@ -790,6 +847,24 @@ EOL;
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['dynamic_product_image'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Dynamic Product Image'))
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'responsive_image',
+        'weight' => -40,
+        'settings' => ['responsive_image_style' => 'rs_5x4'],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'image_image',
+        'weight' => 2,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setComputed(TRUE)
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductImage')
+    ;
 
     $fields['body_html'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Body HTML'))

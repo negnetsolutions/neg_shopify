@@ -1,0 +1,5 @@
+services:
+  neg_shopify.twig.TwigExtension:
+    class: Drupal\neg_shopify\TwigExtension\ShopifyFormatters
+    tags:
+      - {name: twig.extension}

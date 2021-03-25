@@ -10,8 +10,9 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\file\FileInterface;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
-use Drupal\neg_shopify\ShopifyProductVariantInterface;
-use Drupal\neg_shopify\StoreFrontService;
+use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductVariantInterface;
+use Drupal\neg_shopify\Api\ShopifyService;
+use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 
 /**
  * Defines the Shopify product variant entity.
@@ -22,9 +23,9 @@ use Drupal\neg_shopify\StoreFrontService;
  *   id = "shopify_product_variant",
  *   label = @Translation("Shopify product variant"),
  *   handlers = {
- *     "view_builder" = "Drupal\neg_shopify\ShopifyProductVariantViewBuilder",
- *     "list_builder" = "Drupal\neg_shopify\ShopifyProductVariantListBuilder",
- *     "views_data" = "Drupal\neg_shopify\Entity\ShopifyProductVariantViewsData",
+ *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyProductVariantViewBuilder",
+ *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyProductVariantListBuilder",
+ *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyProductVariantViewsData",
  *
  *     "form" = {
  *       "default" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantForm",
@@ -32,7 +33,7 @@ use Drupal\neg_shopify\StoreFrontService;
  *       "edit" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantForm",
  *       "delete" = "Drupal\neg_shopify\Entity\Form\ShopifyProductVariantDeleteForm",
  *     },
- *     "access" = "Drupal\neg_shopify\ShopifyProductVariantAccessControlHandler",
+ *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyProductVariantAccessControlHandler",
  *   },
  *   base_table = "shopify_product_variant",
  *   admin_permission = "administer ShopifyProductVariant entity",
@@ -183,6 +184,20 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Loads a variant by it's sku.
+   *
+   * @param string $sku
+   *   Sku as string.
+   *
+   * @return ShopifyProductVariant
+   *   Product variant.
+   */
+  public static function loadBySku($sku) {
+    $variants = (array) self::loadByProperties(['sku' => $sku]);
+    return reset($variants);
+  }
+
+  /**
    * Loads a variant by it's variant_id.
    *
    * @param string $variant_id
@@ -209,6 +224,20 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     return \Drupal::entityTypeManager()
       ->getStorage('shopify_product_variant')
       ->loadByProperties($props);
+  }
+
+  /**
+   * Converts a shopify product id to a graph ql id.
+   */
+  public static function idToGraphQlId($id, $base64Encoded = FALSE) {
+    return ShopifyService::idToGraphQlId($id, 'ProductVariant', $base64Encoded);
+  }
+
+  /**
+   * Converts a shopify graph ql product id to a rest id.
+   */
+  public static function graphQlIdToId($id, $base64Encoded = FALSE) {
+    return ShopifyService::graphQlIdToId($id, 'ProductVariant', $base64Encoded);
   }
 
   /**
@@ -345,41 +374,8 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    * Fetchs the shopify storefront api id for this variant.
    */
   public function getStoreFrontId() {
-
-    if ($this->get('storefront_id')->isEmpty()) {
-      $product = $this->getProduct();
-      $handle = $product->handle->value;
-      $options = $this->getSelectedOptions();
-
-      // Encode Options.
-      $options = preg_replace('/"([^"]+)"\s*:\s*/', '$1:', json_encode($options));
-
-      $query = <<<EOF
-{
-  productByHandle(handle: "${handle}") {
-    variantBySelectedOptions (selectedOptions: {$options})
-    {
-      id
-    }
-  }
-}
-EOF;
-      $results = StoreFrontService::request($query);
-
-      if (!isset($results['data']) || !isset($results['data']['productByHandle']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']) || !isset($results['data']['productByHandle']['variantBySelectedOptions']['id'])) {
-        return FALSE;
-      }
-
-      $id = $results['data']['productByHandle']['variantBySelectedOptions']['id'];
-      $this->set('storefront_id', $id);
-      $this->save();
-    }
-    else {
-      $id = $this->get('storefront_id')->value;
-    }
-
-    return $id;
-
+    $variantId = $this->get('variant_id')->value;
+    return self::idToGraphQlId($variantId, TRUE);
   }
 
   /**
@@ -719,7 +715,8 @@ EOF;
       ->setDefaultValue('')
       ->setDisplayOptions('view', [
         'label' => 'above',
-        'type' => 'image',
+        'type' => 'responsive_image',
+        'settings' => ['responsive_image_style' => 'rs_image'],
         'weight' => 2,
       ])
       ->setDisplayOptions('form', [
@@ -728,6 +725,24 @@ EOF;
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
+
+    $fields['dynamic_product_image'] = BaseFieldDefinition::create('image')
+      ->setLabel(t('Dynamic Product Image'))
+      ->setDisplayOptions('view', [
+        'label' => 'hidden',
+        'type' => 'responsive_image',
+        'weight' => -40,
+        'settings' => ['responsive_image_style' => 'rs_5x4'],
+      ])
+      ->setDisplayOptions('form', [
+        'type' => 'image_image',
+        'weight' => 2,
+      ])
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE)
+      ->setComputed(TRUE)
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductVariantImage')
+    ;
 
     $fields['option1'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Option 1'))

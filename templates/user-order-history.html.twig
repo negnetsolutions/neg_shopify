@@ -1,0 +1,38 @@
+<section v-cloak class="shopifyCustomerHistoryWidget" data-email="{{ email }}" data-endpoint="{{ url('neg_shopify.customer.orders.json') }}" data-per-page={{ perPage }}>
+  <h2>Order History</h2>
+  <table v-if="records.length > 0">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Payment</th>
+        <th>Fulfillment</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="record in records" >
+        <td class='order'><a target="_blank" :href="'{{ url('neg_shopify.customer.receipt') }}?order=' + btoa(record.id)">{% verbatim %}{{ record.orderNumber }}{% endverbatim %}</a></td>
+        <td class='date'>{% verbatim %}{{ formatDate(record.processedAt) }}{% endverbatim %}</td>
+        <td class='amount'>{% verbatim %}<span v-if="record.totalPriceV2.currencyCode == 'USD'">$</span>{{ formatMoney(record.totalPriceV2.amount) }} <span v-if="record.totalPriceV2.currencyCode != 'USD'">{{ record.totalPriceV2.currencyCode }}</span>{% endverbatim %}</td>
+        <td class="financial_status">{% verbatim %}{{ formatStatus(record.financialStatus) }}{% endverbatim %}</td>
+        <td class="fulfillment_status">{% verbatim %}{{ formatStatus(record.fulfillmentStatus) }}{% endverbatim %}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <template v-else-if="loading === true">
+    <p>Loading...</p>
+  </template>
+
+  <template v-else>
+  <p>You don't have any orders yet.</p>
+  </template>
+
+  <div class="wrap pagination" v-if="hasPrevPage || hasNextPage">
+    <div>
+      <span v-if="hasPrevPage == true" class="prev"><a href="#" @click.prevent="getPrevPage()">‹ previous</a></span>
+      <span v-if="hasNextPage == true" class="next"><a href="#" @click.prevent="getNextPage()">next ›</a></span>
+    </div>
+  </div>
+</section>

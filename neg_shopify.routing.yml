@@ -6,11 +6,27 @@ neg_shopify.settings:
   requirements:
     _permission: 'Administer Shopify API'
 
-neg_shopify.vendors:
-  path: '/vendors/{vendor}'
+neg_shopify.user.activatebyurl:
+  path: '/user/activate'
   defaults:
-    _controller: '\Drupal\neg_shopify\Controller\Vendors::render'
-    _title_callback: '\Drupal\neg_shopify\Controller\Vendors::getTitle'
+     _form: '\Drupal\neg_shopify\Form\ShopifyUserActivateForm'
+     _title: 'Activate your account'
+  requirements:
+    _permission: 'access content'
+
+neg_shopify.user.resetpasswordbyurl:
+  path: '/user/password/reset'
+  defaults:
+     _form: '\Drupal\neg_shopify\Form\ShopifyUserPasswordResetForm'
+     _title: 'Activate your account'
+  requirements:
+    _permission: 'access content'
+
+neg_shopify.vendors_page:
+  path: '/vendors'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\VendorsController::renderAll'
+    _title_callback: '\Drupal\neg_shopify\Controller\VendorsController::getVendorPageTitle'
   requirements:
     _permission: 'access content'
 
@@ -65,6 +81,21 @@ neg_shopify.webhook:
   requirements:
     _permission: 'access content'
 
+neg_shopify.customer.receipt:
+  path: '/account/receipt'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrder'
+    _title: 'Receipt'
+  requirements:
+    _permission: 'view all shopify customer data+view own shopify customer data'
+
+neg_shopify.customer.orders.json:
+  path: '/account/orders.json'
+  defaults:
+    _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrders'
+  requirements:
+    _permission: 'view all shopify customer data+view own shopify customer data'
+
 shopify_product_variant.settings:
   path: '/admin/structure/shopify_product_variant'
   defaults:
@@ -74,6 +105,24 @@ shopify_product_variant.settings:
     _permission: 'administer shopify product variant entities'
   options:
     _admin_route: TRUE
+
+entity.shopify_vendor.collection:
+  path: '/admin/shopify_vendor'
+  defaults:
+    _entity_list: 'shopify_vendor'
+    _title: 'Shopify vendor list'
+  requirements:
+    _permission: 'administer shopify'
+  options:
+    _admin_route: TRUE
+
+entity.shopify_vendor.canonical:
+  path: '/store/vendor/{shopify_vendor}'
+  defaults:
+    _entity_view: 'shopify_vendor'
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _entity_access: 'shopify_vendor.view'
 
 entity.shopify_product.canonical:
   path: '/store/product/{shopify_product}'
@@ -132,6 +181,25 @@ shopify_product.settings:
   options:
     _admin_route: TRUE
 
+entity.shopify_vendor.edit_form:
+  path: '/admin/shopify_vendor/{shopify_vendor}/edit'
+  defaults:
+    _entity_form: shopify_vendor.edit
+    _title: 'Edit Shopify vendor'
+  requirements:
+    _permission: 'edit shopify product entities'
+  options:
+    _admin_route: TRUE
+
+shopify_vendor.settings:
+  path: '/admin/structure/shopify_vendor'
+  defaults:
+   _form: '\Drupal\neg_shopify\Entity\Form\ShopifyVendorSettingsForm'
+   _title: 'Shopify vendor settings'
+  requirements:
+    _permission: 'administer shopify product entities'
+  options:
+    _admin_route: TRUE
 
 # ShopifyProductVariant routing definition
 entity.shopify_product_variant.canonical:

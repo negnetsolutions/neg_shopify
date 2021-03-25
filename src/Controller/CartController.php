@@ -10,7 +10,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Cache;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
-use Drupal\neg_shopify\StoreFrontService;
+use Drupal\neg_shopify\Api\StoreFrontService;
 
 /**
  * Class CartController.
@@ -130,7 +130,10 @@ class CartController extends ControllerBase {
       return $this->removeItem($variantId);
     }
 
+    $variant = ShopifyProductVariant::loadByVariantId($variantId);
+
     $item = [
+      'sku' => $variant->get('sku')->value,
       'variantId' => $variantId,
       'quantity' => $desiredQuantity,
     ];
@@ -280,9 +283,13 @@ EOF;
    * Gets a new checkout.
    */
   protected function createCheckout($lineItems) {
+    $current_user = \Drupal::currentUser();
+    $email = 'email: "' . $current_user->getEmail() . '", ';
+
     $query = <<<EOF
 mutation {
   checkoutCreate(input: {
+    {$email}
     lineItems: {$lineItems}
   }) {
     checkout {
@@ -293,8 +300,10 @@ mutation {
   }
 }
 EOF;
+
     try {
       $results = StoreFrontService::request($query);
+
       if (!isset($results['data']) || !isset($results['data']['checkoutCreate']) || !isset($results['data']['checkoutCreate']['checkout']) || !isset($results['data']['checkoutCreate']['checkout']['id'])) {
         return FALSE;
       }

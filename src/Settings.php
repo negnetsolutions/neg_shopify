@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\Core\Queue\SuspendQueueException;
+use Drupal\Api\ShopifyService;
 
 /**
  * Class Settings.
@@ -15,10 +16,12 @@ class Settings {
   const WEBHOOKQUEUE = 'neg_shopify_webhook';
   const CRONQUEUE = 'neg_shopify';
   const COLLECTIONSQUEUE = 'neg_shopify_collections';
+  const USERSQUEUE = 'neg_shopify_users';
   const DEFAULT_SORT = 'date-descending';
+  const API_VERSION = '2021-01';
 
   /**
-   * Invalidates review cache.
+   * Invalidates product cache.
    */
   public static function invalidateCache() {
     Cache::invalidateTags(['shopify_product']);
@@ -28,6 +31,8 @@ class Settings {
    * Gets the webhook route urls.
    */
   public static function webhookRouteUrl() {
+    // TODO.
+    return 'https://adf257881acf.ngrok.io/shopify/webhook';
     return Url::fromRoute('neg_shopify.webhook')->setAbsolute()->toString();
   }
 
@@ -58,6 +63,7 @@ class Settings {
   public static function shopInfo($key = '', $refresh = FALSE) {
     if ($refresh) {
       $info = ShopifyService::instance()->shopInfo();
+
       // Convert to object.
       $info = json_decode(json_encode($info), FALSE);
       \Drupal::state()->set('shopify.shop_info', $info);
@@ -117,6 +123,15 @@ class Settings {
   }
 
   /**
+   * Get Users Queue.
+   */
+  public static function usersQueue() {
+    $queue_factory = \Drupal::service('queue');
+    $queue = $queue_factory->get(self::USERSQUEUE);
+    return $queue;
+  }
+
+  /**
    * Get Queue.
    */
   public static function queue() {
@@ -150,6 +165,19 @@ class Settings {
   public static function accessToken() {
     $config = self::config();
     return $config->get('store_front_access_token');
+  }
+
+  /**
+   * Gets products label.
+   */
+  public static function productsLabel() {
+    $config = self::config();
+    $label = $config->get('products_label');
+    if ($label === NULL) {
+      return 'products';
+    }
+
+    return $label;
   }
 
   /**

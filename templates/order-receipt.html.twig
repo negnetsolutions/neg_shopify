@@ -1,0 +1,130 @@
+<section class="sales_receipt">
+  <div class="top">
+    <h1>Order {{ order.name }}</h1>
+    <h2>{{ order.processedAt | shopify_date }}</h2>
+  </div>
+
+  <div class="status">{{ order.displayFinancialStatus | display_shopify_financial_status }}</div>
+
+  {% if order.billingAddress.formatted != null %}
+  <div class="billing_address">
+    <h3>Bill To</h3>
+    {% for line in order.billingAddress.formatted %}
+      <p>{{ line }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if order.shippingAddress.formatted != null %}
+  <div class="shipping_address">
+    <h3>Ship To</h3>
+    {% for line in order.shippingAddress.formatted %}
+      <p>{{ line }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="receipt_table">
+    <section class="header">
+      <div class="image">&nbsp;</div>
+      <div class="description">Product</div>
+      <div class="quantity">Quantity</div>
+      <div class="total">Total</div>
+    </section>
+
+    {% for line in order.lineItems.edges %}
+      <section class="line">
+        <div class="image">
+          {% if line.node.image.transformedSrc %}
+          <img decoding="async" loading="lazy" width="{{ line.node.image.width }}" height="{{ line.node.image.height }}" alt="{{ line.node.image.altText }}" src="{{ line.node.image.transformedSrc }}" />
+          {% elseif line.node.thumbnail %}
+            {{ line.node.thumbnail }}
+          {% endif %}
+        </div>
+        <div class="description">
+          {% if line.node.sku | render %}
+            <div><strong>{{ line.node.sku }}</strong></div>
+          {% endif %}
+          {{ line.node.name }}
+          {% if line.node.variantTitle | render %}
+          <div>{{ line.node.variantTitle }}</div>
+          {% endif %}
+          {% if line.node.vendor | render %}
+          <div>{{ line.node.vendor }}</div>
+          {% endif %}
+        </div>
+        <div class="quantity">
+          {{ line.node.quantity }}
+        </div>
+        <div class="total">
+          {% if line.node.originalTotalSet.presentmentMoney.amount != line.node.discountedTotalSet.presentmentMoney.amount %}
+            <span class="strike">{{ line.node.originalTotalSet.presentmentMoney | shopify_currency }}</span>
+            <span class="discount">{{ line.node.discountedTotalSet.presentmentMoney | shopify_currency }}</span>
+          {% else %}
+          {{ line.node.discountedTotalSet.presentmentMoney | shopify_currency }}
+          {% endif %}
+        </div>
+      </section>
+    {% endfor %}
+  </div>
+
+  <div class="receipt_summary">
+    <div class="has-label">
+      <span class="label">Subtotal</span>
+      <span>{{ order.currentSubtotalPriceSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% if order.currentTotalDiscountsSet.presentmentMoney.amount > 0 %}
+    <div class="has-label">
+      <span class="label">Discount</span>
+      <span>{{ order.currentTotalDiscountsSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% endif %}
+    {% for line in order.currentTaxLines %}
+      <div class="has-label">
+        <span class="label">{{ line.title }} {{ line.ratePercentage }}%</span>
+        <span>{{ line.priceSet.presentmentMoney | shopify_currency }}</span>
+      </div>
+    {% endfor %}
+    {% if order.totalShippingPriceSet.presentmentMoney.amount > 0 %}
+    <div class="has-label">
+      <span class="label">Shipping</span>
+      <span>{{ order.totalShippingPriceSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% endif %}
+    <div class="has-label">
+      <span class="label">Total</span>
+      <span>{{ order.currentTotalPriceSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% if order.totalReceivedSet.presentmentMoney.amount != order.currentTotalPriceSet.presentmentMoney.amount %}
+    <div class="has-label">
+      <span class="label">Amount Paid</span>
+      <span>{{ order.totalReceivedSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% endif %}
+    {% if order.totalRefundedSet.presentmentMoney.amount > 0 %}
+    <div class="has-label">
+      <span class="label">Amount Refunded</span>
+      <span>{{ order.totalRefundedSet.presentmentMoney | shopify_currency }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  {% set has_packages = false %}
+  {% for line in order.fulfillments %}
+    {% for package in line.trackingInfo %}
+      {% set has_packages = true %}
+    {% endfor %}
+  {% endfor %}
+  {% if has_packages == true %}
+  <div class="shipping_summary">
+    <h2>Shipments</h2>
+    <ul>
+      {% for line in order.fulfillments %}
+        {% for package in line.trackingInfo %}
+          <li>{{ line.createdAt | shopify_date }} <a target="_blank" href="{{ package.url }}">{{ package.company }} #{{ package.number }}</a></li>
+      {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</section>

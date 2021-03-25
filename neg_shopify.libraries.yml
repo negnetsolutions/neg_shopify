@@ -6,6 +6,17 @@ cart_controller:
     - neg_shopify/shopify.js
     - negnet_utility/closest
     - negnet_utility/createElementFromHTML
+user_order_history_block:
+  version: 0.01
+  js:
+    js/customer/user_order_history.js: {}
+  dependencies:
+    - negnet_utility/vue
+order_receipt:
+  version: 0.01
+  css:
+    theme:
+      css/receipt.css: {}
 cart_block:
   version: 0.01
   css:

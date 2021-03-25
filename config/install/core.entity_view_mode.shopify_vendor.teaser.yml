@@ -1,0 +1,10 @@
+uuid: 2caf5851-6b13-4ff5-b47d-b7859982de7f
+langcode: en
+status: true
+dependencies:
+  module:
+    - neg_shopify
+id: shopify_vendor.teaser
+label: Teaser
+targetEntityType: shopify_vendor
+cache: true

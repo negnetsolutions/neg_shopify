@@ -1,0 +1,142 @@
+.sales_receipt {
+
+  margin: 0 1in;
+  margin-top: 1in;
+
+  h1, h2 {
+    line-height: 1em;
+  }
+  h1 {
+    margin-bottom: 0;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 1.2em;
+  }
+
+  h2 {
+    margin-top: 0;
+    text-align: left;
+    text-transform: capitalize;
+    font-size: 1.0em;
+    white-space: nowrap;
+  }
+
+  .top {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: space-between;
+    h1, h2 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    margin-bottom: 2em;
+  }
+
+  .shipping_summary {
+    text-align: left;
+    margin-top: 2em;
+
+    .tracking_number {
+      a {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .billing_address, .shipping_address  {
+    text-align: left;
+    margin-bottom: 2em;
+    p {
+      margin: 0 !important;
+      padding: 0;
+    }
+  }
+
+  .receipt_table {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: center;
+    justify-content: center;
+
+    .header, .line {
+      display: contents;
+    }
+
+    .image {
+      padding-right: 1em;
+      img {
+        height: auto;
+        max-width: 100% !important;
+        width: 100%;
+      }
+    }
+
+    .total {
+      .strike {
+        text-decoration: line-through;
+      }
+      .discount {
+        color: red;
+      }
+    }
+
+    .header {
+      & > div {
+        font-weight: bold;
+        border-bottom: 1px solid grey;
+        margin-bottom: 1em;
+      }
+    }
+
+    .line {
+      &, * {
+        text-decoration: none;
+      }
+      & > div {
+        margin-bottom: 1em;
+      }
+    }
+
+    @media screen {
+      a.line {
+        &:hover {
+          & > * {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .receipt_summary {
+    text-align: right;
+    margin-top: 2em;
+
+    .has-label {
+      justify-content: flex-end;
+    }
+  }
+
+  .has-label {
+    display: flex;
+    span {
+      display: block;
+    }
+    .label {
+      font-weight: bold;
+      &:after {
+        content: ":";
+        margin-right: .5em;
+      }
+    }
+  }
+
+  .notes {
+    text-align: left;
+    margin-top: 2em;
+    .label {
+      font-weight: bold;
+    }
+  }
+}

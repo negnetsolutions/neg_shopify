@@ -21,3 +21,15 @@ shopify_product_variant.admin.structure.settings:
   description: 'Configure Shopify product variant entities'
   route_name: shopify_product_variant.settings
   parent: system.admin_structure
+
+shopify_vendor.admin.structure.settings:
+  title: Shopify vendor settings
+  description: 'Configure Shopify vendor entities'
+  route_name: shopify_vendor.settings
+  parent: system.admin_structure
+
+neg_shopify.myaccount:
+  weight: 10
+  menu_name: account
+  class: Drupal\neg_shopify\Plugin\Menu\MyAccountMenuLink
+
