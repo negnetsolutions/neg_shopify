@@ -4,7 +4,7 @@ const shopping_cart = new function (){
   this.cart = [];
   this.endpoint = drupalSettings.cart.endpoint;
   this.cartObservers = [];
-  this.debug = true;
+  this.debug = false;
   this.cacheTTL = 60000; // 60 second cache.
 
   this.getCache = function getCache(name) {
