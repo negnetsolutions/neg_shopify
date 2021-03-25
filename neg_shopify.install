@@ -3,6 +3,7 @@
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\ShopifyVendors;
 
 /**
  * Adds "shopify_product.is_available"
@@ -165,4 +166,12 @@ function neg_shopify_update_8715(&$sandbox) {
   $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
 
   return t('shopify_vendor.thumbnail');
+}
+
+/**
+ * Updates shopify vendors.
+ */
+function neg_shopify_update_8716(&$sandbox) {
+  ShopifyVendors::syncVendors();
+  return t('Updated shopify vendors');
 }
