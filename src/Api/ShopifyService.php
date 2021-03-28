@@ -396,12 +396,36 @@ class ShopifyService {
 
     // Fetch this page.
     $products = $this->productService->get($params);
-    $pages[] = $products;
+    if (count($products) > 0) {
+      $pages[] = $products;
+    }
 
     // Get Next Page.
     $next = $this->productService->getNextLink();
     if ($next !== NULL) {
       $pages = array_merge($pages, $this->fetchAllPagedProducts($this->processPageCursor($next)));
+    }
+
+    return $pages;
+  }
+
+  /**
+   * Gets all orders.
+   */
+  public function fetchAllPagedOrders(array $params = []) {
+
+    $pages = [];
+
+    // Fetch this page.
+    $products = $this->orderService->get($params);
+    if (count($products) > 0) {
+      $pages[] = $products;
+    }
+
+    // Get Next Page.
+    $next = $this->orderService->getNextLink();
+    if ($next !== NULL) {
+      $pages = array_merge($pages, $this->fetchAllPagedOrders($this->processPageCursor($next)));
     }
 
     return $pages;
