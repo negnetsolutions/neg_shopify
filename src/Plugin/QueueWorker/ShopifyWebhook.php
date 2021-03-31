@@ -85,6 +85,7 @@ class ShopifyWebhook extends QueueWorkerBase {
           ShopifyProduct::formatDatetimeAsTimestamp(['published_at'], $values);
           $product->set('published_at', $values['published_at']);
           $product->save();
+          Settings::log('Published product %p', ['%p' => $product->id()], 'info');
         }
         break;
 
@@ -94,6 +95,7 @@ class ShopifyWebhook extends QueueWorkerBase {
         if ($product) {
           $product->set('published_at', NULL);
           $product->save();
+          Settings::log('Unpublished product %p', ['%p' => $product->id()], 'info');
         }
         break;
 
