@@ -75,6 +75,39 @@ class SyncShopify extends QueueWorkerBase {
         Settings::log('Synced Shopify Vendors', [], 'debug');
         break;
 
+      case 'syncListings':
+        $visible_products = $data['visible_products'];
+
+        // Find all that are published and shouldn't be.
+        $pids = \Drupal::entityTypeManager()
+          ->getStorage('shopify_product')
+          ->getQuery()
+          ->condition('product_id', $visible_products, 'NOT IN')
+          ->exists('published_at')
+          ->execute();
+        $products = ShopifyProduct::loadMultiple($pids);
+        foreach ($products as $product) {
+          $product->set('published_at', NULL);
+          $product->save();
+          Settings::log('Unpublished product %p', ['%p' => $product->id()], 'info');
+        }
+
+        // Find all that are not published and should be.
+        $pids = \Drupal::entityTypeManager()
+          ->getStorage('shopify_product')
+          ->getQuery()
+          ->condition('product_id', $visible_products, 'IN')
+          ->notExists('published_at')
+          ->execute();
+        $products = ShopifyProduct::loadMultiple($pids);
+        foreach ($products as $product) {
+          $product->set('published_at', time());
+          $product->save();
+          Settings::log('Published product %p', ['%p' => $product->id()], 'info');
+        }
+
+        break;
+
       case 'closeProductBatch':
         $last_updated = time();
         $datetime = new \DateTime();

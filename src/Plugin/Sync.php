@@ -273,6 +273,16 @@ class Sync {
       'op' => 'syncVendors',
     ]);
 
+    // Syncs listings.
+    $visibleProducts = ShopifyService::instance()->fetchAllPagedListings([
+      'limit' => 250,
+    ]);
+
+    $queue->createItem([
+      'op' => 'syncListings',
+      'visible_products' => $visibleProducts,
+    ]);
+
     // Close batch.
     $queue->createItem([
       'op' => 'closeProductBatch',
