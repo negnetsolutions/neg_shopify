@@ -36,7 +36,7 @@ use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
  *     "access" = "Drupal\neg_shopify\Entity\AccessControlHandler\ShopifyVendorAccessControlHandler",
  *   },
  *   base_table = "shopify_vendor",
- *   admin_permission = "administer ShopifyVendor entity",
+ *   admin_permission = "administer shopify vendor entity",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "title",

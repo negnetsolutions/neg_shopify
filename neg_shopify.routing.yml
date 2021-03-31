@@ -124,6 +124,16 @@ entity.shopify_vendor.canonical:
   requirements:
     _entity_access: 'shopify_vendor.view'
 
+entity.shopify_vendor.edit_form:
+  path: '/admin/shopify_vendor/{shopify_vendor}/edit'
+  defaults:
+    _entity_form: shopify_vendor.edit
+    _title: 'Edit Shopify vendor'
+  requirements:
+    _permission: 'edit shopify vendor entities'
+  options:
+    _admin_route: TRUE
+
 entity.shopify_product.canonical:
   path: '/store/product/{shopify_product}'
   defaults:
@@ -181,23 +191,13 @@ shopify_product.settings:
   options:
     _admin_route: TRUE
 
-entity.shopify_vendor.edit_form:
-  path: '/admin/shopify_vendor/{shopify_vendor}/edit'
-  defaults:
-    _entity_form: shopify_vendor.edit
-    _title: 'Edit Shopify vendor'
-  requirements:
-    _permission: 'edit shopify product entities'
-  options:
-    _admin_route: TRUE
-
 shopify_vendor.settings:
   path: '/admin/structure/shopify_vendor'
   defaults:
    _form: '\Drupal\neg_shopify\Entity\Form\ShopifyVendorSettingsForm'
    _title: 'Shopify vendor settings'
   requirements:
-    _permission: 'administer shopify product entities'
+    _permission: 'administer shopify vendor entities'
   options:
     _admin_route: TRUE
 

@@ -33,6 +33,10 @@ view unavailable shopify product entities:
 add shopify product variant entities:
   title: 'Create new Shopify product variant entities'
 
+administer shopify vendor entity:
+  title: 'Administer Shopify vendor entities'
+  description: 'Allow to access the administration form to configure Shopify vendor entities.'
+
 administer shopify product variant entities:
   title: 'Administer Shopify product variant entities'
   description: 'Allow to access the administration form to configure Shopify product variant entities.'

@@ -2,12 +2,9 @@
 
 namespace Drupal\neg_shopify\Entity\Form;
 
-use Drupal\neg_shopify\Settings;
-
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Url;
 
 /**
  * Form controller for Shopify vendor edit forms.
