@@ -13,6 +13,7 @@ class ShopifyService {
   protected static $instance = FALSE;
   protected $client;
   protected $productService = FALSE;
+  protected $productListingService = FALSE;
   protected $orderService = FALSE;
   protected $metafieldService = FALSE;
   protected $smartCollectionService = FALSE;
@@ -54,6 +55,7 @@ class ShopifyService {
 
     $this->client = new ShopifySDK();
     $this->productService = $this->client->Product;
+    $this->productListingService = $this->client->ProductListing;
     $this->orderService = $this->client->Order;
     $this->metafieldService = $this->client->Metafield;
     $this->smartCollectionService = $this->client->SmartCollection;
@@ -387,6 +389,26 @@ class ShopifyService {
       }
       throw $e;
     }
+  }
+
+  /**
+   * Gets all listings.
+   */
+  public function fetchAllPagedListings(array $params = []) {
+
+    // Fetch this page.
+    $products = $this->productListingService->productIds($params);
+    if (isset($products['product_ids'])) {
+      $products = $products['product_ids'];
+    }
+
+    // Get Next Page.
+    $next = $this->productListingService->getNextLink();
+    if ($next !== NULL) {
+      $products = array_merge($products, $this->fetchAllPagedListings($this->processPageCursor($next)));
+    }
+
+    return $products;
   }
 
   /**
