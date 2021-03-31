@@ -118,19 +118,20 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       ];
     }
 
-    // Set published at with product_listing api.
-    try {
-      $values['published_at'] = ShopifyService::instance()->productSalesChannelPublishedAt($values['product_id']);
-    }
-    catch (\Exception $e) {
-      if ($e->getCode() == '403') {
-        Settings::log('403 Trying to access product_listing api', [], 'error');
+    $values['published_at'] = NULL;
 
-        // Default to published if we don't have api access.
-        $values['published_at'] = date('c', time());
+    // Set published at with product_listing api.
+    if ($values['status'] !== FALSE) {
+      try {
+        $values['published_at'] = ShopifyService::instance()->productSalesChannelPublishedAt($values['product_id']);
       }
-      else {
-        $values['published_at'] = NULL;
+      catch (\Exception $e) {
+        if ($e->getCode() == '403') {
+          Settings::log('403 Trying to access product_listing api', [], 'error');
+
+          // Default to published if we don't have api access.
+          $values['published_at'] = date('c', time());
+        }
       }
     }
 
@@ -143,12 +144,21 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
 
     // Set the image for this product.
     if (isset($values['image']) && !empty($values['image'])) {
-      $file = self::setupProductImage($values['image']['src']);
-      if ($file && $file instanceof FileInterface) {
-        $values['image'] = [
-          'target_id' => $file->id(),
-          'alt' => (strlen($values['image']['alt']) > 0) ? $values['image']['alt'] : $values['title'],
-        ];
+      try {
+        $file = self::setupProductImage($values['image']['src']);
+        if ($file && $file instanceof FileInterface) {
+          $values['image'] = [
+            'target_id' => $file->id(),
+            'alt' => (strlen($values['image']['alt']) > 0) ? $values['image']['alt'] : $values['title'],
+          ];
+        }
+      }
+      catch (\Exception $e) {
+        Settings::log('Failed to get image for product id: %id - %m', [
+          '%id' => $values['product_id'],
+          '%m' => $e->getCode(),
+        ], 'error');
+        $values['image'] = NULL;
       }
     }
     else {
@@ -172,12 +182,21 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
         else {
           // This image is not attached to a variant, it should be applied to
           // to the extra images field.
-          $image_file_interface = self::setupProductImage($variant_image['src']);
-          if ($image_file_interface && $image_file_interface instanceof FileInterface) {
-            $values['extra_images'][] = [
-              'target_id' => $image_file_interface->id(),
-              'alt' => (strlen($variant_image['alt']) > 0) ? $variant_image['alt'] : $values['title'],
-            ];
+          try {
+            $image_file_interface = self::setupProductImage($variant_image['src']);
+            if ($image_file_interface && $image_file_interface instanceof FileInterface) {
+              $values['extra_images'][] = [
+                'target_id' => $image_file_interface->id(),
+                'alt' => (strlen($variant_image['alt']) > 0) ? $variant_image['alt'] : $values['title'],
+              ];
+            }
+          }
+          catch (\Exception $e) {
+            Settings::log('Failed to get image for product id: %id - %m', [
+              '%id' => $values['product_id'],
+              '%m' => $e->getCode(),
+            ], 'error');
+            $values['image'] = NULL;
           }
         }
       }
@@ -560,7 +579,10 @@ EOL;
       return $entity;
     }
     catch (\Exception $e) {
-      Settings::log('Failed to sync product id: %id', ['%id' => $values['id']], 'error');
+      Settings::log('Failed to sync product id: %id - %m', [
+        '%id' => $values['id'],
+        '%m' => $e->getMessage(),
+      ], 'error');
     }
 
     return FALSE;
