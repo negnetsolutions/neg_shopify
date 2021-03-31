@@ -198,10 +198,17 @@ function neg_shopify_update_8717(&$sandbox) {
 
   $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
 
+  return t('shopify_product.status');
+}
+
+/**
+ * Sets defaults "shopify_product.status".
+ */
+function neg_shopify_update_8718(&$sandbox) {
+
   $db = \Drupal::database();
   $db->update('shopify_product')
     ->fields(['status' => 1])
     ->execute();
-
-  return t('shopify_product.status');
+  return t('set shopify_product.status defaults.');
 }
