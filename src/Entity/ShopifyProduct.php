@@ -537,8 +537,10 @@ EOL;
     $products = (count($ids) > 0) ? self::loadMultiple($ids) : [];
 
     foreach ($products as $product) {
-      $deleted_products[] = $product;
-      $product->delete();
+      if ($product) {
+        $product->delete();
+        $deleted_products[] = $product;
+      }
     }
 
     return $deleted_products;
