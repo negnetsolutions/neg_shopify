@@ -74,6 +74,29 @@ class ShopifyWebhook extends QueueWorkerBase {
         }
         break;
 
+      case 'product_listings/add':
+      case 'product_listings/update':
+        // Handle publishing event.
+        $product = ShopifyProduct::loadByProductId($data['payload']['product_listing']['product_id']);
+        if ($product) {
+          $values = [
+            'published_at' => $data['payload']['product_listing']['published_at'],
+          ];
+          ShopifyProduct::formatDatetimeAsTimestamp(['published_at'], $values);
+          $product->set('published_at', $values['published_at']);
+          $product->save();
+        }
+        break;
+
+      case 'product_listings/remove':
+        // Handle unpublishing event.
+        $product = ShopifyProduct::loadByProductId($data['payload']['product_listing']['product_id']);
+        if ($product) {
+          $product->set('published_at', NULL);
+          $product->save();
+        }
+        break;
+
       case 'collections/create':
       case 'collections/update':
         $collection = $data['payload'];

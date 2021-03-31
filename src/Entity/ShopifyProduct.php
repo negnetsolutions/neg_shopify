@@ -120,21 +120,6 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
 
     $values['published_at'] = NULL;
 
-    // Set published at with product_listing api.
-    if ($values['status'] !== FALSE) {
-      try {
-        $values['published_at'] = ShopifyService::instance()->productSalesChannelPublishedAt($values['product_id']);
-      }
-      catch (\Exception $e) {
-        if ($e->getCode() == '403') {
-          Settings::log('403 Trying to access product_listing api', [], 'error');
-
-          // Default to published if we don't have api access.
-          $values['published_at'] = date('c', time());
-        }
-      }
-    }
-
     // Format timestamps properly.
     self::formatDatetimeAsTimestamp([
       'created_at',
