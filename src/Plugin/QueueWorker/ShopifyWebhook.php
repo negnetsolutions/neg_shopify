@@ -27,12 +27,12 @@ class ShopifyWebhook extends QueueWorkerBase {
 
     switch ($data['hook']) {
 
-      case 'orders/create':
+      // case 'orders/create':
       case 'orders/updated':
       case 'orders/cancelled':
         break;
 
-      case 'customers/create':
+      // case 'customers/create':
       case 'customers/update':
         $allowShopifyLogins = (BOOL) Settings::config()->get('allow_shopify_users');
         if (!$allowShopifyLogins) {
@@ -51,7 +51,7 @@ class ShopifyWebhook extends QueueWorkerBase {
         }
         break;
 
-      case 'products/create':
+      // case 'products/create':
       case 'products/update':
         $product = ShopifyProduct::updateProduct($data['payload']);
         if ($product !== FALSE) {
