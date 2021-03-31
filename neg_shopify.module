@@ -178,7 +178,6 @@ function neg_shopify_entity_type_alter(array &$entity_types) {
 function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   switch ($form_id) {
     case 'shopify_vendor_edit_form':
-      // $form['dynamic_thumbnail']['#access'] = FALSE;
       unset($form['dynamic_thumbnail']);
       break;
 

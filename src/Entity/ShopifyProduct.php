@@ -524,7 +524,6 @@ EOL;
     return FALSE;
   }
 
-
   /**
    * Get's shopiy vendor entity.
    */
@@ -768,8 +767,7 @@ EOL;
       ->setDisplayOptions('form', [
         'type' => 'entity_reference_autocomplete_tags',
         'weight' => -25,
-        'settings' => [
-        ],
+        'settings' => [],
       ])
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
@@ -863,8 +861,7 @@ EOL;
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setComputed(TRUE)
-      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductImage')
-    ;
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductImage');
 
     $fields['body_html'] = BaseFieldDefinition::create('text_long')
       ->setLabel(t('Body HTML'))
