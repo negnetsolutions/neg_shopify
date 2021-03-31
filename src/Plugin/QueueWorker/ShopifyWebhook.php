@@ -27,7 +27,7 @@ class ShopifyWebhook extends QueueWorkerBase {
 
     switch ($data['hook']) {
 
-      // case 'orders/create':
+      case 'orders/create':
       case 'orders/updated':
       case 'orders/cancelled':
         break;
