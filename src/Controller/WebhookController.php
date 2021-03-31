@@ -66,21 +66,26 @@ class WebhookController extends ControllerBase {
       'payload' => $payload,
     ]);
 
-    $item = $queue->claimItem();
-    if ($item !== FALSE) {
-      try {
-        $worker->processItem($item->data);
-        $queue->deleteItem($item);
+    $lock = \Drupal::lock();
+    if ($lock->acquire('neg_shopify_process_webhook')) {
+      $item = $queue->claimItem();
+      if ($item !== FALSE) {
+        try {
+          $worker->processItem($item->data);
+          $queue->deleteItem($item);
+        }
+        catch (\Exception $e) {
+          // If there was an Exception trown because of an error
+          // Releases the item that the worker could not process.
+          // Another worker can come and process it.
+          Settings::log('Could not process webhook: %m', [
+            '%m' => $e->getMessage(),
+          ], 'error');
+          $queue->releaseItem($item);
+        }
       }
-      catch (\Exception $e) {
-        // If there was an Exception trown because of an error
-        // Releases the item that the worker could not process.
-        // Another worker can come and process it.
-        Settings::log('Could not process webhook: %m', [
-          '%m' => $e->getMessage(),
-        ], 'error');
-        $queue->releaseItem($item);
-      }
+
+      $lock->release('neg_shopify_process_webhook');
     }
 
     return TRUE;
