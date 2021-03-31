@@ -17,6 +17,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\user\UserInterface;
 use Drupal\Core\Render\RenderContext;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
+use Drupal\Core\Cache\Cache;
 
 /**
  * Defines the Shopify product entity.
@@ -106,11 +107,31 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       unset($values['id']);
     }
 
+    if (isset($values['status'])) {
+      $values['status'] = ($values['status'] === 'active') ? TRUE : FALSE;
+    }
+
     if (isset($values['body_html'])) {
       $values['body_html'] = [
         'value' => $values['body_html'],
         'format' => filter_default_format(),
       ];
+    }
+
+    // Set published at with product_listing api.
+    try {
+      $values['published_at'] = ShopifyService::instance()->productSalesChannelPublishedAt($values['product_id']);
+    }
+    catch (\Exception $e) {
+      if ($e->getCode() == '403') {
+        Settings::log('403 Trying to access product_listing api', [], 'error');
+
+        // Default to published if we don't have api access.
+        $values['published_at'] = date('c', time());
+      }
+      else {
+        $values['published_at'] = NULL;
+      }
     }
 
     // Format timestamps properly.
@@ -323,6 +344,19 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   /**
    * {@inheritdoc}
    */
+  public function save() {
+    parent::save();
+
+    $vendor = $this->getShopifyVendor();
+    if ($vendor) {
+      // Invalidate Vendor Cache Tags.
+      Cache::invalidateTags(['shopify_vendor_products:' . $vendor->id()]);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function delete() {
     // Delete this products image.
     if ($this->image instanceof FileInterface) {
@@ -333,7 +367,15 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       $variant = ShopifyProductVariant::load($variant->target_id);
       $variant->delete();
     }
+
+    $vendor = $this->getShopifyVendor();
+
     parent::delete();
+
+    if ($vendor) {
+      // Invalidate Vendor Cache Tags.
+      Cache::invalidateTags(['shopify_vendor_products:' . $vendor->id()]);
+    }
   }
 
   /**
@@ -995,6 +1037,12 @@ EOL;
     $fields['published_at'] = BaseFieldDefinition::create('integer')
       ->setLabel(t('Published'))
       ->setDescription(t('The time that the product was published.'));
+
+    $fields['status'] = BaseFieldDefinition::create('boolean')
+      ->setLabel(t('Published Status'))
+      ->setDefaultValue(TRUE)
+      ->setReadOnly(TRUE)
+      ->setDisplayConfigurable('view', TRUE);
 
     return $fields;
   }

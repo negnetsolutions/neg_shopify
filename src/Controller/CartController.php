@@ -167,7 +167,7 @@ class CartController extends ControllerBase {
       '#attached' => [
         'library' => [
           'neg_shopify/cart_controller',
-          'negnet_utility/negnet-responsive-images'
+          'negnet_utility/negnet-responsive-images',
         ],
       ],
       '#cache' => [

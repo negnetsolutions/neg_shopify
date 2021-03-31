@@ -376,15 +376,17 @@ class ShopifyService {
   /**
    * Checks if product is listed on sales channel.
    */
-  public function productIsListedOnSalesChannel($product_id) {
+  public function productSalesChannelPublishedAt($product_id) {
     try {
       $data = $this->client->ProductListing($product_id)->get();
-      return TRUE;
+      return $data['published_at'];
     }
     catch (\Exception $e) {
+      if ($e->getCode() == '404') {
+        return NULL;
+      }
+      throw $e;
     }
-
-    return FALSE;
   }
 
   /**

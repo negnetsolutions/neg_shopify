@@ -61,15 +61,17 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
       '#count' => $total,
       '#products_label' => Settings::productsLabel(),
       '#defaultSort' => Settings::defaultSortOrder(),
-      '#cache' => [
-        'contexts' => ['user.roles'],
-        'tags' => ['shopify_product_list', 'shopify_vendor:' . $entity->id()],
-      ],
     ];
 
     $build = [
       '#theme' => 'shopify_vendor_product_grid',
       '#products' => $productsBuild,
+      '#cache' => [
+        'contexts' => ['user.roles'],
+        'tags' => [
+          'shopify_vendor_products:' . $entity->id(),
+        ],
+      ],
     ];
 
     $build['#attached']['library'][] = 'neg_shopify/collections';

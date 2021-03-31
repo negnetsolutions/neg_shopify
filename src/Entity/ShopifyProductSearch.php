@@ -71,7 +71,7 @@ class ShopifyProductSearch {
     // Require images for found products.
     $query->condition('image__target_id', NULL, 'IS NOT NULL');
 
-    // Require published product.
+    // Require published product to this channel.
     $query->condition('published_at', time(), '<=');
 
     // Check if user can see all products.
@@ -82,6 +82,9 @@ class ShopifyProductSearch {
     $show = isset($params['show']) ? $params['show'] : 'available';
 
     if ($show === 'available') {
+      // Require active product.
+      $query->condition('status', TRUE);
+
       // Add an or query for available or preorders.
       $group = $query->orConditionGroup();
 

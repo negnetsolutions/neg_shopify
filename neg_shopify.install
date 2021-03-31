@@ -1,9 +1,12 @@
 <?php
 
+/**
+ * @file
+ */
+
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\ShopifyVendors;
+use Drupal\neg_shopify\Entity\ShopifyProduct;
 
 /**
  * Adds "shopify_product.is_available"
@@ -82,9 +85,9 @@ function neg_shopify_update_8712(&$sandbox) {
  * Adds "shopify_vendors table"
  */
 function neg_shopify_update_8713(&$sandbox) {
-    \Drupal::entityTypeManager()->clearCachedDefinitions();
-    \Drupal::entityDefinitionUpdateManager()
-      ->installEntityType(\Drupal::entityTypeManager()->getDefinition('shopify_vendor'));
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  \Drupal::entityDefinitionUpdateManager()
+    ->installEntityType(\Drupal::entityTypeManager()->getDefinition('shopify_vendor'));
   return t('shopify vendor entity created');
 }
 
@@ -174,4 +177,31 @@ function neg_shopify_update_8715(&$sandbox) {
 function neg_shopify_update_8716(&$sandbox) {
   ShopifyVendors::syncVendors();
   return t('Updated shopify vendors');
+}
+
+/**
+ * Adds "shopify_product.status".
+ */
+function neg_shopify_update_8717(&$sandbox) {
+  $definition_update_manager = \Drupal::entityDefinitionUpdateManager();
+  $entity_type = $definition_update_manager->getEntityType('shopify_product');
+  $last_installed_schema_repository = \Drupal::service('entity.last_installed_schema.repository');
+  $field_storage_definitions = $last_installed_schema_repository->getLastInstalledFieldStorageDefinitions('shopify_product');
+
+  $field_storage_definitions['status'] = BaseFieldDefinition::create('boolean')
+    ->setName('status')
+    ->setTargetEntityTypeId('shopify_product')
+    ->setTargetBundle(NULL)
+    ->setLabel(t('Published Status'))
+    ->setDefaultValue(TRUE)
+    ->setReadOnly(TRUE);
+
+  $definition_update_manager->updateFieldableEntityType($entity_type, $field_storage_definitions, $sandbox);
+
+  $db = \Drupal::database();
+  $db->update('shopify_product')
+    ->fields(['status' => 1])
+    ->execute();
+
+  return t('shopify_product.status');
 }

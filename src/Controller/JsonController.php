@@ -139,7 +139,9 @@ class JsonController extends ControllerBase {
 
         $vendor = ShopifyVendor::loadBySlug($slug);
         $data = $vendor->renderProductJson($sortOrder, $page, $perPage);
-        $tags = ['shopify_product_list'];
+        $tags = [
+          'shopify_vendor_products:' . $vendor->id(),
+        ];
         break;
 
       case 'collection':

@@ -22,7 +22,26 @@ class ShopifyProductAccessControlHandler extends EntityAccessControlHandler {
     switch ($operation) {
       case 'view':
         $vendor = $entity->getShopifyVendor();
-        if ($vendor && $vendor->get('status')->value) {
+
+        $published = TRUE;
+
+        if ($vendor) {
+          if (!$vendor->get('status')->value) {
+            $published = FALSE;
+          }
+        }
+
+        // Handle unpublished items.
+        if ($entity->get('published_at')->value === NULL) {
+          $published = FALSE;
+        }
+
+        // Handle draft / archived.
+        if ($entity->get('status')->value == FALSE) {
+          $published = FALSE;
+        }
+
+        if ($published) {
           return AccessResult::allowedIfHasPermission($account, 'view shopify product entities');
         }
         else {
