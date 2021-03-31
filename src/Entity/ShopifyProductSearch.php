@@ -79,6 +79,11 @@ class ShopifyProductSearch {
       $params['show'] = 'all';
     }
 
+    // Filter for max-price.
+    if (isset($params['max_price'])) {
+      $query->condition('low_price', $params['max_price'], '<');
+    }
+
     $show = isset($params['show']) ? $params['show'] : 'available';
 
     if ($show === 'available') {

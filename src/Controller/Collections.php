@@ -32,6 +32,19 @@ class Collections extends ControllerBase {
       $params['show'] = $show;
     }
 
+    $type = \Drupal::request()->query->get('type');
+    if ($type !== NULL) {
+      switch ($type) {
+        case 'facebook':
+          $params['max-price'] = 10000;
+          break;
+
+        case 'pinterest':
+          $params['google_product_category_required'] = TRUE;
+          break;
+      }
+    }
+
     if ($handle !== 'all') {
       $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties(['field_handle' => $handle]);
 
