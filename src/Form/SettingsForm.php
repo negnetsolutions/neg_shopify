@@ -10,8 +10,6 @@ use Drupal\user\Entity\Role;
 use Drupal\neg_shopify\Plugin\Sync;
 use Drupal\neg_shopify\Plugin\Webhooks;
 
-use Drupal\neg_shopify\Api\ShopifyService;
-
 /**
  * Settings for Shopify.
  */
