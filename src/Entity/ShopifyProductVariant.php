@@ -294,6 +294,11 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     $query->isNotNull('product.published_at');
     $query->orderBy('product.is_available', 'DESC');
 
+    // Handle requiring body.
+    if (isset($params['require_body'])) {
+      $query->isNotNull('product.body_html__value');
+    }
+
     // Handle manual collections.
     if (isset($params['collection_id'])) {
       $query->leftJoin('shopify_product__collections', 'collections', 'collections.entity_id = product.id');

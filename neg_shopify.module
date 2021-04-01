@@ -622,6 +622,12 @@ function template_preprocess_shopify_product_variant(&$variables) {
       'variant_id' => $variables['shopify_product_variant']->get('variant_id')->value,
     ],
   ])->toString();
+
+  if (!$variables['shopify_product_variant']->get('dynamic_product_image')->isEmpty()) {
+    $image = $variables['shopify_product_variant']->get('dynamic_product_image')->first()->entity;
+    $variables['imagethumbnail_large'] = ImageStyle::load('rs_image_2200w')->buildUrl($image->getFileUri());
+  }
+
 }
 
 /**
