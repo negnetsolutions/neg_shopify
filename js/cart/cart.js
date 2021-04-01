@@ -107,16 +107,7 @@ const shopping_cart = new function (){
     }
 
     if (data.cart.hasOwnProperty("checkoutStarted") && data.cart.checkoutStarted === true) {
-      // Check to see if this is the cart page.
-      if (window.location.pathname === drupalSettings.cart.cartPage) {
-        console.debug("Checkout Stopped");
-        _.stopCheckout();
-      }
-      else {
-        console.debug("Checkout finished. Clearing cart...");
-        _.resetCart();
-        return false;
-      }
+      _.stopCheckout();
     }
 
     return true;
