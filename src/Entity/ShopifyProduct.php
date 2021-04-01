@@ -120,7 +120,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
 
     // Remove published_at from shopify product data. We are using
     // product_list api to set this.
-    if (isset($values['published_at'])) {
+    if (array_key_exists('published_at', $values)) {
       unset($values['published_at']);
     }
 
