@@ -1,0 +1,19 @@
+<item>
+  <g:id>{{ shopify_product_variant.variant_id.0.value }}</g:id>
+  <g:title><![CDATA[{{ shopify_product.title.0.value|title }}]]></g:title>
+  <g:description><![CDATA[{{ shopify_product.body_html.0.value|striptags }}]]></g:description>
+  <g:product_type>{{ shopify_product.product_type.0.value }}</g:product_type>
+  <g:link><![CDATA[{{ url('entity.shopify_product.canonical', {'variant_id': shopify_product_variant.variant_id.0.value, 'shopify_product': shopify_product.id.0.value}) }}]]></g:link>
+  <g:image_link><![CDATA[{{ imagethumbnail_large }}]]></g:image_link>
+  <g:brand><![CDATA[{{ shopify_product.vendor.0.value }}]]></g:brand>
+  <g:condition>new</g:condition>
+  <g:availability>{% if shopify_product.is_preorder.value == 1 %}preorder{% elseif shopify_product_variant.inventory_quantity.0.value > 0 %}in stock{% else %}out of stock{% endif %}</g:availability>
+  <g:inventory>{{ shopify_product_variant.inventory_quantity.0.value }}</g:inventory>
+  <g:price> {{ shopify_product_variant.price.0.value }} USD </g:price>
+  <g:mpn>{{ shopify_product_variant.sku.0.value }}</g:mpn>
+  <g:shipping_weight>{{ shopify_product_variant.weight.0.value }} {{ shopify_product_variant.weight_unit.0.value }}</g:shipping_weight>
+  <g:item_group_id>{{ shopify_product.product_id.0.value }}</g:item_group_id>
+  {% for tag,value in shopify_product.googleproductcategorytags %}
+    <g:{{ tag }}>{% if value == null %}{{ shopify_product_variant.attribute(tag) }}{% else %}{{ value }}{% endif %}</g:{{ tag }}>
+  {% endfor %}
+</item>

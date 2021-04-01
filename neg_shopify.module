@@ -153,6 +153,10 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
     'shopify_product_variant' => [
       'render element' => 'elements',
     ],
+    'shopify_product_variant__xml_listing' => [
+      'template' => 'shopify-product-variant--xml-listing',
+      'base hook' => 'shopify_product_variant',
+    ],
     'shopify_product_variant__cart' => [
       'template' => 'shopify-product-variant--cart',
       'base hook' => 'shopify_product_variant',

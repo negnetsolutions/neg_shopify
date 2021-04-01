@@ -13,6 +13,7 @@ use Drupal\Core\Render\RenderContext;
 use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductVariantInterface;
 use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
+use Drupal\negnet_utility\PersistentRenderCache;
 
 /**
  * Defines the Shopify product variant entity.
@@ -53,6 +54,26 @@ use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductVariantInterface {
   use EntityChangedTrait;
   use ShopifyEntityTrait;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function save() {
+    parent::save();
+
+    // Updates xml_listing cache.
+    PersistentRenderCache::getCachedView($this, 'xml_listing', TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    // Clear xml_listing cache.
+    PersistentRenderCache::clearCachedView($this, 'xml_listing');
+
+    parent::delete();
+  }
 
   /**
    * {@inheritdoc}
@@ -164,6 +185,23 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   }
 
   /**
+   * Loads an array of item views.
+   */
+  public static function loadViews($variants, $view_mode = 'cart', $defaultContext = TRUE, $persistent = FALSE) {
+    $views = [];
+    foreach ($variants as $variant) {
+      if ($persistent) {
+        $views[] = PersistentRenderCache::getCachedView($variant, $view_mode);
+      }
+      else {
+        $views[] = $variant->loadView($view_mode, $defaultContext);
+      }
+    }
+
+    return $views;
+  }
+
+  /**
    * Loads a view array.
    */
   public function loadView(string $style = 'cart', $defaultContext = TRUE) {
@@ -224,6 +262,224 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     return \Drupal::entityTypeManager()
       ->getStorage('shopify_product_variant')
       ->loadByProperties($props);
+  }
+
+  /**
+   * Searches for variants.
+   */
+  public static function search(array $params) {
+    $query = self::getSearchQuery($params);
+    $result = $query->execute();
+    $ids = [];
+    $results = $result->fetchAllAssoc('id');
+
+    foreach ($results as $result) {
+      $ids[] = $result->id;
+    }
+
+    $ids = (count($ids) > 0) ? self::loadMultiple($ids) : [];
+    return $ids;
+  }
+
+  /**
+   * Searches for variants.
+   */
+  public static function getSearchQuery(array $params) {
+
+    $fields = [
+      'v' => ['id'],
+      'product' => ['is_available'],
+    ];
+
+    $query = \Drupal::database()->select('shopify_product_variant', 'v')
+      ->distinct(TRUE);
+
+    $query->leftJoin('shopify_product__variants', 'variants', 'variants.variants_target_id = v.id');
+    $query->leftJoin('shopify_product', 'product', 'product.id = variants.entity_id');
+    $query->isNotNull('product.image__target_id');
+    $query->isNotNull('product.published_at');
+    $query->orderBy('product.is_available', 'DESC');
+
+    // Handle manual collections.
+    if (isset($params['collection_id'])) {
+      $query->leftJoin('shopify_product__collections', 'collections', 'collections.entity_id = product.id');
+      $query->condition('collections.collections_target_id', $params['collection_id'], '=');
+    }
+
+    $show = isset($params['show']) ? $params['show'] : 'available';
+
+    if ($show === 'available') {
+      // Require active product.
+      $query->condition('product.status', 1);
+
+      // Add an or query for available or preorders.
+      $group = $query->orConditionGroup();
+
+      // Make sure is available.
+      $group->condition('product.is_available', 1);
+
+      // Or is a preorder.
+      $group->condition('product.is_preorder', 1);
+
+      $query->condition($group);
+    }
+
+    // Smart Collection.
+    if (isset($params['collection_sort']) && isset($params['collection_sort']['rules'])) {
+      // Set group type.
+      $rules_group = $query->andConditionGroup();
+      if ($params['collection_disjunctive']) {
+        $rules_group = $query->orConditionGroup();
+      }
+
+      foreach ($params['collection_sort']['rules'] as $rule) {
+        $field = FALSE;
+        $relation = '=';
+
+        switch ($rule['column']) {
+          case 'title':
+            $field = 'product.title';
+            break;
+
+          case 'vendor':
+            $field = 'product.vendor';
+            break;
+
+          case 'type':
+            $field = 'product.product_type';
+            break;
+
+          case 'tag':
+            $field = 'term.name';
+            $query->leftJoin('shopify_product__tags', 'tags', 'tags.entity_id = product.id');
+            $query->leftJoin('taxonomy_term_field_data', 'term', 'term.tid = tags.tags_target_id');
+            break;
+
+          case 'variant_title':
+            $field = 'v.title';
+            break;
+
+          case 'variant_compare_at_price':
+            $field = 'v.compare_at_price';
+            break;
+
+          case 'variant_weight':
+            $field = 'v.weight';
+            break;
+
+          case 'variant_inventory':
+            $field = 'v.inventory_quantity';
+            break;
+
+          case 'variant_price':
+            $field = 'v.price';
+            break;
+        }
+
+        switch ($rule['relation']) {
+          case 'equals':
+            $relation = '=';
+            break;
+
+          case 'not_equals':
+            $relation = '<>';
+            break;
+
+          case 'greater_than':
+            $relation = '>';
+            break;
+
+          case 'less_than':
+            $relation = '<';
+            break;
+
+          case 'starts_with':
+            $relation = 'STARTS_WITH';
+            break;
+
+          case 'ends_with':
+            $relation = 'ENDS_WITH';
+            break;
+
+          case 'contains':
+            $relation = 'CONTAINS';
+            break;
+        }
+
+        if ($field) {
+          $rules_group->condition($field, $rule['condition'], $relation);
+        }
+      }
+
+      $query->condition($rules_group);
+    }
+
+    // Filter for max-price.
+    if (isset($params['max-price'])) {
+      $query->condition('v.price', $params['max-price'], '<');
+    }
+
+    // Filter for max-price.
+    if (isset($params['min-price'])) {
+      $query->condition('v.price', $params['min-price'], '>');
+    }
+
+    // Set sort order.
+    if (isset($params['sort'])) {
+      $sort = $params['sort'];
+    }
+    else {
+      $sort = Settings::defaultSortOrder();
+    }
+
+    $parts = explode('-', $sort);
+
+    // Default.
+    $sort = ['product.title'];
+    $fields['product'][] = 'title';
+
+    if (isset($parts[0])) {
+      switch ($parts[0]) {
+        case 'price':
+          $sort = ['v.price', 'product.title'];
+          $fields['v'][] = 'price';
+          break;
+
+        case 'date':
+          $sort = ['product.created_at', 'product.title'];
+          $fields['product'][] = 'created_at';
+          break;
+
+        case 'title':
+          $sort = ['product.title'];
+          break;
+      }
+    }
+
+    // Default.
+    $direction = 'DESC';
+    if (isset($parts[1])) {
+      switch ($parts[1]) {
+        case 'ascending':
+          $direction = 'ASC';
+          break;
+
+        case 'descending':
+          $direction = 'DESC';
+          break;
+      }
+    }
+
+    foreach ($sort as $option) {
+      $query->orderBy($option, $direction);
+    }
+
+    foreach ($fields as $table => $columns) {
+      $columns = array_unique($columns);
+      $query->fields($table, $columns);
+    }
+
+    return $query;
   }
 
   /**
@@ -741,8 +997,7 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE)
       ->setComputed(TRUE)
-      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductVariantImage')
-    ;
+      ->setClass('\Drupal\neg_shopify\TypedData\DynamicProductVariantImage');
 
     $fields['option1'] = BaseFieldDefinition::create('string')
       ->setLabel(t('Option 1'))
@@ -801,7 +1056,7 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       ->setLabel(t('Updated'))
       ->setDescription(t('The time that the product was last updated.'));
 
-    // @todo: option_values.
+    // @todo option_values.
     return $fields;
   }
 

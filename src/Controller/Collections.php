@@ -7,6 +7,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\neg_shopify\Settings;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Cache\CacheableMetadata;
@@ -73,12 +74,11 @@ class Collections extends ControllerBase {
       $tags = ['shopify_product_list'];
     }
 
-    $search = new ShopifyProductSearch($params);
-    $products = $search->search(0, 1000);
+    $variants = ShopifyProductVariant::search($params);
 
     $build = [
       '#theme' => 'shopify-xml-feed',
-      '#products' => ShopifyProduct::loadView($products, 'xml_listing'),
+      '#products' => ShopifyProductVariant::loadViews($variants, 'xml_listing', TRUE, TRUE),
       '#name' => ($handle === 'all') ? 'All' : $term->getName(),
     ];
 

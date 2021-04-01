@@ -1,0 +1,10 @@
+uuid: 8b0d5eef-13db-4560-80dd-95ee70f9376d
+langcode: en
+status: true
+dependencies:
+  module:
+    - neg_shopify
+id: shopify_product_variant.xml_listing
+label: 'XML Listing'
+targetEntityType: shopify_product_variant
+cache: true
