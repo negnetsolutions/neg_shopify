@@ -72,6 +72,11 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     // Clear xml_listing cache.
     PersistentRenderCache::clearCachedView($this, 'xml_listing');
 
+    if ($this->image instanceof FileInterface) {
+      // Ensure we delete this variant's image.
+      $this->image->delete();
+    }
+
     parent::delete();
   }
 
@@ -171,17 +176,6 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
     ];
     $options = array_combine($options, $options);
     return array_filter($options, 'strlen');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete() {
-    if ($this->image instanceof FileInterface) {
-      // Ensure we delete this variant's image.
-      $this->image->delete();
-    }
-    parent::delete();
   }
 
   /**
