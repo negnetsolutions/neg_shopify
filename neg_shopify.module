@@ -605,6 +605,11 @@ function template_preprocess_shopify_product_variant(&$variables) {
   $variables['shopify_product_variant'] = $variables['elements']['#shopify_product_variant'];
   $variables['shopify_product'] = $variables['shopify_product_variant']->getProduct();
 
+  $variables['description'] = NULL;
+  if (!$variables['shopify_product']->get('body_html')->isEmpty()) {
+    $variables['description'] = $variables['shopify_product']->get('body_html')->first()->value;
+  }
+
   // Helpful $content variable for templates.
   $variables += ['content' => []];
   foreach (Element::children($variables['elements']) as $key) {
