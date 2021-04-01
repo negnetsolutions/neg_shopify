@@ -455,6 +455,8 @@ FROM
 	shopify_product__tags tags
 WHERE
 	tags.entity_id = product.id
+  AND product.published_at is not null
+  AND product.status = 1
 	AND tags.tags_target_id = t.tid
 	AND (product.is_available = 1 or product.is_preorder = 1)
 	AND product.image__target_id is not null
