@@ -284,7 +284,13 @@ EOF;
    */
   protected function createCheckout($lineItems) {
     $current_user = \Drupal::currentUser();
-    $email = 'email: "' . $current_user->getEmail() . '", ';
+    $currentEmail = $current_user->getEmail();
+    $email = NULL;
+
+    // Attempt to tie order to customer.
+    if (strlen($currentEmail) > 0) {
+      $email = 'email: "' . $current_user->getEmail() . '", ';
+    }
 
     $query = <<<EOF
 mutation {
