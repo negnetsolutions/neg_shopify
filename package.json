@@ -16,7 +16,6 @@
     "gulp-shell": "*",
     "gulp-util": "*"
   },
-  "dependencies": {},
   "browserslist": [
     "last 2 versions",
     "> 1%",
