@@ -32,7 +32,13 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
    */
   protected function computeValue() {
     $entity = $this->getEntity();
-    $image = $entity->get('image')->getValue()[0];
+
+    $image = NULL;
+
+    $imageValue = $entity->get('image')->getValue();
+    if (is_array($imageValue) && count($imageValue) > 0) {
+      $image = $imageValue[0];
+    }
 
     if ($variant_id = \Drupal::request()->get('variant_id')) {
       $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
