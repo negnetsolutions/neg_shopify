@@ -1,7 +1,7 @@
 <item>
   <g:id>{{ shopify_product_variant.variant_id.0.value }}</g:id>
   <g:title><![CDATA[{{ shopify_product.title.0.value|title }}]]></g:title>
-  <g:description><![CDATA[{{ description|striptags }}]]></g:description>
+  <g:description><![CDATA[{{ description_plain }}]]></g:description>
   <g:product_type>{{ shopify_product.product_type.0.value }}</g:product_type>
   <g:link><![CDATA[{{ url('entity.shopify_product.canonical', {'variant_id': shopify_product_variant.variant_id.0.value, 'shopify_product': shopify_product.id.0.value}) }}]]></g:link>
   <g:image_link><![CDATA[{{ imagethumbnail_large }}]]></g:image_link>

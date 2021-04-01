@@ -5,13 +5,11 @@
  * Shopify module.
  */
 
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\ShopifyCollection;
 use Drupal\neg_shopify\Settings;
@@ -20,6 +18,7 @@ use Drupal\image\Entity\ImageStyle;
 use Drupal\neg_shopify\UserManagement;
 use Drupal\neg_shopify\ShopifyCustomer;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
+use Drupal\Core\Mail\MailFormatHelper;
 
 /**
  * Implements hook_theme().
@@ -608,6 +607,7 @@ function template_preprocess_shopify_product_variant(&$variables) {
   $variables['description'] = NULL;
   if (!$variables['shopify_product']->get('body_html')->isEmpty()) {
     $variables['description'] = $variables['shopify_product']->get('body_html')->first()->value;
+    $variables['description_plain'] = MailFormatHelper::htmlToText($variables['description']);
   }
 
   // Helpful $content variable for templates.
