@@ -61,8 +61,11 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
   public function save() {
     parent::save();
 
-    // Updates xml_listing cache.
-    PersistentRenderCache::getCachedView($this, 'xml_listing', TRUE);
+    $product = $this->getProduct();
+    if ($product) {
+      // Updates xml_listing cache.
+      PersistentRenderCache::getCachedView($this, 'xml_listing', TRUE);
+    }
   }
 
   /**

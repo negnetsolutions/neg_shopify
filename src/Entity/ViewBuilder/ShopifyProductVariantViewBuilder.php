@@ -22,13 +22,13 @@ class ShopifyProductVariantViewBuilder extends EntityViewBuilder {
       $product = $entity->getProduct();
     }
 
-    if ($display->getComponent('product_title')) {
+    if ($product && $display->getComponent('product_title')) {
       $build['product_title'] = [
         '#markup' => '<div class="title">' . $product->get('title')->value . '</div>',
       ];
     }
 
-    if ($display->getComponent('product_vendor')) {
+    if ($product && $display->getComponent('product_vendor')) {
       $build['product_vendor'] = [
         '#markup' => '<div class="vendor">' . $product->get('vendor')->value . '</div>',
       ];

@@ -5,6 +5,8 @@ namespace Drupal\neg_shopify\TypedData;
 use Drupal\Core\TypedData\ComputedItemListTrait;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\neg_shopify\Entity\ShopifyProduct;
+use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 
 /**
  * Finds dyamic product image for current product and variant.
@@ -23,12 +25,12 @@ class DynamicProductVariantImage extends FieldItemList implements EntityReferenc
     $image = NULL;
 
     // Variant's image.
-    if (!$entity->get('image')->isEmpty()) {
-      $image = $entity->get('image')->getValue()[0];
+    if ($entity instanceof ShopifyProductVariant && !$entity->get('image')->isEmpty()) {
+      $image = $entity->image->first()->entity;
     }
-    elseif (!$product->get('image')->isEmpty()) {
+    elseif ($product instanceof ShopifyProduct && $product->image->target_id) {
       // Product image.
-      $image = $product->get('image')->getValue()[0];
+      $image = $product->image->first()->entity;
     }
 
     if ($image) {

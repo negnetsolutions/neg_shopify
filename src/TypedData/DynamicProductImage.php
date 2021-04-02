@@ -35,9 +35,8 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
 
     $image = NULL;
 
-    $imageValue = $entity->get('image')->getValue();
-    if (is_array($imageValue) && count($imageValue) > 0) {
-      $image = $imageValue[0];
+    if (!$entity->get('image')->isEmpty()) {
+      $image = $entity->image->first()->entity;
     }
 
     if ($variant_id = \Drupal::request()->get('variant_id')) {
@@ -50,12 +49,14 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
     }
 
     if ($active_variant instanceof ShopifyProductVariant) {
-      if ($active_variant->image->target_id) {
-        $image = $active_variant->image->getValue()[0];
+      if (!$active_variant->get('image')->isEmpty()) {
+        $image = $active_variant->image->first()->entity;
       }
     }
 
-    $this->list[0] = $this->createItem(0, $image);
+    if ($image) {
+      $this->list[0] = $this->createItem(0, $image);
+    }
   }
 
   /**
