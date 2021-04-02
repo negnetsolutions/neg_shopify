@@ -20,16 +20,21 @@ class DynamicProductVariantImage extends FieldItemList implements EntityReferenc
     $entity = $this->getEntity();
     $product = $entity->getProduct();
 
+    $image = NULL;
+
     // Variant's image.
-    if ($entity->image->target_id) {
+    if (!$entity->get('image')->isEmpty()) {
       $image = $entity->get('image')->getValue()[0];
     }
-    else {
+    elseif (!$product->get('image')->isEmpty()) {
       // Product image.
       $image = $product->get('image')->getValue()[0];
     }
 
-    $this->list[0] = $this->createItem(0, $image);
+    if ($image) {
+      $this->list[0] = $this->createItem(0, $image);
+    }
+
   }
 
   /**
