@@ -5,7 +5,7 @@ namespace Drupal\neg_shopify;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\Core\Queue\SuspendQueueException;
-use Drupal\Api\ShopifyService;
+use Drupal\neg_shopify\Api\ShopifyService;
 
 /**
  * Class Settings.

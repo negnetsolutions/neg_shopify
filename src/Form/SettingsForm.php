@@ -37,7 +37,12 @@ class SettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config(Settings::CONFIGNAME);
 
-    $form['shop_url'] = [
+    $form['api'] = [
+      '#type' => 'details',
+      '#title' => t('Api Connection'),
+    ];
+
+    $form['api']['shop_url'] = [
       '#type' => 'textfield',
       '#title' => t('Shopify Shop Name'),
       '#default_value' => $config->get('shop_url'),
@@ -45,7 +50,7 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['api_key'] = [
+    $form['api']['api_key'] = [
       '#type' => 'textfield',
       '#title' => t('Shopify API Key'),
       '#default_value' => $config->get('api_key'),
@@ -53,7 +58,7 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['api_password'] = [
+    $form['api']['api_password'] = [
       '#type' => 'textfield',
       '#title' => t('Shopify API Password'),
       '#default_value' => $config->get('api_password'),
@@ -61,7 +66,7 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['api_secret'] = [
+    $form['api']['api_secret'] = [
       '#type' => 'textfield',
       '#title' => t('Shopify Shared Secret'),
       '#default_value' => $config->get('api_secret'),
@@ -69,7 +74,7 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['store_front_access_token'] = [
+    $form['api']['store_front_access_token'] = [
       '#type' => 'textfield',
       '#title' => t('Shopify Storefront Access Token'),
       '#default_value' => $config->get('store_front_access_token'),
@@ -77,11 +82,10 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
-    $form['google_product_category'] = [
-      '#type' => 'textfield',
-      '#title' => t('Default Google Product Category'),
-      '#default_value' => $config->get('google_product_category'),
-      '#required' => TRUE,
+    $form['api']['reset_shop_info'] = [
+      '#type' => 'submit',
+      '#value' => t('Reload Shop Info Cache'),
+      '#submit' => ['::reloadShopInfoCache'],
     ];
 
     $form['user_management'] = [
@@ -98,6 +102,13 @@ class SettingsForm extends ConfigFormBase {
     $form['product_display'] = [
       '#type' => 'details',
       '#title' => t('Product Display'),
+    ];
+
+    $form['product_display']['google_product_category'] = [
+      '#type' => 'textfield',
+      '#title' => t('Default Google Product Category'),
+      '#default_value' => $config->get('google_product_category'),
+      '#required' => TRUE,
     ];
 
     $form['product_display']['products_per_page'] = [
@@ -411,6 +422,14 @@ class SettingsForm extends ConfigFormBase {
       $role->save();
       $role->grantPermission('view own shopify customer data');
     }
+  }
+
+  /**
+   * Reload's store info cache.
+   */
+  public function reloadShopInfoCache() {
+    Settings::shopInfo('domain', TRUE);
+    \Drupal::messenger()->addStatus('Shop Info Cache reloaded!', TRUE);
   }
 
   /**
