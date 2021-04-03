@@ -426,6 +426,11 @@ function neg_shopify_renderable_links() {
       '#type' => 'link',
       '#title' => t('Shopify Admin &rarr;'),
       '#url' => Url::fromUri('https://' . Settings::shopInfo('domain') . '/admin', ['attributes' => ['target' => '_blank']]),
+      '#cache' => [
+        'tags' => [
+          'config:neg_shopify.settings',
+        ],
+      ],
     ];
   }
   return $links;
