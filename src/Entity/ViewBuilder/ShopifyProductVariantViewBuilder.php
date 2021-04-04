@@ -16,6 +16,7 @@ class ShopifyProductVariantViewBuilder extends EntityViewBuilder {
    */
   protected function alterBuild(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
 
+    $product = NULL;
     $build['#available'] = $entity->isAvailable();
 
     if ($display->getComponent('dynamic_product_image') || $display->getComponent('product_vendor') || $display->getComponent('product_title')) {
