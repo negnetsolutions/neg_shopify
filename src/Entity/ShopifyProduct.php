@@ -373,7 +373,9 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     // Delete all variants for this product.
     foreach ($this->get('variants') as $variant) {
       $variant = ShopifyProductVariant::load($variant->target_id);
-      $variant->delete();
+      if ($variant) {
+        $variant->delete();
+      }
     }
 
     $vendor = $this->getShopifyVendor();

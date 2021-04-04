@@ -81,7 +81,7 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
    */
   private function getFirstVariantId(object $variants) {
     foreach ($variants as $variant) {
-      if ($variant->entity->isAvailable()) {
+      if ($variant && $variant->entity->isAvailable()) {
         return $variant->entity->id();
       }
     }
