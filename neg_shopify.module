@@ -581,12 +581,16 @@ function template_preprocess_shopify_product(array &$variables) {
 
   $vendor = $variables['shopify_product']->getShopifyVendor();
   if ($vendor) {
+    $variables['vendor_url'] = $vendor->toUrl('canonical');
     if ($vendor->access('view')) {
-      $variables['vendor_url'] = [
+      $variables['vendor_link'] = [
         '#type' => 'link',
         '#url' => $vendor->toUrl('canonical'),
         '#title' => $vendor->get('title')->first()->value,
       ];
+    }
+    else {
+      $variables['vendor_link'] = $vendor->get('title')->first()->value;
     }
   }
 

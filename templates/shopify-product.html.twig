@@ -15,11 +15,7 @@ view_mode ? view_mode|clean_class,
       {{ content.title }}
     </h1>
     <h2 itemprop="brand">
-      {% if vendor_url|render %}
-        {{ vendor_url }}
-      {% else %}
-        {{ content.vendor }}
-      {% endif %}
+      {{ vendor_url }}
     </h2>
     {{ content.active_variant }}
     <div class="description" itemprop="description">
