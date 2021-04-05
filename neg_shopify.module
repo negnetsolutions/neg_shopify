@@ -552,7 +552,15 @@ function template_preprocess_shopify_vendor(array &$variables) {
   $variables['type'] = $entity->get('type')->value;
   $variables['status'] = $entity->get('status')->value;
 
-  $variables['attributes']['class'][] = ($variables['status'] == TRUE) ? 'published' : 'unpublished';
+  // Get number of available products.
+  $availableProducts = $entity->getProductCount(TRUE);
+  if ($availableProducts > 0) {
+    $variables['attributes']['class'][] = ($variables['status'] == TRUE) ? 'published' : 'unpublished';
+  }
+  else {
+    // Set unpublished class if no products available since the vendor will not show anyway.
+    $variables['attributes']['class'][] = 'unpublished';
+  }
 
   $variables['url'] = !$variables['shopify_vendor']->isNew() ? $variables['shopify_vendor']->toUrl('canonical')->toString() : NULL;
 }

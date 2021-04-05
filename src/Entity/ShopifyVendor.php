@@ -144,25 +144,52 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     ];
     $params = array_merge($defaults, $params);
 
-    $query = \Drupal::entityTypeManager()
-      ->getStorage('shopify_vendor')
-      ->getQuery();
+    $fields = [
+      'v' => ['id'],
+    ];
+
+    $query = \Drupal::database()->select('shopify_vendor', 'v')
+      ->distinct(TRUE);
 
     $user = \Drupal::currentUser();
     if (!$user->hasPermission('view shopify toolbar')) {
-      $query->condition('status', TRUE);
+      // Require published vendor.
+      $query->condition('v.status', 1);
+
+      // Require vendor with active products.
+      $query->leftJoin('shopify_product', 'p', 'p.vendor_slug = v.slug');
+
+      $query->condition('p.status', 1);
+      $query->isNotNull('p.published_at');
+
+      $group = $query->orConditionGroup();
+      $group->condition('p.is_available', 1);
+      $group->condition('p.is_preorder', 1);
+      $query->condition($group);
+
+      $query->addExpression('COUNT(p.id)', 'p_id_count');
+      $query->groupBy('v.id');
     }
 
     if (count($params['tags']) > 0) {
-      $query->condition('tags', $params['tags'], 'IN');
+      $query->leftJoin('shopify_vendor__tags', 'tags', 'tags.entity_id = v.id');
+      $query->condition('tags.tags_target_id', $params['tags'], 'IN');
+      $fields['tags'][] = 'tags_target_id';
     }
 
     if (count($params['types']) > 0) {
-      $query->condition('type', $params['types'], 'IN');
+      $query->leftJoin('shopify_vendor__type', 'vtypes', 'vtypes.entity_id = v.id');
+      $query->condition('vtypes.type_value', $params['types'], 'IN');
+      $fields['vtypes'][] = 'type_value';
     }
 
     if ($perPage !== 0) {
       $query->range($page * $perPage, $perPage);
+    }
+
+    foreach ($fields as $table => $columns) {
+      $columns = array_unique($columns);
+      $query->fields($table, $columns);
     }
 
     return $query;
@@ -186,11 +213,15 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
   /**
    * Get's product count.
    */
-  public function getProductCount() {
+  public function getProductCount($onlyAvailable = FALSE) {
     $params = [
       'sort' => Settings::defaultSortOrder(),
       'vendor_slug' => $this->get('slug')->value,
     ];
+
+    if ($onlyAvailable) {
+      $params['show'] = 'available';
+    }
 
     $search = new ShopifyProductSearch($params);
     return $search->count();

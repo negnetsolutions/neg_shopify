@@ -97,10 +97,14 @@ class ShopifyVendors {
     ];
     $params = array_merge($defaults, $params);
 
-    $total = ShopifyVendor::search(0, FALSE, $params)->count()->execute();
+    $total = ShopifyVendor::search(0, FALSE, $params)->countQuery()->execute()->fetchField();
 
     $vendors = [];
-    $vids = ShopifyVendor::search($page, $perPage, $params)->execute();
+    $results = ShopifyVendor::search($page, $perPage, $params)->execute();
+    $vids = [];
+    foreach ($results as $result) {
+      $vids[] = $result->id;
+    }
 
     $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
@@ -134,10 +138,15 @@ class ShopifyVendors {
     $variables['#attributes']['data-id'] = 'tags_' . implode('_', $params['tags']) . '[]types_' . implode('_', $params['types']);
     $variables['#attributes']['data-type'] = 'vendors';
 
-    $count = ShopifyVendor::search(0, FALSE, $params)->count()->execute();
+    $count = ShopifyVendor::search(0, FALSE, $params)->countQuery()->execute()->fetchField();
 
     $vendors = [];
-    $vids = ShopifyVendor::search(0, Settings::productsPerPage(), $params)->execute();
+    $results = ShopifyVendor::search(0, Settings::productsPerPage(), $params)->execute();
+    $vids = [];
+    foreach ($results as $result) {
+      $vids[] = $result->id;
+    }
+
     $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
     foreach ($availableVendors as $vendor) {
