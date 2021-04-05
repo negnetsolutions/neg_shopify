@@ -134,6 +134,7 @@ class CartController extends ControllerBase {
 
     $item = [
       'sku' => $variant->get('sku')->value,
+      'price' => $variant->get('price')->value,
       'variantId' => $variantId,
       'quantity' => $desiredQuantity,
     ];

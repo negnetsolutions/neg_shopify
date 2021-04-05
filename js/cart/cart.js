@@ -207,7 +207,8 @@ const shopping_cart = new function (){
         let item = _.cart.items[i];
         items.push({
           'sku': item.sku,
-          'qty': item.quantity
+          'qty': item.quantity,
+          'price': item.price
         });
       }
 
