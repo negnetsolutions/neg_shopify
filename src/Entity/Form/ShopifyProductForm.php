@@ -24,16 +24,6 @@ class ShopifyProductForm extends ContentEntityForm {
     $form = parent::buildForm($form, $form_state);
     $entity = $this->entity;
 
-    // Add edit on Shopify link.
-    $form['edit_shopify'] = [
-      '#type' => 'link',
-      '#title' => t('Edit on Shopify'),
-      '#url' => Url::fromUri('https://' . Settings::shopInfo('domain') . '/admin/products/' . $entity->product_id->value),
-      '#attributes' => ['target' => '_blank'],
-      '#suffix' => t('<br /><strong>Modifications to Shopify products should be done on Shopify and synced to the Drupal site.</strong>'),
-      '#multilingual' => TRUE,
-    ];
-
     $form['langcode'] = [
       '#title' => $this->t('Language'),
       '#type' => 'language_select',
