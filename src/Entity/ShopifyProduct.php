@@ -1025,7 +1025,7 @@ EOL;
         'type' => 'string_textfield',
         'weight' => 2,
       ])
-      ->setDisplayConfigurable('form', FALSE)
+      ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', FALSE);
 
     $fields['options'] = BaseFieldDefinition::create('map')
