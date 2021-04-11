@@ -14,6 +14,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\neg_shopify\Entity\EntityInterface\ShopifyVendorInterface;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
+use Drupal\neg_shopify\Event\VendorSearchQueryEvent;
 
 /**
  * Defines the Shopify vendor entity.
@@ -145,7 +146,7 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     $params = array_merge($defaults, $params);
 
     $fields = [
-      'v' => ['id'],
+      'v' => ['id', 'title'],
     ];
 
     $query = \Drupal::database()->select('shopify_vendor', 'v')
@@ -190,6 +191,15 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     foreach ($fields as $table => $columns) {
       $columns = array_unique($columns);
       $query->fields($table, $columns);
+    }
+
+    // Throw an event to allow query to be altered.
+    $event = new VendorSearchQueryEvent($query);
+    \Drupal::service('event_dispatcher')->dispatch(VendorSearchQueryEvent::ALTERSEARCHQUERY, $event);
+
+    // Add default order by.
+    if (count($query->getOrderBy()) === 0) {
+      $query->orderBy('v.title', 'ASC');
     }
 
     return $query;
