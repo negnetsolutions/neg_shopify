@@ -445,6 +445,8 @@ class ShopifyCollection {
         $fieldRules['rules'] = $collection['rules'];
       }
       else {
+        // Manual Colleciton.
+
         // Set type.
         $term->field_type = [
           'value' => 'CustomCollection',
@@ -602,38 +604,39 @@ class ShopifyCollection {
   protected static function syncProducts($collection, $saveTerms = TRUE) {
     $term = self::load($collection['id']);
     $collects = ShopifyService::instance()->fetchCollectionProducts($collection['id']);
+
+    $ids = [];
+    foreach ($collects as $c) {
+      $ids[] = $c['id'];
+    }
+
     $product_ids = [];
 
-    foreach ($collects as $c) {
+    foreach ($ids as $id) {
 
       // Update this product information.
-      $product = ShopifyProduct::loadByProductId($c['id']);
+      $product = ShopifyProduct::loadByProductId($id);
       if (!$product) {
         continue;
       }
 
       // Add item to product_ids.
-      $product_ids[] = $c['id'];
+      $product_ids[] = $id;
 
       if ($saveTerms === TRUE) {
         // Only save product term connections if $saveTerms is TRUE.
         foreach ($product->collections as $key => $item) {
           if ($item->target_id && ($item->target_id == $term->id())) {
             // Product already in collection.
-            // Check if this collection is active.
-            if ($term->field_shopify_collection_pub->value == 0) {
-              // Remove this collection from the product.
-              $product->collections->removeItem($key);
-              $product->save();
-            }
+            // Remove this collection from the product.
+            $product->collections->removeItem($key);
+            $product->save();
             continue 2;
           }
         }
 
-        if ($term->field_shopify_collection_pub->value != 0) {
-          $product->collections[] = $term;
-          $product->save();
-        }
+        $product->collections[] = $term;
+        $product->save();
       }
     }
 
