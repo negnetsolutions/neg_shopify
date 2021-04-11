@@ -19,7 +19,7 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
    * Gets first variant id.
    */
   private function getFirstVariantId(object $variants) {
-    foreach ($variants as $i => $variant) {
+    foreach ($variants as $variant) {
       if ($variant->entity->isAvailable()) {
         return $variant->entity->id();
       }
