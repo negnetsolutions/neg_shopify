@@ -7,6 +7,7 @@ use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
+use Drupal\file\Entity\File;
 
 /**
  * Finds dyamic product image for current product and variant.
@@ -46,22 +47,22 @@ class DynamicProductVariantImage extends FieldItemList implements EntityReferenc
     $entity = $this->getEntity();
     $product = $entity->getProduct();
 
-    $image = NULL;
+    $tid = NULL;
 
     // Variant's image.
     if ($entity->image->target_id) {
-      $image = $entity->get('image')->getValue()[0];
+      $tid = $entity->image->target_id;
     }
     else {
       // Product image.
-      $image = $product->get('image')->getValue()[0];
+      $tid = $product->image->target_id;
     }
 
-    if ($image === NULL) {
+    if ($tid === NULL) {
       return [];
     }
 
-    $file = File::load($image['target_id']);
+    $file = File::load($tid);
     if (!$file) {
       return [];
     }
