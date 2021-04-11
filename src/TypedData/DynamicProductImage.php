@@ -65,7 +65,11 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
   public function referencedEntities() {
     $entity = $this->getEntity();
 
-    $image = $entity->get('image')->value[0];
+    $image = NULL;
+
+    if ($entity->image->target_id) {
+      $image = $entity->get('image')->value[0];
+    }
 
     if ($variant_id = \Drupal::request()->get('variant_id')) {
       $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
@@ -82,7 +86,15 @@ class DynamicProductImage extends FieldItemList implements EntityReferenceFieldI
       }
     }
 
-    return [$image['target_id']];
+    if ($image === NULL) {
+      return [];
+    }
+
+    $file = File::load($image['target_id']);
+    if (!$file) {
+      return [];
+    }
+    return [$file];
   }
 
 }

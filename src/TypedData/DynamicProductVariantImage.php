@@ -46,6 +46,8 @@ class DynamicProductVariantImage extends FieldItemList implements EntityReferenc
     $entity = $this->getEntity();
     $product = $entity->getProduct();
 
+    $image = NULL;
+
     // Variant's image.
     if ($entity->image->target_id) {
       $image = $entity->get('image')->getValue()[0];
@@ -55,7 +57,15 @@ class DynamicProductVariantImage extends FieldItemList implements EntityReferenc
       $image = $product->get('image')->getValue()[0];
     }
 
-    return [$image['target_id']];
+    if ($image === NULL) {
+      return [];
+    }
+
+    $file = File::load($image['target_id']);
+    if (!$file) {
+      return [];
+    }
+    return [$file];
   }
 
 }
