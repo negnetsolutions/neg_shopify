@@ -176,6 +176,18 @@ function neg_shopify_entity_type_alter(array &$entity_types) {
 }
 
 /**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function neg_shopify_entity_bundle_field_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle) {
+  if ($bundle === 'shopify_product') {
+    if (isset($fields['field_product'])) {
+      // Remove deleted shopify products in validation process.
+      $fields['field_product']->addConstraint('EmptyDeletedProducts', []);
+    }
+  }
+}
+
+/**
  * Implements hook_form_alter().
  */
 function neg_shopify_form_alter(&$form, FormStateInterface $form_state, $form_id) {
