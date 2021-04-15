@@ -14,6 +14,9 @@ use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\ShopifyCustomer;
 use Drupal\neg_shopify\ShopifyVendors;
 use Drupal\neg_shopify\Settings;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\neg_shopify\Event\UserDataAuthorizeEvent;
 
 /**
  * Class JsonController.
@@ -59,6 +62,39 @@ class JsonController extends ControllerBase {
   }
 
   /**
+   * Checks access.
+   */
+  public function userOrdersAccess(AccountInterface $account) {
+
+    $email = \Drupal::request()->query->get('email');
+    $accountEmail = $account->getEmail();
+
+    if ($email === NULL) {
+      $email = $accountEmail;
+    }
+
+    $result = AccessResult::neutral();
+
+    if ($accountEmail === $email) {
+      $result = AccessResult::allowedIfHasPermission($account, 'view own shopify customer data');
+    }
+    else {
+      $result = AccessResult::allowedIfHasPermission($account, 'view all shopify customer data');
+    }
+
+    $event = new UserDataAuthorizeEvent($account, $result);
+    $event_dispatcher = \Drupal::service('event_dispatcher');
+    $event_dispatcher->dispatch(UserDataAuthorizeEvent::USERORDERSACCESS, $event);
+
+    // Don't allow neutral results.
+    if ($result->isNeutral()) {
+      return AccessResult::forbidden();
+    }
+
+    return $result;
+  }
+
+  /**
    * Renders user orders.
    */
   public function userOrders() {
@@ -79,21 +115,13 @@ class JsonController extends ControllerBase {
       $perPage = 5;
     }
 
-    $current_user = \Drupal::currentUser();
-    $current_email = $current_user->getEmail();
-
     if ($email === NULL) {
       $email = $current_user->getEmail();
     }
 
-    if ($current_user->hasPermission('view all shopify customer data') || ($current_email === $email && $current_user->hasPermission('view own shopify customer data'))) {
-      $customer = new ShopifyCustomer([
-        'email' => $email,
-      ]);
-    }
-    else {
-      throw new NotFoundHttpException();
-    }
+    $customer = new ShopifyCustomer([
+      'email' => $email,
+    ]);
 
     $data = $customer->getUserOrders($page, $perPage, $direction);
 

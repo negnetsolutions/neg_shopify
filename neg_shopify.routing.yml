@@ -94,7 +94,7 @@ neg_shopify.customer.orders.json:
   defaults:
     _controller: '\Drupal\neg_shopify\Controller\JsonController::userOrders'
   requirements:
-    _permission: 'view all shopify customer data+view own shopify customer data'
+    _custom_access: '\Drupal\neg_shopify\Controller\JsonController::userOrdersAccess'
 
 shopify_product_variant.settings:
   path: '/admin/structure/shopify_product_variant'
