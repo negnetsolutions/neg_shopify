@@ -150,7 +150,7 @@ const shopping_cart = new function (){
   this.findItemByVariantId = function findItemByVariantId(variant_id) {
     for (let i = 0; i < _.cart.items.length; i++) {
       let item = _.cart.items[i];
-      if (item.variantId == variant_id) {
+      if (item.variant_id == variant_id) {
         return item;
       }
     }
@@ -169,6 +169,8 @@ const shopping_cart = new function (){
 
       let event = (qtyDiff > 0) ? 'addToCart' : 'removeFromCart';
       const details = {
+        'variant_id' : variant_id,
+        'product_id' : item.product_id,
         'sku': item.sku,
         'qty': Math.abs(qtyDiff)
       };
@@ -179,7 +181,7 @@ const shopping_cart = new function (){
     _.request(
       {
         request: 'update',
-        variantId: variant_id,
+        variant_id: variant_id,
         qty: qty,
       });
   };
@@ -206,6 +208,8 @@ const shopping_cart = new function (){
       for (let i = 0; i < _.cart.items.length; i++) {
         let item = _.cart.items[i];
         items.push({
+          'variant_id' : item.variant_id,
+          'product_id' : item.product_id,
           'sku': item.sku,
           'qty': item.quantity,
           'price': item.price
@@ -218,6 +222,8 @@ const shopping_cart = new function (){
 
       events.triggerEvent('checkout', details);
     }
+
+    return;
 
     _.request(
       {
@@ -236,7 +242,7 @@ const shopping_cart = new function (){
     _.request(
       {
         request: 'add',
-        variantId: variant_id,
+        variant_id: variant_id,
         qty: qty,
       }, function (data) {
         btn.value = 'Add to Cart';

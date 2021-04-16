@@ -49,7 +49,7 @@ class CartController extends ControllerBase {
   protected function calculateCartTotals($cart) {
     $total = 0;
     foreach ($cart['items'] as $item) {
-      $variant = ShopifyProductVariant::loadByVariantId($item['variantId']);
+      $variant = ShopifyProductVariant::loadByVariantId($item['variant_id']);
       $price = (float) $variant->price->value * 100;
       $total += $price * (int) $item['quantity'];
     }
@@ -75,7 +75,7 @@ class CartController extends ControllerBase {
     $cart = $this->getCart();
 
     foreach ($cart['items'] as $index => $item) {
-      if ($item['variantId'] === $variantId) {
+      if ($item['variant_id'] === $variantId) {
         return $index;
       }
     }
@@ -131,11 +131,17 @@ class CartController extends ControllerBase {
     }
 
     $variant = ShopifyProductVariant::loadByVariantId($variantId);
+    $id = NULL;
+    $product = $variant->getProduct();
+    if ($product) {
+      $id = $product->get('product_id')->value;
+    }
 
     $item = [
       'sku' => $variant->get('sku')->value,
       'price' => $variant->get('price')->value,
-      'variantId' => $variantId,
+      'product_id' => ($id === NULL) ? $variant->get('sku')->value : $id,
+      'variant_id' => $variantId,
       'quantity' => $desiredQuantity,
     ];
 
@@ -272,16 +278,16 @@ EOF;
         return $this->rendercart();
 
       case 'remove':
-        $variantId = \Drupal::request()->query->get('variantId');
+        $variantId = \Drupal::request()->query->get('variant_id');
         return $this->removeItem($variantId);
 
       case 'update':
-        $variantId = \Drupal::request()->query->get('variantId');
+        $variantId = \Drupal::request()->query->get('variant_id');
         $qty = \Drupal::request()->query->get('qty');
         return $this->addItem($variantId, $qty, FALSE);
 
       case 'add':
-        $variantId = \Drupal::request()->query->get('variantId');
+        $variantId = \Drupal::request()->query->get('variant_id');
         $qty = \Drupal::request()->query->get('qty');
         return $this->addItem($variantId, $qty);
     }
@@ -379,7 +385,7 @@ EOF;
     // Check for IDs.
     foreach ($cart['items'] as &$item) {
       if (!isset($item['id'])) {
-        $variant = ShopifyProductVariant::loadByVariantId($item['variantId']);
+        $variant = ShopifyProductVariant::loadByVariantId($item['variant_id']);
         if ($variant === FALSE) {
           break;
         }
@@ -389,7 +395,7 @@ EOF;
       }
 
       $lineItems[] = [
-        'variantId' => $item['id'],
+        'variant_id' => $item['id'],
         'quantity' => (int) $item['quantity'],
       ];
     }
@@ -447,7 +453,11 @@ EOF;
     if (!isset($params['nocart'])) {
       $cart = $this->getCart();
       foreach ($cart['items'] as &$item) {
-        $variant = ShopifyProductVariant::loadByVariantId($item['variantId']);
+        if (!isset($item['variant_id'])) {
+          $item['variant_id'] = $item['variantId'];
+        }
+
+        $variant = ShopifyProductVariant::loadByVariantId($item['variant_id']);
         if ($variant) {
           $view = $variant->loadView('cart', FALSE);
           $item['view'] = $view;

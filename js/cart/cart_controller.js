@@ -98,7 +98,7 @@ const cartController = function (el) {
         let el = createElementFromHTML(cart.items[i].view);
         let number = el.querySelector('.item-qty input');
         number.value = cart.items[i].quantity;
-        el.setAttribute('data-variant-id', cart.items[i].variantId);
+        el.setAttribute('data-variant-id', cart.items[i].variant_id);
         fragment.appendChild(el);
       }
 

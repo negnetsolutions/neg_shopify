@@ -50,6 +50,7 @@ class ShopifyAddToCartForm extends FormBase {
 
     // Data attribute used by shopify.js.
     $form['#attributes']['data-variant-id'] = $variant_id;
+    $form['#attributes']['data-product-id'] = $product->get('product_id')->value;
     $form['#attributes']['data-variant-sku'] = $variant->get('sku')->value;
     $form['#attributes']['data-variant-price'] = $variant->get('price')->value;
 
