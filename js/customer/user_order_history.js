@@ -48,7 +48,7 @@ const shopifyCustomerHistoryWidget = new function() {
     },
     computed: {
       url: function() {
-        return this.endpoint + "?email=" + this.email + "&page=" + this.cursor + "&direction=" + this.direction + "&per-page=" + this.perPage;
+        return this.endpoint + (this.endpoint.split('?')[1] ? '&':'?') + "email=" + this.email + "&page=" + this.cursor + "&direction=" + this.direction + "&per-page=" + this.perPage;
       }
     },
     methods: {

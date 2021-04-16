@@ -115,6 +115,8 @@ class JsonController extends ControllerBase {
       $perPage = 5;
     }
 
+    $current_user = \Drupal::currentUser();
+
     if ($email === NULL) {
       $email = $current_user->getEmail();
     }
