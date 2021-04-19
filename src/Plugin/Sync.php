@@ -237,7 +237,6 @@ class Sync {
     }
 
     $pages = $service->fetchAllPagedProducts([
-      'published_status' => 'published',
       'updated_at_min' => ShopifyService::getLastProductUpdatedDate(),
       'limit' => '250',
     ]);

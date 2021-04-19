@@ -58,9 +58,7 @@ class SyncShopify extends QueueWorkerBase {
         break;
 
       case 'deleteProducts':
-        $products = ShopifyProduct::deleteOrphanedProducts([
-          'published_status' => 'published',
-        ]);
+        $products = ShopifyProduct::deleteOrphanedProducts();
 
         $deleted = count($products);
 
