@@ -33,14 +33,20 @@ class ShopifyAddToCartForm extends FormBase {
 
     $variant_id = (isset($_GET['variant_id']) && is_numeric($_GET['variant_id'])) ? $_GET['variant_id'] : FALSE;
 
-    if ($variant_id === FALSE) {
+    $variant = NULL;
+    if ($variant_id !== FALSE) {
+      $variant = ShopifyProductVariant::loadByVariantId($variant_id);
+    }
+
+    if (!$variant) {
       // No variant set yet, setup the default first variant.
       $entity_id = $product->variants->get(0)->getValue()['target_id'];
       $variant = ShopifyProductVariant::load($entity_id);
       $variant_id = $variant->variant_id->value;
     }
-    else {
-      $variant = ShopifyProductVariant::loadByVariantId($variant_id);
+
+    if (!$variant) {
+      return [];
     }
 
     $form['#action'] = '//' . Settings::shopInfo('domain') . '/cart/add';
