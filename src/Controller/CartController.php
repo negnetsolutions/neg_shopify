@@ -11,6 +11,7 @@ use Drupal\Core\Cache\Cache;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\neg_shopify\Api\StoreFrontService;
+use Drupal\neg_shopify\Api\GraphQlException;
 
 /**
  * Class CartController.
@@ -319,7 +320,11 @@ EOF;
         return FALSE;
       }
     }
-    catch (\Exception $e) {
+    catch (GraphQlException $e) {
+      Settings::log('Update Checkout Exception: @results @query', [
+        '@results' => print_r($e->getErrors(), TRUE),
+        '@query' => $query,
+      ]);
       return FALSE;
     }
 
@@ -361,8 +366,11 @@ EOF;
         return FALSE;
       }
     }
-    catch (\Exception $e) {
-      Settings::log($e->getMessage());
+    catch (GraphQlException $e) {
+      Settings::log('Create Checkout Exception: @results @query', [
+        '@results' => print_r($e->getErrors(), TRUE),
+        '@query' => $query,
+      ]);
       return FALSE;
     }
 
@@ -395,13 +403,18 @@ EOF;
       }
 
       $lineItems[] = [
-        'variant_id' => $item['id'],
+        'variantId' => $item['id'],
         'quantity' => (int) $item['quantity'],
       ];
     }
 
     // Encode lineItems.
     $lineItems = preg_replace('/"([^"]+)"\s*:\s*/', '$1:', json_encode($lineItems));
+
+    Settings::log('Checkout: @line @cart', [
+      '@line' => print_r($lineItems, TRUE),
+      '@cart' => print_r($cart, TRUE),
+    ]);
 
     if (!isset($cart['checkout']['id'])) {
       // Create a new checkout.

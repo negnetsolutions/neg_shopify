@@ -83,6 +83,11 @@ const shopping_cart = new function (){
       callback.call(_, data);
     }
 
+    if (data.status !== 'OK') {
+      window.alert(data.status);
+      return;
+    }
+
     if (typeof data.cart !== 'undefined' && typeof data.cart.items !== 'undefined') {
       // Notify observers.
       for (let i = 0; i < _.cartObservers.length; i++) {
@@ -200,7 +205,7 @@ const shopping_cart = new function (){
       });
   };
 
-  this.checkout = function checkout() {
+  this.checkout = function checkout(callback) {
     // Attempt to queue analytics event.
     if (typeof events === 'object') {
 
@@ -226,7 +231,7 @@ const shopping_cart = new function (){
     _.request(
       {
         request: 'checkout'
-      });
+      }, callback);
   };
 
   this.addToCart = function addToCart(e) {

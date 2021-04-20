@@ -41,7 +41,12 @@ const cartController = function (el) {
   this.checkout = function checkout(e) {
     _.checkoutBtn.value = 'Please Wait';
     _.checkoutBtn.disabled = true;
-    shopping_cart.checkout();
+    shopping_cart.checkout(function(data) {
+      if (data.status !== 'OK') {
+        _.checkoutBtn.value = 'Checkout';
+        _.checkoutBtn.disabled = false;
+      }
+    });
     e.preventDefault();
     e.stopPropagation();
   };
