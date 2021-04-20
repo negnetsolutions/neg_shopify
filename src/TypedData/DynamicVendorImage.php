@@ -20,20 +20,26 @@ class DynamicVendorImage extends FieldItemList implements EntityReferenceFieldIt
   protected function computeValue() {
     $entity = $this->getEntity();
 
+    $image = NULL;
+
     if ($entity->thumbnail->target_id) {
       // Check for vendor override image.
-      $image = $entity->get('thumbnail')->getValue()[0];
+      $image = $entity->get('thumbnail')->entity;
     }
     else {
       $products = $entity->getProducts(1);
       if (count($products) > 0) {
         $product = reset($products);
         // Product image.
-        $image = $product->get('image')->getValue()[0];
+        if ($product && !$product->get('image')->isEmpty()) {
+          $image = $product->get('image')->entity;
+        }
       }
     }
 
-    $this->list[0] = $this->createItem(0, $image);
+    if ($image) {
+      $this->list[0] = $this->createItem(0, $image);
+    }
   }
 
   /**
@@ -42,11 +48,11 @@ class DynamicVendorImage extends FieldItemList implements EntityReferenceFieldIt
   public function referencedEntities() {
     $entity = $this->getEntity();
 
-    $image = FALSE;
+    $tid = NULL;
 
     if ($entity->thumbnail->target_id) {
       // Check for vendor override image.
-      $image = $entity->get('thumbnail')->getValue()[0];
+      $tid = $entity->thumbnail->target_id;
     }
     else {
       $products = $entity->getProducts(1);
@@ -54,15 +60,20 @@ class DynamicVendorImage extends FieldItemList implements EntityReferenceFieldIt
         $product = reset($products);
 
         // Product image.
-        $image = $product->get('image')->getValue()[0];
+        if ($product && !$product->image->isEmpty()) {
+          $tid = $product->image->target_id;
+        }
       }
     }
 
-    if (!$image) {
+    if ($tid === NULL) {
       return [];
     }
 
-    $file = File::load($image['target_id']);
+    $file = File::load($tid);
+    if (!$file) {
+      return [];
+    }
 
     return [$file];
   }
