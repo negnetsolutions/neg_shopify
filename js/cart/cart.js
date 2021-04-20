@@ -223,8 +223,6 @@ const shopping_cart = new function (){
       events.triggerEvent('checkout', details);
     }
 
-    return;
-
     _.request(
       {
         request: 'checkout'
