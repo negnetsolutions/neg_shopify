@@ -164,6 +164,39 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Impements hook_page_attachments_alter().
+ */
+function neg_shopify_page_attachments_alter(array &$attachments) {
+  if (isset($attachments['#attached']['html_head_link'])) {
+    foreach ($attachments['#attached']['html_head_link'] as $index => $value) {
+      if (is_array($value[0]) && isset($value[0]['rel']) && ($value[0]['rel'] == 'delete-form' || $value[0]['rel'] == 'edit-form')) {
+        unset($attachments['#attached']['html_head_link'][$index]);
+      }
+    }
+  }
+
+  $route = \Drupal::routeMatch()->getRouteName();
+  switch ($route) {
+    case 'neg_shopify.cart':
+      $attachments['#attached']['html_head'] = [
+        [
+          [
+            '#type' => 'html_tag',
+            '#tag' => 'meta',
+            '#value' => '',
+            '#attributes' => [
+              'name' => 'description',
+              'content' => 'Add items to your cart to checkout online!',
+            ],
+          ],
+          'page_description',
+        ],
+      ];
+      break;
+  }
+}
+
+/**
  * Implements hook_entity_type_alter().
  */
 function neg_shopify_entity_type_alter(array &$entity_types) {
