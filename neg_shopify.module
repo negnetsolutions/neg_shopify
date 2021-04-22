@@ -5,6 +5,8 @@
  * Shopify module.
  */
 
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Database\Query\AlterableInterface;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\Render\Element;
@@ -164,6 +166,15 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Implements hook_query_TAG_alter().
+ */
+function neg_shopify_query_publishedvendors_alter(AlterableInterface $query) {
+  $query->leftJoin('shopify_vendor', 'v', 'v.slug = shopify_product.vendor_slug');
+  $query->fields('v', ['status']);
+  $query->condition('v.status', 1);
+}
+
+/**
  * Impements hook_page_attachments_alter().
  */
 function neg_shopify_page_attachments_alter(array &$attachments) {
@@ -211,7 +222,7 @@ function neg_shopify_entity_type_alter(array &$entity_types) {
 /**
  * Implements hook_entity_bundle_field_info_alter().
  */
-function neg_shopify_entity_bundle_field_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle) {
+function neg_shopify_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
   if ($bundle === 'shopify_product') {
     if (isset($fields['field_product'])) {
       // Remove deleted shopify products in validation process.
@@ -635,6 +646,11 @@ function template_preprocess_shopify_product(array &$variables) {
   $vendor = $variables['shopify_product']->getShopifyVendor();
   if ($vendor) {
     $variables['vendor_url'] = $vendor->toUrl('canonical');
+
+    if ($vendor->status->value != TRUE) {
+      $variables['attributes']['class'][] = 'unpublished';
+    }
+
     if ($vendor->access('view')) {
       $variables['vendor_link'] = [
         '#type' => 'link',

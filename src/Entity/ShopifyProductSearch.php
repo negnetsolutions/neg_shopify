@@ -105,6 +105,9 @@ class ShopifyProductSearch {
       $group->condition('is_preorder', TRUE);
 
       $query->condition($group);
+
+      // Only show from published vendors.
+      $query->addTag('publishedvendors');
     }
 
     if (isset($params['tags'])) {
