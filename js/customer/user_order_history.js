@@ -88,7 +88,7 @@ const shopifyCustomerHistoryWidget = new function() {
       },
       formatDate: function(value) {
         const d = new Date(value);
-        return appendLeadingZeroes(d.getMonth() + 1) + "-" + appendLeadingZeroes(d.getDay()) + "-" + d.getFullYear();
+        return appendLeadingZeroes(d.getMonth() + 1) + "-" + appendLeadingZeroes(d.getDate()) + "-" + d.getFullYear();
       }
     },
     created: function() {
