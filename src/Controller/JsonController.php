@@ -191,7 +191,7 @@ class JsonController extends ControllerBase {
         $vendors = ShopifyVendor::filterTagsForVendors($tags);
 
         $data = ShopifyProductSearch::renderJson($sortOrder, $page, $perPage, $tags, $vendors);
-        $tags = ['shopify_product_list'];
+        $tags = ['shopify_product_list', 'shopify_vendor_list'];
 
         break;
 
