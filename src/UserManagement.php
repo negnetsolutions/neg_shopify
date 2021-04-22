@@ -144,6 +144,10 @@ class UserManagement {
    */
   public static function loadUserByShopifyId($id) {
 
+    if (strlen($id) === 0) {
+      return NULL;
+    }
+
     if (!str_starts_with($id, 'gid://shopify/Customer/')) {
       $id = ShopifyCustomer::idToGraphQlId($id);
     }
