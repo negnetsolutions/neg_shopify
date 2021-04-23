@@ -109,7 +109,15 @@ class ShopifyVendors {
     $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
     foreach ($availableVendors as $vendor) {
-      $vendors[] = $vendor->loadView('teaser', FALSE);
+      $count = 1;
+      $user = \Drupal::currentUser();
+      if (!$user->hasPermission('view shopify toolbar')) {
+        $count = $vendor->getProductCount(TRUE);
+      }
+
+      if ($count > 0) {
+        $vendors[] = $vendor->loadView('teaser', FALSE);
+      }
     }
 
     return [
@@ -150,7 +158,16 @@ class ShopifyVendors {
     $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
     foreach ($availableVendors as $vendor) {
-      $vendors[] = $vendor->loadView();
+
+      $count = 1;
+      $user = \Drupal::currentUser();
+      if (!$user->hasPermission('view shopify toolbar')) {
+        $count = $vendor->getProductCount(TRUE);
+      }
+
+      if ($count > 0) {
+        $vendors[] = $vendor->loadView();
+      }
     }
 
     $variables['#vendors'] = [
