@@ -23,6 +23,11 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
 
     if ($display->getComponent('dynamic_thumbnail')) {
       $build['thumbnail'] = $build['dynamic_thumbnail'];
+      if (isset($build['thumbnail'][0])) {
+        if (!$entity->get('title')->isEmpty()) {
+          $build['thumbnail'][0]['#item']->alt = $entity->get('title')->value;
+        }
+      }
     }
 
     if ($display->getComponent('products')) {
@@ -85,4 +90,5 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
 
     return $build;
   }
+
 }
