@@ -161,7 +161,7 @@ class ShopifyVendors {
       '#controls' => FALSE,
       '#defaultSort' => Settings::defaultSortOrder(),
       '#cache' => [
-        'tags' => ['shopify_product_list'],
+        'tags' => ['shopify_product_list', 'shopify_vendors_list'],
       ],
     ];
 
