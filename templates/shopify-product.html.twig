@@ -4,7 +4,7 @@ set classes = [
 view_mode ? view_mode|clean_class,
 ]
 %}
-<article{{ attributes.addClass(classes) }}>
+<article{{ attributes.addClass(classes).setAttribute('itemtype', 'http://schema.org/Product').setAttribute('itemscope', 'itemscope') }}>
   <meta itemprop="url" content="{{ url }}">
   {% if imagethumbnail|render %}
     <meta itemprop="image" content="{{ imagethumbnail }}">
