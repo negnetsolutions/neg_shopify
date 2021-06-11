@@ -704,9 +704,12 @@ function template_preprocess_shopify_product_variant(&$variables) {
     unset($variables['content']['compare_at_price']);
   }
 
+  $variables['schemaPrice'] = $variables['shopify_product_variant']->get('price')->value;
+
   $variables['currency'] = Settings::shopInfo()->currency;
 
   $variables['url'] = $variables['shopify_product']->toUrl('canonical')->setOptions([
+    'absolute' => TRUE,
     'query' => [
       'variant_id' => $variables['shopify_product_variant']->get('variant_id')->value,
     ],

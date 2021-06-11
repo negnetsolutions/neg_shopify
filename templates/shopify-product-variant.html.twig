@@ -12,12 +12,14 @@
  * @ingroup themeable
  */
 #}
+<meta itemprop="sku" content="{{ shopify_product_variant.sku.0.value }}" />
 <div class="offers" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-  <meta itemprop="priceCurrency" content="{{ currency }}">
+  <meta itemprop="priceCurrency" content="{{ currency }}" />
+  <meta itemprop="url" content="{{ url }}" />
   <link itemprop="availability" href="http://schema.org/{% if available %}InStock{% else %}OutOfStock{% endif %}">
 
   {% if content.compare_at_price|render %}
     <div class="compare_at_price">{{ content.compare_at_price }}</div>
   {% endif %}
-  <div class="price{% if content.compare_at_price|render %} sale {% endif %}" itemprop="price">{{ content.price }}</div>
+  <div class="price{% if content.compare_at_price|render %} sale {% endif %}" itemprop="price" content="{{ schemaPrice }}">{{ content.price }}</div>
 </div>
