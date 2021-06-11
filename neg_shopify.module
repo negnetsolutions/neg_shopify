@@ -708,6 +708,8 @@ function template_preprocess_shopify_product_variant(&$variables) {
 
   $variables['currency'] = Settings::shopInfo()->currency;
 
+  $variables['available'] = $variables['shopify_product_variant']->isAvailable();
+
   $variables['url'] = $variables['shopify_product']->toUrl('canonical')->setOptions([
     'absolute' => TRUE,
     'query' => [
