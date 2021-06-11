@@ -86,6 +86,10 @@ class ShopifyProductViewBuilder extends EntityViewBuilder {
       }
     }
 
+    if (isset($variants[0])) {
+      return $variants[0]->entity->id();
+    }
+
     return FALSE;
   }
 
