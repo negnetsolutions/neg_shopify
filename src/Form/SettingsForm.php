@@ -82,6 +82,14 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['api']['checkout_domain'] = [
+      '#type' => 'textfield',
+      '#title' => t('Checkout Domain'),
+      '#default_value' => $config->get('checkout_domain'),
+      '#description' => t('Enter your checkout domain or leave blank to use [storename].myshopify.com'),
+      '#required' => FALSE,
+    ];
+
     $form['api']['reset_shop_info'] = [
       '#type' => 'submit',
       '#value' => t('Reload Shop Info Cache'),
@@ -444,6 +452,7 @@ class SettingsForm extends ConfigFormBase {
     }
 
     $config->set('shop_url', $form_state->getValue('shop_url'))
+      ->set('checkout_domain', $form_state->getValue('checkout_domain'))
       ->set('products_frequency', $form_state->getValue('products_frequency'))
       ->set('collections_frequency', $form_state->getValue('collections_frequency'))
       ->set('users_frequency', $form_state->getValue('users_frequency'))

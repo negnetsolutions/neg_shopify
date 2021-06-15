@@ -439,10 +439,19 @@ EOF;
     $cart['checkoutStarted'] = TRUE;
     $this->saveCart($cart);
 
+    // Transform checkout url.
+    $checkoutDomain = Settings::config()->get('checkout_domain');
+    $shopUrl = Settings::config()->get('shop_url');
+    $url = $checkout['webUrl'];
+
+    if (strlen($checkoutDomain) > 0) {
+      $url = str_replace($shopUrl . '.myshopify.com', $checkoutDomain, $url);
+    }
+
     return $this->renderCart([
       'nocache' => TRUE,
       'nocart' => TRUE,
-      'redirect' => $checkout['webUrl'],
+      'redirect' => $url,
     ]);
   }
 
