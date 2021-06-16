@@ -242,7 +242,13 @@ class ShopifyCollection {
     $params = [];
 
     $term = $variables['term'];
-    self::attachMetatag($variables, 'description', 'Shop ' . $term->getName());
+    $description = 'Shop ' . $term->getName();
+
+    if (!$term->get('description')->isEmpty() && strlen(strip_tags($term->get('description')->value)) > 0) {
+      $description = strip_tags($term->get('description')->value);
+    }
+
+    self::attachMetatag($variables, 'description', $description);
 
     $variables['attributes']['data-id'] = $term->id();
 
