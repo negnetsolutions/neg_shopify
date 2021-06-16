@@ -166,6 +166,46 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
 }
 
 /**
+ * Get's active variant.
+ */
+function neg_shopify_get_active_product_variant(ShopifyProduct $entity) {
+
+  if ($variant_id = \Drupal::request()->get('variant_id')) {
+    $active_variant = ShopifyProductVariant::loadByVariantId($variant_id);
+  }
+  else {
+    $variants = $entity->variants;
+    $variant_id = _neg_shopify_get_first_product_variant($variants);
+    if ($variant_id !== FALSE) {
+      $active_variant = ShopifyProductVariant::load($variant_id);
+    }
+  }
+
+  if ($active_variant instanceof ShopifyProductVariant) {
+    return $active_variant;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Gets first variant id.
+ */
+function _neg_shopify_get_first_product_variant(object $variants) {
+  foreach ($variants as $variant) {
+    if ($variant && $variant->entity->isAvailable()) {
+      return $variant->entity->id();
+    }
+  }
+
+  if (isset($variants[0])) {
+    return $variants[0]->entity->id();
+  }
+
+  return FALSE;
+}
+
+/**
  * Implements hook_query_TAG_alter().
  */
 function neg_shopify_query_publishedvendors_alter(AlterableInterface $query) {
