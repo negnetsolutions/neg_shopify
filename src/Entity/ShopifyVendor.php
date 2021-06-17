@@ -25,6 +25,7 @@ use Drupal\neg_shopify\Event\VendorSearchQueryEvent;
  *   id = "shopify_vendor",
  *   label = @Translation("Shopify Vendor"),
  *   handlers = {
+ *     "storage_schema" = "Drupal\neg_shopify\Entity\StorageSchema\ShopifyVendorStorageSchema",
  *     "view_builder" = "Drupal\neg_shopify\Entity\ViewBuilder\ShopifyVendorViewBuilder",
  *     "list_builder" = "Drupal\neg_shopify\Entity\ListBuilder\ShopifyVendorListBuilder",
  *     "views_data" = "Drupal\neg_shopify\Entity\ViewsData\ShopifyVendorViewsData",

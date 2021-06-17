@@ -8,22 +8,13 @@ use Drupal\Core\Entity\ContentEntityTypeInterface;
 /**
  * Defines the node schema handler.
  */
-class ShopifyProductStorageSchema extends SqlContentEntityStorageSchema {
+class ShopifyVendorStorageSchema extends SqlContentEntityStorageSchema {
 
   /**
    * {@inheritdoc}
    */
   protected function getEntitySchema(ContentEntityTypeInterface $entity_type, $reset = FALSE) {
     $schema = parent::getEntitySchema($entity_type, $reset);
-
-    if ($data_table = $this->storage->getDataTable()) {
-      $schema[$data_table]['indexes'] += [
-        'shopify_product__avaiable' => ['is_available'],
-        'shopify_product__vendor_slug' => ['vendor_slug'],
-        'shopify_product__low_price' => ['low_price'],
-      ];
-    }
-
     return $schema;
   }
 
