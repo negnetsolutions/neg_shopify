@@ -231,10 +231,11 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
           $values['low_price'] = $variant['price'];
         }
 
+        $inventory_management = $variant['inventory_management'];
         $inventory_policy = $variant['inventory_policy'];
         $inventory_quantity = $variant['inventory_quantity'];
 
-        if ($inventory_policy == 'deny') {
+        if ($inventory_management == 'shopify' && $inventory_policy == 'deny') {
           if ($inventory_quantity > 0) {
             $available += $inventory_quantity;
           }
