@@ -140,8 +140,8 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    * Checks to see is variant is available.
    */
   public function isAvailable() {
-    $policy = $this->get('inventory_policy')->first()->getValue()['value'];
-    $quantityAvailable = $this->get('inventory_quantity')->first()->getValue()['value'];
+    $policy = $this->get('inventory_policy')->value;
+    $quantityAvailable = $this->get('inventory_quantity')->value;
 
     if ($policy == 'continue') {
       return TRUE;
