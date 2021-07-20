@@ -77,12 +77,17 @@ class SyncShopify extends QueueWorkerBase {
         $visible_products = $data['visible_products'];
 
         // Find all that are published and shouldn't be.
-        $pids = \Drupal::entityTypeManager()
+        $query = \Drupal::entityTypeManager()
           ->getStorage('shopify_product')
           ->getQuery()
-          ->condition('product_id', $visible_products, 'NOT IN')
-          ->exists('published_at')
-          ->execute();
+          ->exists('published_at');
+
+        if (count($visible_products) > 0) {
+          $query->condition('product_id', $visible_products, 'NOT IN');
+        }
+
+        $pids = $query->execute();
+
         $products = ShopifyProduct::loadMultiple($pids);
         foreach ($products as $product) {
           $product->set('published_at', NULL);

@@ -538,15 +538,15 @@ EOL;
       $product_ids[] = $product['id'];
     }
 
-    // Handle no products gracefully.
-    if (count($product_ids) === 0) {
-      return [];
-    }
-
     $deleted_products = [];
 
     $query = \Drupal::entityQuery('shopify_product');
-    $query->condition('product_id', $product_ids, 'NOT IN');
+
+    // Handle no products gracefully.
+    if (count($product_ids) > 0) {
+      $query->condition('product_id', $product_ids, 'NOT IN');
+    }
+
     $ids = $query->execute();
     $products = (count($ids) > 0) ? self::loadMultiple($ids) : [];
 
