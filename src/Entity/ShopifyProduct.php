@@ -538,6 +538,11 @@ EOL;
       $product_ids[] = $product['id'];
     }
 
+    // Handle no products gracefully.
+    if (count($product_ids) === 0) {
+      return [];
+    }
+
     $deleted_products = [];
 
     $query = \Drupal::entityQuery('shopify_product');
