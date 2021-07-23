@@ -10,7 +10,7 @@ const cartBlock = new function cartBlock() {
   this.cart = this.el.querySelector('.shopify_cart');
   this.overlay = this.el.querySelector('.mini-cart-overlay');
   this.closeButton = this.el.querySelector('.close-cart');
-  this.cartLinks = document.querySelectorAll("a[href='/cart']");
+  this.cartLinks = document.querySelectorAll("a[href^='/cart']");
 
   this.close = function close() {
     _.el.classList.remove("open");
