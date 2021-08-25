@@ -177,6 +177,13 @@ class ShopifyProductSearch {
         $relation = '=';
 
         switch ($rule['column']) {
+          case 'is_price_reduced':
+            $invert = ($rule['relation'] == 'is_set') ? FALSE : TRUE;
+            $field = 'variants.entity:shopify_product_variant.compare_at_price';
+            $rule['condition'] = ($invert) ? '' : 0;
+            $rule['relation'] = ($invert) ? '=' : 'greater_than';
+            break;
+
           case 'title':
             $field = $rule['column'];
             break;
