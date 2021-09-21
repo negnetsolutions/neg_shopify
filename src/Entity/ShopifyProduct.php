@@ -407,15 +407,16 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
    */
   public function getView(string $style = 'store_listing', $defaultContext = TRUE) {
 
-    $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($this, $style);
-
     if ($defaultContext === FALSE) {
       $rendered_view = NULL;
-      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
+      $entity = $this;
+      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$entity, $style, &$rendered_view) {
+        $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($entity, $style);
         $rendered_view = render($build);
       });
     }
     else {
+      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product')->view($this, $style);
       $rendered_view = $build;
     }
 
