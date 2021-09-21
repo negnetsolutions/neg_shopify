@@ -87,7 +87,7 @@ class MyAccountMenuLink extends MenuLinkDefault {
    * {@inheritdoc}
    */
   public function getCacheContexts() {
-    return ['user.roles:authenticated'];
+    return ['user.roles'];
   }
 
 }
