@@ -222,14 +222,19 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
     if (isset($values['variants']) && is_array($values['variants'])) {
       $available = 0;
 
+      // Find highest price of the bunch.
+      $highPrice = 0;
       foreach ($values['variants'] as &$variant) {
+        if ($highPrice === 0) {
+          $highPrice = $variant['price'];
+        }
+        elseif ($variant['price'] > $highPrice) {
+          $highPrice = $variant['price'];
+        }
+      }
+      $values['low_price'] = $highPrice;
 
-        if ($values['low_price'] === 0) {
-          $values['low_price'] = $variant['price'];
-        }
-        elseif ($variant['price'] < $values['low_price']) {
-          $values['low_price'] = $variant['price'];
-        }
+      foreach ($values['variants'] as &$variant) {
 
         $inventory_management = $variant['inventory_management'];
         $inventory_policy = $variant['inventory_policy'];
@@ -242,6 +247,11 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
         }
         else {
           $available += 1;
+        }
+
+        // Calculate lowest "available" price.
+        if ($available > 0 && $variant['price'] < $values['low_price']) {
+          $values['low_price'] = $variant['price'];
         }
 
         // Attempt to load this variant.
@@ -259,6 +269,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       if ($available > 0) {
         $values['is_available'] = TRUE;
       }
+
     }
 
     // Convert options.
