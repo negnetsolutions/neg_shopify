@@ -311,7 +311,7 @@ class ShopifyProductSearch {
       }
     }
 
-    $query->sort('is_available', 'DESC');
+    $query->addTag('sort_by_is_available');
 
     foreach ($sort as $option) {
       $query->sort($option, $direction);

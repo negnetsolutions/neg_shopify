@@ -206,6 +206,17 @@ function _neg_shopify_get_first_product_variant(object $variants) {
 }
 
 /**
+ * Alters product search.
+ */
+function neg_shopify_query_sort_by_is_available_alter(AlterableInterface $query) {
+  $query->addExpression('IF(shopify_product.is_preorder > 0, 1, shopify_product.is_available)', '0_inventory_available', []);
+  $orderBy = &$query->getOrderBy();
+
+  $orderBy['0_inventory_available'] = 'DESC';
+  ksort($orderBy);
+}
+
+/**
  * Implements hook_query_TAG_alter().
  */
 function neg_shopify_query_publishedvendors_alter(AlterableInterface $query) {
