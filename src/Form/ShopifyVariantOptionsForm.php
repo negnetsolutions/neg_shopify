@@ -33,6 +33,9 @@ class ShopifyVariantOptionsForm extends FormBase {
     $form['#cache']['contexts'] = ['url.query_args'];
     $form['#cache']['tags'] = $product->getCacheTags();
 
+    // Set form action to product url.
+    $form['#action'] = $product->toUrl()->toString();
+
     $form_state->set('product', $product);
 
     $variant_id = \Drupal::request()->get('variant_id', FALSE);
