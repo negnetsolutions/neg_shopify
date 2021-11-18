@@ -41,6 +41,6 @@ shopify.toolbar:
 collections:
   version: 0.01
   js:
-    js/collections/collections.js: {}
+    js/collections/collections.min.js: {minified: true}
   dependencies:
     - negnet_utility/autopager
