@@ -8,6 +8,7 @@ use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Url;
+use Drupal\neg_shopify\Utilities\Pager;
 
 /**
  * ShopifyCollection Class.
@@ -108,14 +109,20 @@ class ShopifyCollection {
 
     $variables['#attached']['library'][] = 'neg_shopify/collections';
     $variables['#attributes']['class'][] = 'shopify_collection';
-    $variables['#attributes']['class'][] = 'autopager';
+    $variables['#attributes']['class'][] = 'pager';
     $variables['#attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['#attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['#attributes']['data-sort'] = Settings::defaultSortOrder();
     $variables['#attributes']['data-id'] = 'all';
     $variables['#attributes']['data-type'] = 'collection';
 
-    self::attachMetatag($variables, 'description', 'Shop all products.');
+    $page = \Drupal::request()->query->get('page') ?? 0;
+    $description = 'Shop all products.';
+    if ($page && is_numeric($page) && $page > 0) {
+      $description .= ' - Page ' . ($page + 1);
+    }
+
+    self::attachMetatag($variables, 'description', $description);
 
     $params = [
       'sort' => Settings::defaultSortOrder(),
@@ -125,8 +132,16 @@ class ShopifyCollection {
     $search = new ShopifyProductSearch($params);
 
     // Initial Page Render.
-    $products = $search->search(0, Settings::productsPerPage());
+    $products = $search->search($page, Settings::productsPerPage());
     $total = $search->count();
+
+    $variables['#attributes']['data-total'] = $total;
+
+    $pager = new Pager([
+      'page' => $page,
+      'total' => $total,
+      'perPage' => Settings::productsPerPage(),
+    ]);
 
     $variables['#products'] = [
       '#theme' => 'shopify_product_grid',
@@ -134,8 +149,9 @@ class ShopifyCollection {
       '#products_label' => Settings::productsLabel(),
       '#count' => $total,
       '#defaultSort' => Settings::defaultSortOrder(),
+      '#pager' => $pager->render(),
       '#cache' => [
-        'contexts' => ['user.roles'],
+        'contexts' => ['user.roles', 'url.query_args'],
         'tags' => $tags,
       ],
     ];
@@ -228,10 +244,12 @@ class ShopifyCollection {
    */
   public static function render(&$variables) {
 
+    $page = \Drupal::request()->query->get('page') ?? 0;
+
     $variables['#attached']['library'][] = 'neg_shopify/collections';
 
     $variables['attributes']['class'][] = 'shopify_collection';
-    $variables['attributes']['class'][] = 'autopager';
+    $variables['attributes']['class'][] = 'pager';
     $variables['attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['attributes']['data-sort'] = Settings::defaultSortOrder();
@@ -246,6 +264,10 @@ class ShopifyCollection {
 
     if (!$term->get('description')->isEmpty() && strlen(strip_tags($term->get('description')->value)) > 0) {
       $description = strip_tags($term->get('description')->value);
+    }
+
+    if ($page && is_numeric($page) && $page > 0) {
+      $description .= ' - Page ' . ($page + 1);
     }
 
     self::attachMetatag($variables, 'description', $description);
@@ -314,8 +336,15 @@ class ShopifyCollection {
     $search = new ShopifyProductSearch($params);
 
     // Initial Page Render.
-    $products = $search->search(0, Settings::productsPerPage());
+    $products = $search->search($page, Settings::productsPerPage());
     $total = $search->count();
+    $variables['attributes']['data-total'] = $total;
+
+    $pager = new Pager([
+      'page' => $page,
+      'total' => $total,
+      'perPage' => Settings::productsPerPage(),
+    ]);
 
     $variables['products'] = [
       '#theme' => 'shopify_product_grid',
@@ -324,8 +353,9 @@ class ShopifyCollection {
       '#count' => $total,
       '#defaultSort' => $variables['attributes']['data-sort'],
       '#allowManualSort' => $allowManualSorting,
+      '#pager' => $pager->render(),
       '#cache' => [
-        'contexts' => ['user.roles'],
+        'contexts' => ['user.roles', 'url.query_args'],
         'tags' => $tags,
       ],
     ];
@@ -352,6 +382,7 @@ class ShopifyCollection {
   public static function cacheTags($collection_id, $includeProducts = TRUE) {
     $tags = [
       'taxonomy_term:' . $collection_id,
+      'config:neg_shopify.settings',
     ];
 
     if ($includeProducts) {

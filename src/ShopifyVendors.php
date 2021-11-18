@@ -2,13 +2,9 @@
 
 namespace Drupal\neg_shopify;
 
-use Drupal\neg_shopify\Entity\ShopifyProduct;
-use Drupal\neg_shopify\Entity\ShopifyProductSearch;
 use Drupal\neg_shopify\Entity\ShopifyVendor;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Url;
-use Drupal\Core\Render\RenderContext;
-use Drupal\neg_shopify\Settings;
+use Drupal\neg_shopify\Utilities\Pager;
 
 /**
  * ShopifyVendors Class.
@@ -108,9 +104,9 @@ class ShopifyVendors {
 
     $availableVendors = (count($vids) > 0) ? ShopifyVendor::loadMultiple($vids) : [];
 
+    $user = \Drupal::currentUser();
     foreach ($availableVendors as $vendor) {
       $count = 1;
-      $user = \Drupal::currentUser();
       if (!$user->hasPermission('view shopify toolbar')) {
         $count = $vendor->getProductCount(TRUE);
       }
@@ -130,9 +126,11 @@ class ShopifyVendors {
    * Renders vendors page.
    */
   public static function renderVendorsPage(&$variables, $params = []) {
+    $page = \Drupal::request()->query->get('page') ?? 0;
+
     $variables['#attached']['library'][] = 'neg_shopify/collections';
     $variables['#attributes']['class'][] = 'shopify_collection';
-    $variables['#attributes']['class'][] = 'autopager';
+    $variables['#attributes']['class'][] = 'pager';
     $variables['#attributes']['data-perpage'] = Settings::productsPerPage();
     $variables['#attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $variables['#attributes']['data-sort'] = Settings::defaultSortOrder();
@@ -147,9 +145,16 @@ class ShopifyVendors {
     $variables['#attributes']['data-type'] = 'vendors';
 
     $count = ShopifyVendor::search(0, FALSE, $params)->countQuery()->execute()->fetchField();
+    $variables['#attributes']['data-total'] = $count;
+
+    $pager = new Pager([
+      'page' => $page,
+      'total' => $count,
+      'perPage' => Settings::productsPerPage(),
+    ]);
 
     $vendors = [];
-    $results = ShopifyVendor::search(0, Settings::productsPerPage(), $params)->execute();
+    $results = ShopifyVendor::search($page, Settings::productsPerPage(), $params)->execute();
     $vids = [];
     foreach ($results as $result) {
       $vids[] = $result->id;
@@ -177,8 +182,14 @@ class ShopifyVendors {
       '#count' => $count,
       '#controls' => FALSE,
       '#defaultSort' => Settings::defaultSortOrder(),
+      '#pager' => $pager->render(),
       '#cache' => [
-        'tags' => ['shopify_product_list', 'shopify_vendors_list'],
+        'tags' => [
+          'shopify_product_list',
+          'shopify_vendors_list',
+          'url.query_args',
+          'config:neg_shopify.settings',
+        ],
       ],
     ];
 

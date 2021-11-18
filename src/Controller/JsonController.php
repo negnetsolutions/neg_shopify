@@ -228,7 +228,6 @@ class JsonController extends ControllerBase {
 
         $data = ShopifyVendors::renderVendorsPageJson($params, $sortOrder, $page, $perPage);
         $tags = ['shopify_product_list', 'shopify_vendors_list'];
-
     }
 
     $cache = [

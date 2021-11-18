@@ -40,7 +40,15 @@ shopify.toolbar:
       css/shopify.toolbar.css: {}
 collections:
   version: 0.01
-  js:
-    js/collections/collections.min.js: {minified: true}
   dependencies:
-    - negnet_utility/autopager
+    - neg_shopify/pager
+pager:
+  version: 0.01
+  css:
+    theme:
+      css/pager.css: {}
+  js:
+    js/pager/pager.min.js: {minified: true, attributes: { defer: true }}
+  dependencies:
+    - negnet_utility/createElementFromHTML
+    - negnet_utility/closest

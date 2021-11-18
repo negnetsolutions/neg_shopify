@@ -27,6 +27,17 @@ use Drupal\Core\Mail\MailFormatHelper;
  */
 function neg_shopify_theme($existing, $type, $theme, $path) {
   return [
+    'neg_shopify_pager' => [
+      'template' => 'pager',
+      'variables' => [
+        'endpoint' => NULL,
+        'page' => 0,
+        'perPage' => Settings::productsPerPage(),
+        'pages' => [],
+        'prev' => NULL,
+        'next' => NULL,
+      ],
+    ],
     'field__extra_images' => [
       'template' => 'field--extra-images',
       'base hook' => 'field',
@@ -110,6 +121,7 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
         'allowManualSort' => FALSE,
         'controls' => TRUE,
         'products_label' => 'products',
+        'pager' => [],
       ],
     ],
     'neg_shopify_cart' => [
@@ -163,6 +175,41 @@ function neg_shopify_theme($existing, $type, $theme, $path) {
       'base hook' => 'shopify_product_variant',
     ],
   ];
+}
+
+/**
+ * Implements hook_metatag_attachment_alter().
+ */
+function neg_shopify_metatags_attachments_alter(array &$attachments) {
+  if (isset($attachments['#attached']['html_head'])) {
+    $page = \Drupal::request()->query->get('page');
+
+    foreach ($attachments['#attached']['html_head'] as &$attachment) {
+      switch ($attachment[1]) {
+        case 'title':
+          $title = &$attachment[0]['#attributes']['content'];
+
+          if ($page && is_numeric($page) && $page > 0) {
+            $title .= ' - Page ' . ($page + 1);
+          }
+
+          break;
+
+        case 'description':
+          if ($page && is_numeric($page) && $page > 0) {
+            $attachment[0]['#attributes']['content'] .= ' - Page ' . ($page + 1);
+          }
+
+          break;
+
+        case 'canonical_url':
+          if ($page && is_numeric($page) && $page > 0) {
+            $attachment[0]['#attributes']['href'] .= '?page=' . $page;
+          }
+          break;
+      }
+    }
+  }
 }
 
 /**
@@ -229,6 +276,7 @@ function neg_shopify_query_publishedvendors_alter(AlterableInterface $query) {
  * Impements hook_page_attachments_alter().
  */
 function neg_shopify_page_attachments_alter(array &$attachments) {
+
   if (isset($attachments['#attached']['html_head_link'])) {
     foreach ($attachments['#attached']['html_head_link'] as $index => $value) {
       if (is_array($value[0]) && isset($value[0]['rel']) && ($value[0]['rel'] == 'delete-form' || $value[0]['rel'] == 'edit-form')) {

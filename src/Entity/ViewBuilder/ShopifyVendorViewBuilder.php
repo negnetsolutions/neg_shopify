@@ -5,11 +5,10 @@ namespace Drupal\neg_shopify\Entity\ViewBuilder;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityViewBuilder;
-use Drupal\file\Entity\File;
-use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\Core\Url;
+use Drupal\neg_shopify\Utilities\Pager;
 
 /**
  * Class ShopifyVendorViewBuilder.
@@ -30,7 +29,7 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
       }
     }
 
-    if ($display->getComponent('products')) {
+    if ($display->getComponent('products') && $view_mode === 'full') {
       // Get products.
       $build['products'] = $this->renderProducts($entity);
     }
@@ -57,8 +56,15 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    * Renders products.
    */
   protected function renderProducts(EntityInterface $entity) {
-    $products = $entity->getProducts(Settings::productsPerPage(), 0);
+    $page = \Drupal::request()->query->get('page') ?? 0;
+    $products = $entity->getProducts(Settings::productsPerPage(), $page);
     $total = $entity->getProductCount();
+
+    $pager = new Pager([
+      'page' => $page,
+      'total' => $total,
+      'perPage' => Settings::productsPerPage(),
+    ]);
 
     $productsBuild = [
       '#theme' => 'shopify_product_grid',
@@ -66,22 +72,24 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
       '#count' => $total,
       '#products_label' => Settings::productsLabel(),
       '#defaultSort' => Settings::defaultSortOrder(),
+      '#pager' => $pager->render(),
     ];
 
     $build = [
       '#theme' => 'shopify_vendor_product_grid',
       '#products' => $productsBuild,
       '#cache' => [
-        'contexts' => ['user.roles'],
+        'contexts' => ['user.roles', 'url.query_args'],
         'tags' => [
           'shopify_vendor_products:' . $entity->id(),
         ],
       ],
     ];
 
+    $build['#attributes']['data-total'] = $total;
     $build['#attached']['library'][] = 'neg_shopify/collections';
     $build['#attributes']['class'][] = 'shopify_collection';
-    $build['#attributes']['class'][] = 'autopager';
+    $build['#attributes']['class'][] = 'pager';
     $build['#attributes']['data-perpage'] = Settings::productsPerPage();
     $build['#attributes']['data-endpoint'] = Url::fromRoute('neg_shopify.products.json')->toString();
     $build['#attributes']['data-sort'] = Settings::defaultSortOrder();

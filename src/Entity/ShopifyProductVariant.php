@@ -203,15 +203,17 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
    */
   public function loadView(string $style = 'cart', $defaultContext = TRUE) {
 
-    $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product_variant')->view($this, $style);
+    $entity = $this;
 
     if ($defaultContext === FALSE) {
       $rendered_view = NULL;
-      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$build, &$rendered_view) {
+      \Drupal::service('renderer')->executeInRenderContext(new RenderContext(), function () use (&$entity, $style, &$rendered_view) {
+        $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product_variant')->view($entity, $style);
         $rendered_view = render($build);
       });
     }
     else {
+      $build = \Drupal::entityTypeManager()->getViewBuilder('shopify_product_variant')->view($entity, $style);
       $rendered_view = $build;
     }
 

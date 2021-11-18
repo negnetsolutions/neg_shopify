@@ -5,8 +5,6 @@ namespace Drupal\neg_shopify\Controller;
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\neg_shopify\ShopifyCollection;
-use Drupal\neg_shopify\Entity\ShopifyProductSearch;
-use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
 use Drupal\neg_shopify\Settings;
 use Drupal\Core\Cache\CacheableResponse;
