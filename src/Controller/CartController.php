@@ -173,6 +173,20 @@ class CartController extends ControllerBase {
     $build = [
       '#theme' => 'neg_shopify_cart',
       '#attached' => [
+        'html_head' => [
+          [
+            [
+              '#type' => 'html_tag',
+              '#tag' => 'meta',
+              '#value' => '',
+              '#attributes' => [
+                'name' => 'viewport',
+                'content' => 'width=device-width, initial-scale=1.0',
+              ],
+            ],
+            'viewport',
+          ],
+        ],
         'library' => [
           'neg_shopify/cart_controller',
           'negnet_utility/negnet-responsive-images',
