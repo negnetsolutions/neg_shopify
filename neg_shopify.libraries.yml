@@ -32,6 +32,7 @@ shopify.js:
     js/cart/cart.js: {}
   dependencies:
     - core/drupalSettings
+    - negnet_utility/closest
 shopify.toolbar:
   version: 1.x
   css:

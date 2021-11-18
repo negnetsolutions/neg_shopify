@@ -235,9 +235,9 @@ const shopping_cart = new function (){
   };
 
   this.addToCart = function addToCart(e) {
-    const form = document.querySelector('.shopify-add-to-cart-form');
+    const form = e.closest('form.shopify-add-to-cart-form')
     const variant_id = form.getAttribute('data-variant-id');
-    const qty = form.querySelector('.form-item-quantity input').value
+    const qty = form.querySelector('input[name="quantity"]').value
     const btn = form.querySelector('.form-submit');
     btn.value = 'Adding to Cart...';
     btn.disabled = true;
