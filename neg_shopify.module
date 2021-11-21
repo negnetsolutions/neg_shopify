@@ -769,6 +769,13 @@ function template_preprocess_shopify_product(array &$variables) {
   }
 
   $variables['url'] = !$variables['shopify_product']->isNew() ? $variables['shopify_product']->toUrl('canonical')->toString() : NULL;
+
+  $variables['#cache']['contexts'][] = 'paragraph_view_mode';
+  if (isset($variables['elements']['#mode'])) {
+    if ($variables['elements']['#mode'] === 'preview' && isset($variables['content']['add_to_cart_form'])) {
+      unset($variables['content']['add_to_cart_form']);
+    }
+  }
 }
 
 /**
@@ -850,6 +857,9 @@ function _neg_shopify_process_paragraph_shopify_product(&$variables) {
 
       if ($published && $entity->get('is_available')->value == TRUE) {
         $variables['product'] = $entity->getView('store_listing');
+        if ($variables['view_mode'] === 'preview') {
+          $variables['product']['#mode'] = 'preview';
+        }
       }
     }
   }
