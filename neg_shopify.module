@@ -770,12 +770,6 @@ function template_preprocess_shopify_product(array &$variables) {
 
   $variables['url'] = !$variables['shopify_product']->isNew() ? $variables['shopify_product']->toUrl('canonical')->toString() : NULL;
 
-  $variables['#cache']['contexts'][] = 'paragraph_view_mode';
-  if (isset($variables['elements']['#mode'])) {
-    if ($variables['elements']['#mode'] === 'preview' && isset($variables['content']['add_to_cart_form'])) {
-      unset($variables['content']['add_to_cart_form']);
-    }
-  }
 }
 
 /**
