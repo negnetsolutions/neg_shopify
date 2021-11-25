@@ -9,6 +9,7 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Url;
 use Drupal\neg_shopify\Utilities\Pager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * ShopifyCollection Class.
@@ -21,9 +22,15 @@ class ShopifyCollection {
    * Render's Json.
    */
   public static function renderJson($collection_id, $sortOrder = FALSE, $page = 0, $perPage = FALSE) {
+
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
+
     if ($sortOrder === FALSE) {
       $sortOrder = Settings::defaultSortOrder();
     }
+
     if ($perPage === FALSE) {
       $perPage = Settings::productsPerPage();
     }
@@ -117,6 +124,10 @@ class ShopifyCollection {
     $variables['#attributes']['data-type'] = 'collection';
 
     $page = \Drupal::request()->query->get('page') ?? 0;
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
+
     $description = 'Shop all products.';
     if ($page && is_numeric($page) && $page > 0) {
       $description .= ' - Page ' . ($page + 1);
@@ -245,6 +256,9 @@ class ShopifyCollection {
   public static function render(&$variables) {
 
     $page = \Drupal::request()->query->get('page') ?? 0;
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
 
     $variables['#attached']['library'][] = 'neg_shopify/collections';
 

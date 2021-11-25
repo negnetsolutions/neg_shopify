@@ -5,6 +5,7 @@ namespace Drupal\neg_shopify;
 use Drupal\neg_shopify\Entity\ShopifyVendor;
 use Drupal\Core\Url;
 use Drupal\neg_shopify\Utilities\Pager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * ShopifyVendors Class.
@@ -87,6 +88,10 @@ class ShopifyVendors {
       $perPage = Settings::productsPerPage();
     }
 
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
+
     $defaults = [
       'tags' => [],
       'types' => [],
@@ -127,6 +132,9 @@ class ShopifyVendors {
    */
   public static function renderVendorsPage(&$variables, $params = []) {
     $page = \Drupal::request()->query->get('page') ?? 0;
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
 
     $variables['#attached']['library'][] = 'neg_shopify/collections';
     $variables['#attributes']['class'][] = 'shopify_collection';

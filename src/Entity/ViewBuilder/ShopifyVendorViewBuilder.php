@@ -9,6 +9,7 @@ use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProduct;
 use Drupal\Core\Url;
 use Drupal\neg_shopify\Utilities\Pager;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Class ShopifyVendorViewBuilder.
@@ -57,6 +58,10 @@ class ShopifyVendorViewBuilder extends EntityViewBuilder {
    */
   protected function renderProducts(EntityInterface $entity) {
     $page = \Drupal::request()->query->get('page') ?? 0;
+    if (!is_numeric($page) || $page < 0) {
+      throw new NotFoundHttpException();
+    }
+
     $products = $entity->getProducts(Settings::productsPerPage(), $page);
     $total = $entity->getProductCount();
 
