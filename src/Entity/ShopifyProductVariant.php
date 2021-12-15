@@ -14,6 +14,7 @@ use Drupal\neg_shopify\Entity\EntityInterface\ShopifyProductVariantInterface;
 use Drupal\neg_shopify\Api\ShopifyService;
 use Drupal\neg_shopify\Entity\EntityTrait\ShopifyEntityTrait;
 use Drupal\negnet_utility\PersistentRenderCache;
+use Drupal\neg_shopify\Settings;
 
 /**
  * Defines the Shopify product variant entity.
@@ -115,12 +116,21 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
 
     // Setup image.
     if (isset($values['image']) && !empty($values['image'])) {
-      $file = self::setupProductImage($values['image']->src);
-      if ($file instanceof FileInterface) {
-        $values['image'] = [
-          'target_id' => $file->id(),
-          'alt' => $values['image']->alt,
-        ];
+      try {
+        $file = self::setupProductImage($values['image']['src']);
+        if ($file && $file instanceof FileInterface) {
+          $values['image'] = [
+            'target_id' => $file->id(),
+            'alt' => $values['image']->alt,
+          ];
+        }
+      }
+      catch (\Exception $e) {
+        Settings::log('Failed to get variant image for variant id: %id - %m', [
+          '%id' => $values['variant_id'],
+          '%m' => $e->getCode(),
+        ], 'error');
+        $values['image'] = NULL;
       }
     }
     else {
