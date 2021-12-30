@@ -222,7 +222,8 @@ const shopping_cart = new function (){
       }
 
       const details = {
-        'items': items
+        'items': items,
+        'order_number': null
       };
 
       events.triggerEvent('checkout', details);
