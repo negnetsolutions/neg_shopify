@@ -82,6 +82,28 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
   /**
    * {@inheritdoc}
    */
+  public function getAnalyticsDetails() {
+    $variant = $this->getFirstAvailableVariant();
+
+    if (!$variant) {
+      return FALSE;
+    }
+
+    $item = [
+      'name' => $this->get('title')->value,
+      'id' => $this->get('product_id')->value,
+      'variant' => $variant->get('sku')->value,
+      'brand' => $this->get('vendor')->value,
+      'price' => $variant->get('price')->value,
+      '#tags' => $this->getCacheTags(),
+    ];
+
+    return $item;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCacheTagsToInvalidate() {
 
     // @todo Add bundle-specific listing cache tag?
