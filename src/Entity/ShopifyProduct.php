@@ -93,6 +93,7 @@ class ShopifyProduct extends ContentEntityBase implements ShopifyProductInterfac
       'name' => $this->get('title')->value,
       'id' => $this->get('product_id')->value,
       'variant' => $variant->get('sku')->value,
+      'sku' => $variant->get('sku')->value,
       'brand' => $this->get('vendor')->value,
       'price' => $variant->get('price')->value,
       '#tags' => $this->getCacheTags(),
