@@ -26,8 +26,11 @@ class ShopifyAddToCartForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ShopifyProduct $product = NULL) {
-    // Disable caching of this form.
-    $form['#cache']['max-age'] = 0;
+    // Set form cache.
+    $form['#cache'] = [
+      'contexts' => ['url'],
+      'tags' => $product->getCacheTags(),
+    ];
 
     $form_state->set('product', $product);
 
@@ -46,8 +49,11 @@ class ShopifyAddToCartForm extends FormBase {
     }
 
     if (!$variant) {
-      return [];
+      return $form;
     }
+
+    // Include variant cache tags.
+    $form['#cache']['tags'] = array_merge($form['#cache']['tags'], $variant->getCacheTags());
 
     $form['#action'] = '//' . Settings::shopInfo('domain') . '/cart/add';
 
