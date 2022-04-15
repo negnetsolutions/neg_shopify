@@ -2,15 +2,13 @@ var gulp         = require("gulp"),
     sass         = require("gulp-sass")(require('sass')),
     autoprefixer = require("gulp-autoprefixer"),
     cleanCSS    =  require('gulp-clean-css'),
-    exec = require('child_process').exec,
-    util = require('gulp-util')
+    exec = require('child_process').exec
     ;
 
 var config = {
   jsPattern: 'js/**/*.js',
   sassPattern: 'scss/**/*.*',
-  cssPath: 'css',
-  dev: !!util.env.dev
+  cssPath: 'css'
 };
 
 // Compile SCSS files to CSS
@@ -20,7 +18,7 @@ gulp.task("scss", function (done) {
       outputStyle : config.dev ? "expanded" : "compressed"
     }))
     .pipe(autoprefixer())
-    .pipe(config.dev ? util.noop() : cleanCSS({compatibility: '*'}))
+    .pipe(cleanCSS({compatibility: '*'}))
     .pipe(gulp.dest(config.cssPath))
   ;
 
