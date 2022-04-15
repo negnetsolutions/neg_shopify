@@ -26,6 +26,7 @@ class Collections extends ControllerBase {
       'sort' => Settings::defaultSortOrder(),
       'min-price' => 1,
       'require_body' => TRUE,
+      'in_stock' => TRUE,
     ];
 
     $show = \Drupal::request()->query->get('show');

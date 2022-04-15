@@ -320,6 +320,10 @@ class ShopifyProductVariant extends ContentEntityBase implements ShopifyProductV
       $query->condition('collections.collections_target_id', $params['collection_id'], '=');
     }
 
+    if (isset($params['in_stock'])) {
+      $query->condition('product.is_available', 1);
+    }
+
     $show = isset($params['show']) ? $params['show'] : 'available';
 
     if ($show === 'available') {
