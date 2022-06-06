@@ -24,18 +24,18 @@
       display: flex;
     }
 
-    .link.next, .link.prev {
+    .next, .prev {
       .title {
         display: none;
       }
     }
 
-    .link.next {
+    .next {
       a:after {
         content: ">>";
       }
     }
-    .link.prev {
+    .prev {
       a:after {
         content: "<<";
       }

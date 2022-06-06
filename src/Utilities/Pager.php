@@ -113,7 +113,7 @@ class Pager {
     if ($currentPage > 0) {
       $pages[] = [
         '#wrapper_attributes' => [
-          'class' => 'link first',
+          'class' => 'first',
         ],
         'value' => $this->getPageLink(0, '‹‹ First', [
           'pager__item',
@@ -142,7 +142,7 @@ class Pager {
 
     $pages[] = [
       '#wrapper_attributes' => [
-        'class' => 'link prev' . ((($currentPage - 1) >= 0) ? '' : ' disabled'),
+        'class' => 'prev' . ((($currentPage - 1) >= 0) ? '' : ' disabled'),
       ],
       'value' => $link,
     ];
@@ -169,7 +169,7 @@ class Pager {
 
       $pages[] = [
         '#wrapper_attributes' => [
-          'class' => 'link page',
+          'class' => 'page',
         ],
         'value' => $this->getPageLink($i, NULL, $classes),
       ];
@@ -206,7 +206,7 @@ class Pager {
 
     $pages[] = [
       '#wrapper_attributes' => [
-        'class' => 'link next' . ((($currentPage + 1) <= $this->getPageCount()) ? '' : ' disabled'),
+        'class' => 'next' . ((($currentPage + 1) <= $this->getPageCount()) ? '' : ' disabled'),
       ],
       'value' => $link,
     ];
@@ -214,7 +214,7 @@ class Pager {
     if ($currentPage != ($this->getPageCount())) {
       $pages[] = [
         '#wrapper_attributes' => [
-          'class' => 'link last',
+          'class' => 'last',
         ],
         'value' => $this->getPageLink($this->getPageCount(), 'Last ››', [
           'pager__item',
