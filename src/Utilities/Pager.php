@@ -110,37 +110,50 @@ class Pager {
     }
 
     if ($currentPage > 0) {
-      $pages[] = $this->getPageLink(0, '‹‹ First', [
-        'pager__item',
-        'pager__item--first',
-      ]);
-    }
-
-    if (($currentPage - 1) >= 0) {
-      $link = $this->getPageLink($currentPage - 1, '‹‹', [
-        'pager__item',
-        'pager__item--prev',
-      ]);
-
-      $link['#attached']['html_head'][] = [
-        [
-          '#type' => 'html_tag',
-          '#tag' => 'link',
-          '#value' => '',
-          '#attributes' => [
-            'rel' => 'prev',
-            'href' => $this->getPageUrl($currentPage - 1)->setAbsolute(TRUE)->toString(),
-          ],
+      $pages[] = [
+        '#wrapper_attributes' => [
+          'class' => 'link first',
         ],
-        'pager_rel_prev',
+        'value' => $this->getPageLink(0, '‹‹ First', [
+          'pager__item',
+          'pager__item--first',
+        ]),
       ];
-
-      $pages[] = $link;
     }
+
+    $link = $this->getPageLink($currentPage - 1, '‹‹', [
+      'pager__item',
+      'pager__item--prev',
+    ]);
+
+    $link['#attached']['html_head'][] = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'link',
+        '#value' => '',
+        '#attributes' => [
+          'rel' => 'prev',
+          'href' => $this->getPageUrl($currentPage - 1)->setAbsolute(TRUE)->toString(),
+        ],
+      ],
+      'pager_rel_prev',
+    ];
+
+    $pages[] = [
+      '#wrapper_attributes' => [
+        'class' => 'link prev' . ((($currentPage - 1) >= 0) ? '' : ' disabled'),
+      ],
+      'value' => $link,
+    ];
 
     if ($i != $max && $i > 0) {
       $pages[] = [
-        '#markup' => '…',
+        '#wrapper_attributes' => [
+          'class' => 'ellipsis',
+        ],
+        'value' => [
+          '#markup' => '…',
+        ],
       ];
     }
 
@@ -153,44 +166,75 @@ class Pager {
         $classes[] = 'is-active';
       }
 
-      $pages[] = $this->getPageLink($i, NULL, $classes);
+      $pages[] = [
+        '#wrapper_attributes' => [
+          'class' => 'link page',
+        ],
+        'value' => $this->getPageLink($i, NULL, $classes),
+      ];
     }
 
     if ($last < $this->getPageCount()) {
       $pages[] = [
-        '#markup' => '…',
-      ];
-    }
-
-    if (($currentPage + 1) <= $this->getPageCount()) {
-
-      $link = $this->getPageLink($currentPage + 1, '››', [
-        'pager__item',
-        'pager__item--next',
-      ]);
-
-      $link['#attached']['html_head'][] = [
-        [
-          '#type' => 'html_tag',
-          '#tag' => 'link',
-          '#value' => '',
-          '#attributes' => [
-            'rel' => 'next',
-            'href' => $this->getPageUrl($currentPage + 1)->setAbsolute(TRUE)->toString(),
-          ],
+        '#wrapper_attributes' => [
+          'class' => 'ellipsis',
         ],
-        'pager_rel_next',
+        'value' => [
+          '#markup' => '…',
+        ],
       ];
-
-      $pages[] = $link;
-
     }
+
+    $link = $this->getPageLink($currentPage + 1, '››', [
+      'pager__item',
+      'pager__item--next',
+    ]);
+
+    $link['#attached']['html_head'][] = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'link',
+        '#value' => '',
+        '#attributes' => [
+          'rel' => 'next',
+          'href' => $this->getPageUrl($currentPage + 1)->setAbsolute(TRUE)->toString(),
+        ],
+      ],
+      'pager_rel_next',
+    ];
+
+    $pages[] = [
+      '#wrapper_attributes' => [
+        'class' => 'link next' . ((($currentPage + 1) <= $this->getPageCount()) ? '' : ' disabled'),
+      ],
+      'value' => $link,
+    ];
 
     if ($currentPage != ($this->getPageCount())) {
-      $pages[] = $this->getPageLink($this->getPageCount(), 'Last ››', [
-        'pager__item',
-        'pager__item--last',
-      ]);
+      $pages[] = [
+        '#wrapper_attributes' => [
+          'class' => 'link last',
+        ],
+        'value' => $this->getPageLink($this->getPageCount(), 'Last ››', [
+          'pager__item',
+          'pager__item--last',
+        ]),
+      ];
+    }
+
+    if ($this->getPageCount() > 1) {
+      $pages[] = [
+        '#wrapper_attributes' => [
+          'class' => 'info',
+        ],
+        'value' => [
+          '#type' => 'inline_template',
+          '#template' => '<span>{{ somecontent }}</span>',
+          '#context' => [
+            'somecontent' => $currentPage + 1 . ' of ' . $this->getPageCount() . ' Pages',
+          ],
+        ],
+      ];
     }
 
     return $pages;
@@ -221,7 +265,7 @@ class Pager {
     foreach ($query as $index => $q) {
       $p = explode('=', $q);
       if ($p[0] === 'page') {
-        unset ($query[$index]);
+        unset($query[$index]);
       }
     }
 
@@ -231,20 +275,20 @@ class Pager {
 
     $parts['query'] = implode('&', $query);
 
-    return Url::fromUri($this->unparse_url($parts));
+    return Url::fromUri($this->unparseUrl($parts));
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function unparse_url($parsed_url) {
+  protected function unparseUrl($parsed_url) {
     $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
-    $host     = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+    $host     = $parsed_url['host'] ?? '';
     $port     = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-    $user     = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-    $pass     = isset($parsed_url['pass']) ? ':' . $parsed_url['pass']  : '';
+    $user     = $parsed_url['user'] ?? '';
+    $pass     = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
     $pass     = ($user || $pass) ? "$pass@" : '';
-    $path     = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+    $path     = $parsed_url['path'] ?? '';
     $query    = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
     $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
     return "$scheme$user$pass$host$port$path$query$fragment";
