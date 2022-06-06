@@ -23,6 +23,24 @@
       padding: 0 .5em;
       display: flex;
     }
+
+    .link.next, .link.prev {
+      .title {
+        display: none;
+      }
+    }
+
+    .link.next {
+      a:after {
+        content: ">>";
+      }
+    }
+    .link.prev {
+      a:after {
+        content: "<<";
+      }
+    }
+
     .is-active {
       &, & > a {
         font-weight: bold;

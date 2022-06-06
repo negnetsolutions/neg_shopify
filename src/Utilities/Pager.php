@@ -3,6 +3,7 @@
 namespace Drupal\neg_shopify\Utilities;
 
 use Drupal\Core\Url;
+use Drupal\Core\Render\Markup;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\neg_shopify\Settings;
 
@@ -121,7 +122,7 @@ class Pager {
       ];
     }
 
-    $link = $this->getPageLink($currentPage - 1, '‹‹', [
+    $link = $this->getPageLink($currentPage - 1, 'Previous', [
       'pager__item',
       'pager__item--prev',
     ]);
@@ -185,7 +186,7 @@ class Pager {
       ];
     }
 
-    $link = $this->getPageLink($currentPage + 1, '››', [
+    $link = $this->getPageLink($currentPage + 1, 'Next', [
       'pager__item',
       'pager__item--next',
     ]);
@@ -306,7 +307,7 @@ class Pager {
     $title = ($title === NULL) ? $page + 1 : $title;
     $link = [
       '#type' => 'link',
-      '#title' => $title,
+      '#title' => Markup::create("<span class='title'>$title</span>"),
       '#url' => $url,
       '#attributes' => [
         'class' => $classes,
