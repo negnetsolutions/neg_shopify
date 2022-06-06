@@ -232,7 +232,7 @@ class Pager {
           '#type' => 'inline_template',
           '#template' => '<span>{{ somecontent }}</span>',
           '#context' => [
-            'somecontent' => $currentPage + 1 . ' of ' . $this->getPageCount() . ' Pages',
+            'somecontent' => $currentPage + 1 . ' of ' . ($this->getPageCount() + 1) . ' Pages',
           ],
         ],
       ];

@@ -99,16 +99,17 @@ var Pager = function (el, opts) {
 
     const fragment = document.createDocumentFragment();
     const totalPagesShown = parseInt(9);
+    let disabled = '';
 
     if (parseInt(_.currentPage) > 0) {
-      let el = createElementFromHTML("<li><a href='" + _.buildUrl(0) + "' class='pager__item pager__item--first' data-page='0'>‹‹ First</a></li>");
+      let el = createElementFromHTML("<li class='first'><a href='" + _.buildUrl(0) + "' class='pager__item pager__item--first' data-page='0'><span class='title'>‹‹ First</span></a></li>");
       fragment.appendChild(el);
     }
 
-    if ((parseInt(_.currentPage) - 1) >= 0) {
-      el = createElementFromHTML("<li><a href='" + _.buildUrl(parseInt(_.currentPage) - 1) + "' class='pager__item pager__item--prev' rel='prev' data-page='" + (parseInt(_.currentPage) - 1) + "'>‹‹</a></li>");
-      fragment.appendChild(el);
-    }
+    // Previous Page.
+    disabled = (parseInt(_.currentPage) > 0) ? '' : ' disabled';
+    el = createElementFromHTML("<li class='prev"+disabled+"'><a href='" + _.buildUrl(parseInt(_.currentPage) - 1) + "' class='pager__item pager__item--prev' rel='prev' data-page='" + (parseInt(_.currentPage) - 1) + "'><span class='title'>Previous</span></a></li>");
+    fragment.appendChild(el);
 
     let middle = Math.ceil(totalPagesShown / 2);
     let current = parseInt(_.currentPage);
@@ -128,29 +129,34 @@ var Pager = function (el, opts) {
     }
 
     if (i != max && i > 0) {
-      el = createElementFromHTML("<li>…</li>");
+      el = createElementFromHTML("<li class='ellipsis'>…</li>");
       fragment.appendChild(el);
     }
 
     for (; i <= last && i <= max; i++) {
-      let el = createElementFromHTML("<li><a href='" + _.buildUrl(i) + "' class='pager__item" + ((i == parseInt(_.currentPage)) ? ' is-active Loader' : '') + "' data-page='" + i +"'>" + (i + 1) + "</a></li>");
+      let el = createElementFromHTML("<li class='page'><a href='" + _.buildUrl(i) + "' class='pager__item" + ((i == parseInt(_.currentPage)) ? ' is-active Loader' : '') + "' data-page='" + i +"'><span class='title'>" + (i + 1) + "</span></a></li>");
       fragment.appendChild(el);
     }
 
     if (last < parseInt(_.totalPages)) {
-      el = createElementFromHTML("<li>…</li>");
+      el = createElementFromHTML("<li class='ellipsis'>…</li>");
       fragment.appendChild(el);
     }
 
-    if ((current + 1) <= parseInt(_.totalPages)) {
-      el = createElementFromHTML("<li><a href='" + _.buildUrl(parseInt(_.currentPage) + 1) + "' class='pager__item pager__item--next' rel='next' data-page='" + (parseInt(_.currentPage) + 1) + "'>››</a></li>");
-      fragment.appendChild(el);
-    }
+    // Next Page.
+    disabled = ((current + 1) <= parseInt(_.totalPages)) ? '' : ' disabled';
+    el = createElementFromHTML("<li class='next"+disabled+"'><a href='" + _.buildUrl(parseInt(_.currentPage) + 1) + "' class='pager__item pager__item--next' rel='next' data-page='" + (parseInt(_.currentPage) + 1) + "'><span class='title'>Next</span></a></li>");
+    fragment.appendChild(el);
 
     if (parseInt(_.currentPage) != (parseInt(_.totalPages))) {
-      let el = createElementFromHTML("<li><a href='" + _.buildUrl(parseInt(_.totalPages)) + "' class='pager__item pager__item--last' data-page='" + (parseInt(_.totalPages)) + "'>Last ››</a></li>");
+      let el = createElementFromHTML("<li class='last'><a href='" + _.buildUrl(parseInt(_.totalPages)) + "' class='pager__item pager__item--last' data-page='" + (parseInt(_.totalPages)) + "'><span class='title'>Last ››</span></a></li>");
       fragment.appendChild(el);
     }
+
+    // Info.
+    el = createElementFromHTML("<li class='info'><span>" + (current + 1) + " of " + (parseInt(_.totalPages) + 1) + " Pages</span></li>")
+    fragment.appendChild(el);
+
     _.pagerItems.innerHTML = '';
     _.pagerItems.appendChild(fragment);
   };
