@@ -206,4 +206,5 @@ var Pager = function (el, opts) {
 };
 
 var pagers = document.querySelectorAll(".pager");
-Array.prototype.forEach.call(pagers, function(el) { new Pager(el) });
+window.shopify_pagers = [];
+Array.prototype.forEach.call(pagers, function(el) { window.shopify_pagers.push(new Pager(el)) });
