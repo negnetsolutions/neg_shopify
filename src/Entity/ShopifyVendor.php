@@ -176,13 +176,24 @@ class ShopifyVendor extends ContentEntityBase implements ShopifyVendorInterface 
     if (count($params['tags']) > 0) {
       $query->leftJoin('shopify_vendor__tags', 'tags', 'tags.entity_id = v.id');
       $query->condition('tags.tags_target_id', $params['tags'], 'IN');
-      $fields['tags'][] = 'tags_target_id';
+      if (count($query->getGroupBy()) > 0) {
+        $query->addExpression('MIN(tags.tags_target_id)', 'tags_target_id');
+      }
+      else {
+        $fields['tags'][] = 'tags_target_id';
+      }
     }
 
     if (count($params['types']) > 0) {
       $query->leftJoin('shopify_vendor__type', 'vtypes', 'vtypes.entity_id = v.id');
       $query->condition('vtypes.type_value', $params['types'], 'IN');
-      $query->addExpression('MIN(vtypes.type_value)', 'type_value');
+
+      if (count($query->getGroupBy()) > 0) {
+        $query->addExpression('MIN(vtypes.type_value)', 'type_value');
+      }
+      else {
+        $fields['vtypes'][] = 'type_value';
+      }
     }
 
     if ($perPage !== 0) {
