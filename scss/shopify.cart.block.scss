@@ -19,10 +19,9 @@
   .mini-cart {
     position: absolute;
     top: 0;
-    right: 0;
     bottom: 0;
-    transform-origin: middle right;
-    transform: translateX(100%) scaleX(0);
+    left: 100%;
+    transform-origin: right;
 
     width: 45vw;
     min-width: 300px;
@@ -58,7 +57,7 @@
       pointer-events: all;
     }
     .mini-cart {
-      transform: none;
+      transform: translateX(-100%);
     }
   }
 }
