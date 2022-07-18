@@ -225,7 +225,6 @@ window.shopify_pager_manager = new function() {
 
   this.getPagerByEl = function getPagerByEl(el) {
 
-    console.debug(_.pagers);
     for (let i = 0; i < _.pagers.length; i++) {
       if (_.pagers[i].el === el) {
         return _.pagers[i];
