@@ -205,6 +205,28 @@ var Pager = function (el, opts) {
 
 };
 
-var pagers = document.querySelectorAll(".pager");
 window.shopify_pagers = [];
-Array.prototype.forEach.call(pagers, function(el) { window.shopify_pagers.push(new Pager(el)) });
+
+window.shopify_pager_manager = new function() {
+  const _ = this;
+  this.pagers = [];
+
+  Array.prototype.forEach.call(document.querySelectorAll(".pager"), function(el) {
+    let p = new Pager(el);
+    window.shopify_pagers.push(p);
+    _.pagers.push(p);
+  });
+
+  this.getPagerByEl = function getPagerByEl(el) {
+
+    console.debug(_.pagers);
+    for (let i = 0; i < _.pagers.length; i++) {
+      if (_.pagers[i].el === el) {
+        return _.pagers[i];
+      }
+    }
+
+    return null;
+  };
+
+}();
