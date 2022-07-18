@@ -25,7 +25,13 @@ var Pager = function (el, opts) {
   this.opts = (typeof(opts) !== "undefined") ? opts : {};
   this.url = el.dataset.endpoint;
   this.itemsEl = el.querySelector('.items');
-  this.firstPage = (_.itemsEl.children.length > 0) ? 1 : 0;
+  this.itemsContainer = this.itemsEl.querySelector('.items_container');
+
+  if (!this.itemsContainer) {
+    this.itemsContainer = this.itemsEl;
+  }
+
+  this.firstPage = (_.itemsContainer.children.length > 0) ? 1 : 0;
   this.sortEl = el.querySelector('#sort_order');
 
   if (this.sortEl !== null) {
@@ -44,7 +50,7 @@ var Pager = function (el, opts) {
 
     history.pushState(null, null, _.buildUrl(page));
 
-    _.itemsEl.classList.add("dim");
+    _.itemsContainer.classList.add("dim");
 
     _.xobj.open('GET', endpoint, true); // Replace 'my_data' with the path to your file
     _.xobj.onreadystatechange = function () {
@@ -71,9 +77,9 @@ var Pager = function (el, opts) {
         }
 
         window.requestAnimationFrame(function() {
-          _.itemsEl.innerHTML = '';
-          _.itemsEl.appendChild(fragment);
-          _.itemsEl.classList.remove("dim");
+          _.itemsContainer.innerHTML = '';
+          _.itemsContainer.appendChild(fragment);
+          _.itemsContainer.classList.remove("dim");
           _.el.scrollIntoView({ block: 'start',  behavior: 'smooth' });
         });
       }
