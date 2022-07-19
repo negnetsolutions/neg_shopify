@@ -399,7 +399,7 @@ EOF;
     $cart = $this->getCart();
 
     if (count($cart['items']) === 0) {
-      return $this->renderError('Your cart is empty!');
+      return $this->renderError(t('Your cart is empty!'));
     }
 
     $lineItems = [];

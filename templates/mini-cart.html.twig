@@ -2,21 +2,21 @@
   <div class="mini-cart">
     <section class="shopify_cart cart">
       <div class="cart_wrapper">
-        <button rel="button" aria-label="Close Cart" class="close-cart">X</button>
+        <button rel="button" aria-label="{{ 'Close Cart'|t }}" class="close-cart">X</button>
 
         <form action="" method="post">
-          <div class="cart-title"><strong>Your Cart</strong></div>
+          <div class="cart-title"><strong>{{ 'Your Cart'|t }}</strong></div>
           <div class="items">
             <ul class="item-list">
             </ul>
           </div>
           <div class="subtotal">
-            <strong>Subtotal:</strong>
-            <p class="value">Loading...</p>
-            <p class="note">Shipping &amp; taxes calculated at checkout</p>
+            <strong>{{ 'Subtotal'|t }}:</strong>
+            <p class="value">{{ 'Loading'|t }}...</p>
+            <p class="note">{{ 'Shipping &amp; taxes calculated at checkout'|t }}</p>
           </div>
           <div class="checkout-form">
-            <input type="submit" name="checkout" value="Check out" class="checkout-btn">
+            <input type="submit" name="checkout" value="{{ 'Check out'|t }}" class="checkout-btn">
           </div>
         </form>
       </div>

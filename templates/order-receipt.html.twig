@@ -1,6 +1,6 @@
 <section class="sales_receipt">
   <div class="top">
-    <h1>Order {{ order.name }}</h1>
+    <h1>{{ 'Order'|t }} {{ order.name }}</h1>
     <h2>{{ order.processedAt | shopify_date }}</h2>
   </div>
 
@@ -8,7 +8,7 @@
 
   {% if order.billingAddress.formatted != null %}
   <div class="billing_address">
-    <h3>Bill To</h3>
+    <h3>{{ 'Bill To'|t }}</h3>
     {% for line in order.billingAddress.formatted %}
       <p>{{ line }}</p>
     {% endfor %}
@@ -17,7 +17,7 @@
 
   {% if order.shippingAddress.formatted != null %}
   <div class="shipping_address">
-    <h3>Ship To</h3>
+    <h3>{{ 'Ship To'|t }}</h3>
     {% for line in order.shippingAddress.formatted %}
       <p>{{ line }}</p>
     {% endfor %}
@@ -27,9 +27,9 @@
   <div class="receipt_table">
     <section class="header">
       <div class="image">&nbsp;</div>
-      <div class="description">Product</div>
-      <div class="quantity">Quantity</div>
-      <div class="total">Total</div>
+      <div class="description">{{ 'Product'|t }}</div>
+      <div class="quantity">{{ 'Quantity'|t }}</div>
+      <div class="total">{{ 'Total'|t }}</div>
     </section>
 
     {% for line in order.lineItems.edges %}
@@ -70,12 +70,12 @@
 
   <div class="receipt_summary">
     <div class="has-label">
-      <span class="label">Subtotal</span>
+      <span class="label">{{ 'Subtotal'|t }}</span>
       <span>{{ order.currentSubtotalPriceSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% if order.currentTotalDiscountsSet.presentmentMoney.amount > 0 %}
     <div class="has-label">
-      <span class="label">Discount</span>
+      <span class="label">{{ 'Discount'|t }}</span>
       <span>{{ order.currentTotalDiscountsSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% endif %}
@@ -87,23 +87,23 @@
     {% endfor %}
     {% if order.totalShippingPriceSet.presentmentMoney.amount > 0 %}
     <div class="has-label">
-      <span class="label">Shipping</span>
+      <span class="label">{{ 'Shipping'|t }}</span>
       <span>{{ order.totalShippingPriceSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% endif %}
     <div class="has-label">
-      <span class="label">Total</span>
+      <span class="label">{{ 'Total'|t }}</span>
       <span>{{ order.currentTotalPriceSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% if order.totalReceivedSet.presentmentMoney.amount != order.currentTotalPriceSet.presentmentMoney.amount %}
     <div class="has-label">
-      <span class="label">Amount Paid</span>
+      <span class="label">{{ 'Amount Paid'|t }}</span>
       <span>{{ order.totalReceivedSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% endif %}
     {% if order.totalRefundedSet.presentmentMoney.amount > 0 %}
     <div class="has-label">
-      <span class="label">Amount Refunded</span>
+      <span class="label">{{ 'Amount Refunded'|t }}</span>
       <span>{{ order.totalRefundedSet.presentmentMoney | shopify_currency }}</span>
     </div>
     {% endif %}
@@ -117,7 +117,7 @@
   {% endfor %}
   {% if has_packages == true %}
   <div class="shipping_summary">
-    <h2>Shipments</h2>
+    <h2>{{ 'Shipments'|t }}</h2>
     <ul>
       {% for line in order.fulfillments %}
         {% for package in line.trackingInfo %}
