@@ -109,11 +109,11 @@ class CartController extends ControllerBase {
 
     $cart = $this->getCart();
 
-    if ($variantId === NULL) {
+    if ($variantId === NULL || !is_numeric($variantId) || $variantId < 0) {
       return $this->renderError('Variant ID must be set!');
     }
 
-    if ($quantity === NULL) {
+    if ($quantity === NULL || !is_numeric($quantity)) {
       return $this->renderError('Quantity must be set!');
     }
 
