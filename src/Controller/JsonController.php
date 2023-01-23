@@ -107,11 +107,11 @@ class JsonController extends ControllerBase {
       $direction = 'after';
     }
 
-    if ($page === '0') {
+    if ($page === '0' || !is_numeric($page) || $page < 0) {
       $page = NULL;
     }
 
-    if ($perPage === NULL) {
+    if ($perPage === NULL || !is_numeric($perPage) || $perPage < 0) {
       $perPage = 5;
     }
 
@@ -158,6 +158,14 @@ class JsonController extends ControllerBase {
     $sortOrder = \Drupal::request()->query->get('sort');
     $sortOrder = ($sortOrder === NULL) ? Settings::defaultSortOrder() : $sortOrder;
     $tags = [];
+
+    if (!is_numeric($page) || $page < 0) {
+      $page = 0;
+    }
+
+    if (!is_numeric($perPage) || $perPage < 0) {
+      $perPage = Settings::productsPerPage();
+    }
 
     switch ($type) {
       case 'vendor':
