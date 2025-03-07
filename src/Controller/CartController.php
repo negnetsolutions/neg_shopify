@@ -206,33 +206,7 @@ class CartController extends ControllerBase {
    * Verifies checkout.
    */
   protected function verifyCheckoutIsActive() {
-    $cart = $this->getCart();
-    $checkoutId = $cart['checkout']['id'];
-
-    $query = <<<EOF
-query {
-  node(id: "{$checkoutId}") {
-    ... on Checkout {
-      completedAt
-    }
-  }
-}
-EOF;
-
-    try {
-      $results = StoreFrontService::request($query);
-
-      if (isset($results['data']) && isset($results['data']['node'])) {
-        if ($results['data']['node']['completedAt'] === NULL) {
-          return TRUE;
-        }
-      }
-
-    }
-    catch (\Exception $e) {
-    }
-
-    return FALSE;
+    return TRUE;
   }
 
   /**
