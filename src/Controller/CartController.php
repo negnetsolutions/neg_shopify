@@ -311,63 +311,23 @@ EOF;
   }
 
   /**
-   * Updates a checkout.
-   */
-  protected function updateCheckout($checkoutId, $lineItems) {
-
-    $query = <<<EOF
-  mutation {
-    checkoutLineItemsReplace(lineItems: {$lineItems}, checkoutId: "{$checkoutId}",
-  ) {
-      checkout {
-         id
-         webUrl
-         completedAt
-       }
-    }
-  }
-EOF;
-
-    try {
-      $results = StoreFrontService::request($query);
-      if (!isset($results['data']) || !isset($results['data']['checkoutLineItemsReplace']) || !isset($results['data']['checkoutLineItemsReplace']['checkout']) || !isset($results['data']['checkoutLineItemsReplace']['checkout']['id'])) {
-        return FALSE;
-      }
-    }
-    catch (GraphQlException $e) {
-      Settings::log('Update Checkout Exception: @results @query', [
-        '@results' => print_r($e->getErrors(), TRUE),
-        '@query' => $query,
-      ]);
-      return FALSE;
-    }
-
-    return $results['data']['checkoutLineItemsReplace']['checkout'];
-  }
-
-  /**
    * Gets a new checkout.
    */
   protected function createCheckout($lineItems) {
-    $current_user = \Drupal::currentUser();
-    $currentEmail = $current_user->getEmail();
-    $email = NULL;
-
-    // Attempt to tie order to customer.
-    if (strlen($currentEmail) > 0) {
-      $email = 'email: "' . $current_user->getEmail() . '", ';
+    // Alter line items.
+    foreach ($lineItems as &$line) {
+      $line['merchandiseId'] = $line['variantId'];
+      unset($line['variantId']);
     }
 
     $query = <<<EOF
 mutation {
-  checkoutCreate(input: {
-    {$email}
-    lineItems: {$lineItems}
+  cartCreate(input: {
+    lines: {$lineItems}
   }) {
-    checkout {
+    cart {
        id
-       webUrl
-       completedAt
+       checkoutUrl
      }
   }
 }
@@ -376,7 +336,7 @@ EOF;
     try {
       $results = StoreFrontService::request($query);
 
-      if (!isset($results['data']) || !isset($results['data']['checkoutCreate']) || !isset($results['data']['checkoutCreate']['checkout']) || !isset($results['data']['checkoutCreate']['checkout']['id'])) {
+      if (!isset($results['data']) || !isset($results['data']['cartCreate']) || !isset($results['data']['cartCreate']['cart']) || !isset($results['data']['cartCreate']['cart']['id'])) {
         return FALSE;
       }
     }
@@ -388,7 +348,7 @@ EOF;
       return FALSE;
     }
 
-    return $results['data']['checkoutCreate']['checkout'];
+    return $results['data']['cartCreate']['cart'];
   }
 
   /**
@@ -430,37 +390,19 @@ EOF;
       '@cart' => print_r($cart, TRUE),
     ]);
 
-    if (!isset($cart['checkout']['id'])) {
-      // Create a new checkout.
-      $checkout = $this->createCheckout($lineItems);
-      if ($checkout === FALSE) {
-        return $this->renderError('Could not create checkout! Please try again later!');
-      }
-
-      $cart['checkout'] = $checkout;
+    // Create a new checkout.
+    $checkout = $this->createCheckout($lineItems);
+    if ($checkout === FALSE) {
+      return $this->renderError('Could not create checkout! Please try again later!');
     }
-    else {
-      $checkoutId = $cart['checkout']['id'];
 
-      // Update an existing.
-      $checkout = $this->updateCheckout($checkoutId, $lineItems);
-      if ($checkout === FALSE) {
-        return $this->renderError('Could not update checkout! Please try again later!');
-      }
-    }
+    $cart['checkout'] = $checkout;
 
     // Mark checkout as started.
     $cart['checkoutStarted'] = TRUE;
     $this->saveCart($cart);
 
-    // Transform checkout url.
-    $checkoutDomain = Settings::config()->get('checkout_domain');
-    $shopUrl = Settings::config()->get('shop_url');
-    $url = $checkout['webUrl'];
-
-    if (strlen($checkoutDomain) > 0) {
-      $url = str_replace($shopUrl . '.myshopify.com', $checkoutDomain, $url);
-    }
+    $url = $checkout['checkoutUrl'];
 
     return $this->renderCart([
       'nocache' => TRUE,
