@@ -6,7 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
-
+use Drupal\neg_shopify\ValidationException;
 use Drupal\Core\Cache\Cache;
 use Drupal\neg_shopify\Settings;
 use Drupal\neg_shopify\Entity\ShopifyProductVariant;
@@ -314,17 +314,14 @@ EOF;
    * Gets a new checkout.
    */
   protected function createCheckout($lineItems) {
-    // Alter line items.
-    foreach ($lineItems as &$line) {
-      $line['merchandiseId'] = $line['variantId'];
-      unset($line['variantId']);
-    }
-
     $query = <<<EOF
 mutation {
   cartCreate(input: {
     lines: {$lineItems}
   }) {
+    userErrors {
+      message
+    }
     cart {
        id
        checkoutUrl
@@ -335,6 +332,10 @@ EOF;
 
     try {
       $results = StoreFrontService::request($query);
+
+      if (isset($results['data']) && isset($results['data']['cartCreate']) && isset($results['data']['cartCreate']['userErrors'])) {
+        throw new ValidationException($results['data']['cartCreate']['userErrors'][0]['message']);
+      }
 
       if (!isset($results['data']) || !isset($results['data']['cartCreate']) || !isset($results['data']['cartCreate']['cart']) || !isset($results['data']['cartCreate']['cart']['id'])) {
         return FALSE;
@@ -377,7 +378,7 @@ EOF;
       }
 
       $lineItems[] = [
-        'variantId' => $item['id'],
+        'merchandiseId' => $item['id'],
         'quantity' => (int) $item['quantity'],
       ];
     }
@@ -391,7 +392,11 @@ EOF;
     ]);
 
     // Create a new checkout.
-    $checkout = $this->createCheckout($lineItems);
+    try {
+      $checkout = $this->createCheckout($lineItems);
+    } catch (ValidationException $e) {
+      return $this->renderError($e->getMessage());
+    }
     if ($checkout === FALSE) {
       return $this->renderError('Could not create checkout! Please try again later!');
     }
