@@ -333,7 +333,7 @@ EOF;
     try {
       $results = StoreFrontService::request($query);
 
-      if (isset($results['data']) && isset($results['data']['cartCreate']) && isset($results['data']['cartCreate']['userErrors'])) {
+      if (isset($results['data']) && isset($results['data']['cartCreate']) && isset($results['data']['cartCreate']['userErrors']) && count($results['data']['cartCreate']['userErrors']) > 0) {
         throw new ValidationException($results['data']['cartCreate']['userErrors'][0]['message']);
       }
 
